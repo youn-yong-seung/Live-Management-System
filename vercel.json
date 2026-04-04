@@ -1,15 +1,10 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": "vite",
-  "buildCommand": "pnpm --filter @workspace/live-crm run build",
+  "buildCommand": "pnpm --filter @workspace/live-crm run build && node artifacts/api-server/build-vercel.mjs",
   "outputDirectory": "artifacts/live-crm/dist",
   "installCommand": "pnpm install",
-  "functions": {
-    "api/**/*.ts": {
-      "includeFiles": "artifacts/api-server/src/**,lib/**"
-    }
-  },
   "rewrites": [
+    { "source": "/api/cron", "destination": "/api/cron" },
     { "source": "/api/:path(.*)", "destination": "/api" },
     { "source": "/((?!api).*)", "destination": "/index.html" }
   ],

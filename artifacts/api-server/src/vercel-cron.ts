@@ -1,19 +1,20 @@
-import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { db } from "../lib/db/src/index";
+import { db } from "@workspace/db";
 import {
   notificationRulesTable,
   notificationLogTable,
   livesTable,
   registrationsTable,
-} from "../lib/db/src/schema";
+} from "@workspace/db";
 import { eq, and, isNotNull } from "drizzle-orm";
-import { getSolapiConfig, sendAlimtalkBatch, sendSmsBatch } from "../artifacts/api-server/src/lib/solapiHelper";
+import { getSolapiConfig, sendAlimtalkBatch, sendSmsBatch } from "./lib/solapiHelper";
+import type { IncomingMessage, ServerResponse } from "http";
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // Verify this is called by Vercel Cron (not external)
+export default async function handler(req: IncomingMessage, res: ServerResponse) {
   const authHeader = req.headers.authorization;
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    return res.status(401).json({ error: "Unauthorized" });
+    res.statusCode = 401;
+    res.end(JSON.stringify({ error: "Unauthorized" }));
+    return;
   }
 
   try {
@@ -112,9 +113,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       sentCount++;
     }
 
-    return res.status(200).json({ ok: true, sentCount });
+    res.statusCode = 200;
+    res.setHeader("Content-Type", "application/json");
+    res.end(JSON.stringify({ ok: true, sentCount }));
   } catch (err) {
     console.error("Cron scheduler error:", err);
-    return res.status(500).json({ error: "Scheduler failed" });
+    res.statusCode = 500;
+    res.end(JSON.stringify({ error: "Scheduler failed" }));
   }
 }
