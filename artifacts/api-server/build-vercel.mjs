@@ -20,21 +20,12 @@ async function buildVercel() {
   const shared = {
     platform: "node",
     bundle: true,
-    format: "esm",
+    format: "cjs",
     logLevel: "info",
     external: [
       "*.node",
       "pg-native",
     ],
-    banner: {
-      js: `import { createRequire as __crReq } from 'node:module';
-import __path from 'node:path';
-import __url from 'node:url';
-globalThis.require = __crReq(import.meta.url);
-globalThis.__filename = __url.fileURLToPath(import.meta.url);
-globalThis.__dirname = __path.dirname(globalThis.__filename);
-`,
-    },
   };
 
   // Build API handler
