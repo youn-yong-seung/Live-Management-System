@@ -1,8 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import {
   useGetLives, getGetLivesQueryKey,
-  useCreateLive, useUpdateLive, useDeleteLive,
-  useGetRegistrations, getGetDashboardSummaryQueryKey,
 } from "@workspace/api-client-react";
 import type { Live, LiveStatus } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -253,13 +251,9 @@ export default function Admin() {
   const { data: lives, isLoading: isLivesLoading, refetch: refetchLives } = useGetLives(
     {}, { query: { queryKey: getGetLivesQueryKey() } }
   );
-  const { data: registrations, isLoading: isRegistrationsLoading } = useGetRegistrations(
-    selectedLiveForRegs || 0,
-    { query: { queryKey: ["registrations", selectedLiveForRegs], enabled: !!selectedLiveForRegs && isRegistrationsModalOpen } }
-  );
-  const createLive = useCreateLive();
-  const updateLive = useUpdateLive();
-  const deleteLive = useDeleteLive();
+  const [registrations, setRegistrations] = useState<Array<{ id: number; name: string; phone: string; email: string | null; createdAt: string | null }>>([]);
+  const [isRegistrationsLoading, setIsRegistrationsLoading] = useState(false);
+  const [isSavingLive, setIsSavingLive] = useState(false);
 
   /* ── Login handler ─────────────────────────────── */
   const handleLogin = async (e: React.FormEvent) => {
@@ -529,24 +523,34 @@ export default function Admin() {
 
   const handleSaveLive = async () => {
     if (!liveForm.title) { toast({ variant: "destructive", title: "오류", description: "제목을 입력해주세요." }); return; }
+    setIsSavingLive(true);
     try {
       const data = { title: liveForm.title, description: liveForm.description || null, youtubeUrl: liveForm.youtubeUrl || null, scheduledAt: liveForm.scheduledAt ? new Date(liveForm.scheduledAt).toISOString() : null, status: liveForm.status, thumbnailUrl: liveForm.thumbnailUrl || null };
-      if (liveForm.id) { await updateLive.mutateAsync({ id: liveForm.id, data }); toast({ title: "수정 완료" }); }
-      else { await createLive.mutateAsync({ data }); toast({ title: "생성 완료" }); }
+      if (liveForm.id) { await apiFetch(`/lives/${liveForm.id}`, { method: "PUT", body: JSON.stringify(data) }); toast({ title: "수정 완료" }); }
+      else { await apiFetch("/lives", { method: "POST", body: JSON.stringify(data) }); toast({ title: "생성 완료" }); }
       setIsLiveModalOpen(false);
       queryClient.invalidateQueries({ queryKey: getGetLivesQueryKey() });
-      queryClient.invalidateQueries({ queryKey: getGetDashboardSummaryQueryKey() });
     } catch { toast({ variant: "destructive", title: "오류", description: "저장 중 문제가 발생했습니다." }); }
+    finally { setIsSavingLive(false); }
   };
 
   const handleDeleteLive = async (id: number) => {
     if (!confirm("정말 삭제하시겠습니까?")) return;
     try {
-      await deleteLive.mutateAsync({ id });
+      await apiFetch(`/lives/${id}`, { method: "DELETE" });
       toast({ title: "삭제 완료" });
       queryClient.invalidateQueries({ queryKey: getGetLivesQueryKey() });
-      queryClient.invalidateQueries({ queryKey: getGetDashboardSummaryQueryKey() });
     } catch { toast({ variant: "destructive", title: "오류", description: "삭제 실패" }); }
+  };
+
+  const loadRegistrations = async (liveId: number) => {
+    setIsRegistrationsLoading(true);
+    setRegistrations([]);
+    try {
+      const data = await apiFetch<Array<{ id: number; name: string; phone: string; email: string | null; createdAt: string | null }>>(`/lives/${liveId}/registrations`);
+      setRegistrations(data);
+    } catch { /* ignore */ }
+    finally { setIsRegistrationsLoading(false); }
   };
 
   /* ── Helpers ───────────────────────────────────── */
@@ -614,7 +618,8 @@ export default function Admin() {
           variant="ghost"
           size="sm"
           className="text-gray-400 hover:text-red-500 rounded-xl"
-          onClick={() => {
+          onClick={async () => {
+            try { await apiFetch("/admin/logout", { method: "POST" }); } catch { /* ignore */ }
             sessionStorage.removeItem("crm_admin_auth");
             sessionStorage.removeItem("crm_admin_token");
             setIsAuthenticated(false);
@@ -669,7 +674,7 @@ export default function Admin() {
                         <TableCell className="font-medium text-gray-900">{live.title}</TableCell>
                         <TableCell className="text-gray-500 text-sm">{formatDate(live.scheduledAt)}</TableCell>
                         <TableCell className="text-center">
-                          <button className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-blue-600" onClick={() => { setSelectedLiveForRegs(live.id); setIsRegistrationsModalOpen(true); }}>
+                          <button className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-blue-600" onClick={() => { setSelectedLiveForRegs(live.id); setIsRegistrationsModalOpen(true); loadRegistrations(live.id); }}>
                             <Users className="h-4 w-4" />{live.registrationCount}
                           </button>
                         </TableCell>
@@ -1087,8 +1092,8 @@ export default function Admin() {
           </div>
           <DialogFooter>
             <Button variant="outline" className="rounded-xl border-gray-200" onClick={() => setIsLiveModalOpen(false)}>취소</Button>
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold" onClick={handleSaveLive} disabled={createLive.isPending || updateLive.isPending}>
-              {(createLive.isPending || updateLive.isPending) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}저장
+            <Button className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold" onClick={handleSaveLive} disabled={isSavingLive}>
+              {isSavingLive && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}저장
             </Button>
           </DialogFooter>
         </DialogContent>
