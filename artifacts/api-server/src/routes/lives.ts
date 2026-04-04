@@ -280,6 +280,9 @@ router.put("/lives/:liveId/custom-questions", requireAdminAuth, async (req: Requ
       return res.status(400).json({ error: "맞춤 질문은 최대 3개까지 설정할 수 있습니다." });
     }
 
+    const [live] = await db.select({ id: livesTable.id }).from(livesTable).where(eq(livesTable.id, liveId));
+    if (!live) return res.status(404).json({ error: "Live not found" });
+
     await db.delete(liveCustomQuestionsTable).where(eq(liveCustomQuestionsTable.liveId, liveId));
 
     if (questions.length > 0) {
@@ -407,24 +410,16 @@ router.post("/lives/:liveId/registrations", async (req: Request, res: Response) 
       return;
     }
 
-    // Extra optional analytics fields from body (beyond Zod schema)
-    const rawBody = req.body as {
-      industry?: string;
-      channelSource?: string[];
-      skillLevel?: string;
-      customAnswers?: Record<string, string | string[]>;
-    };
-
     const insertData = insertRegistrationSchema.parse({
       liveId,
       name: body.name,
       phone: body.phone,
       email: body.email ?? null,
       message: body.message ?? null,
-      industry: rawBody.industry ?? null,
-      channelSource: Array.isArray(rawBody.channelSource) ? rawBody.channelSource : null,
-      skillLevel: rawBody.skillLevel ?? null,
-      customAnswers: rawBody.customAnswers ?? null,
+      industry: body.industry ?? null,
+      channelSource: Array.isArray(body.channelSource) ? body.channelSource : null,
+      skillLevel: body.skillLevel ?? null,
+      customAnswers: body.customAnswers ?? null,
     });
 
     const [registration] = await db.insert(registrationsTable).values(insertData).returning();
