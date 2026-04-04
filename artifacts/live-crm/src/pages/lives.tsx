@@ -106,13 +106,12 @@ export default function Lives() {
         data: {
           name: data.name,
           phone: data.phone,
-          email: data.email || undefined,
-          message: data.message || undefined,
-          // @ts-expect-error extra analytics fields not in generated type
-          industry: data.industry || undefined,
-          channelSource: data.channelSource?.length ? data.channelSource : undefined,
-          skillLevel: data.skillLevel || undefined,
-          customAnswers: data.customAnswers && Object.keys(data.customAnswers).length ? data.customAnswers : undefined,
+          email: data.email || null,
+          message: data.message || null,
+          industry: data.industry || null,
+          channelSource: data.channelSource?.length ? data.channelSource : null,
+          skillLevel: data.skillLevel || null,
+          customAnswers: data.customAnswers && Object.keys(data.customAnswers).length ? data.customAnswers : null,
         },
       },
       {

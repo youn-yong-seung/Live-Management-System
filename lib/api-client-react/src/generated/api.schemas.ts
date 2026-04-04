@@ -62,6 +62,10 @@ export interface CreateRegistrationBody {
   phone: string;
   email?: string | null;
   message?: string | null;
+  industry?: string | null;
+  channelSource?: string[] | null;
+  skillLevel?: string | null;
+  customAnswers?: Record<string, string | string[]> | null;
 }
 
 export interface DashboardSummary {

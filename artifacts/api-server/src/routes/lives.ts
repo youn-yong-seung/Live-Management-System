@@ -272,6 +272,10 @@ router.put("/lives/:liveId/custom-questions", requireAdminAuth, async (req: Requ
     try { questions = parseCustomQuestions(req.body); }
     catch (err) { return res.status(400).json({ error: (err as Error).message }); }
 
+    if (questions.length > 3) {
+      return res.status(400).json({ error: "맞춤 질문은 최대 3개까지 설정할 수 있습니다." });
+    }
+
     await db.delete(liveCustomQuestionsTable).where(eq(liveCustomQuestionsTable.liveId, liveId));
 
     if (questions.length > 0) {

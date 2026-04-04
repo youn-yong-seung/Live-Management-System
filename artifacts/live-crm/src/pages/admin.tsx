@@ -17,13 +17,14 @@ import { formatDate } from "@/lib/date-utils";
 import {
   Plus, Edit, Trash2, Users, Loader2, RefreshCw, Settings,
   Bell, Send, Eye, CheckCircle, Clock, AlertCircle, KeyRound,
-  MessageSquare, Zap, Lock, Youtube, TrendingUp, ThumbsUp,
+  Zap, Lock, Youtube, TrendingUp, ThumbsUp, X,
   MessageCircle, PlayCircle, BarChart2,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
+  LineChart, Line,
 } from "recharts";
 
 /* ── Types ─────────────────────────────────────────── */
@@ -268,11 +269,8 @@ export default function Admin() {
   const [analytics, setAnalytics] = useState<RegistrationAnalytics | null>(null);
   const [isLoadingAnalytics, setIsLoadingAnalytics] = useState(false);
 
-  /* ── Custom questions state ─────────────────────── */
-  const [questionsModal, setQuestionsModal] = useState<{ liveId: number | null; liveTitle: string; open: boolean }>({ liveId: null, liveTitle: "", open: false });
+  /* ── Custom questions state (integrated in campaign modal) ── */
   const [customQuestions, setCustomQuestions] = useState<CustomQuestion[]>([]);
-  const [isLoadingQuestions, setIsLoadingQuestions] = useState(false);
-  const [isSavingQuestions, setIsSavingQuestions] = useState(false);
 
   /* ── Existing hooks ────────────────────────────── */
   const { data: lives, isLoading: isLivesLoading, refetch: refetchLives } = useGetLives(
@@ -494,13 +492,16 @@ export default function Admin() {
     setRulesModal({ live, open: true });
     setIsLoadingRules(true);
     setEditingOffsetIdx(null);
+    setCustomQuestions([]);
     try {
-      const [rules, trigger] = await Promise.all([
+      const [rules, trigger, qs] = await Promise.all([
         apiFetch<NotificationRule[]>(`/lives/${live.id}/notification-rules`),
         apiFetch<RegistrationTrigger>(`/lives/${live.id}/registration-trigger`),
+        apiFetch<CustomQuestion[]>(`/lives/${live.id}/custom-questions`),
       ]);
       setNotifRules(rules);
       setTriggerConfig(trigger);
+      setCustomQuestions(qs.map((q) => ({ ...q, options: q.options ?? null })));
       if (templates.length === 0 && solapiConfig?.configured) {
         fetchTemplates(true);
       }
@@ -525,8 +526,12 @@ export default function Admin() {
           method: "PUT",
           body: JSON.stringify(triggerConfig),
         }),
+        apiFetch(`/lives/${rulesModal.live.id}/custom-questions`, {
+          method: "PUT",
+          body: JSON.stringify(customQuestions.map((q, i) => ({ ...q, displayOrder: i }))),
+        }),
       ]);
-      toast({ title: "저장 완료", description: "알림 캠페인이 저장되었습니다." });
+      toast({ title: "저장 완료", description: "캠페인 설정이 저장되었습니다." });
       setRulesModal({ live: null, open: false });
       loadSchedule();
     } catch (err) {
@@ -595,33 +600,7 @@ export default function Admin() {
     }
   };
 
-  /* ── Custom questions handlers ───────────────────── */
-  const openQuestionsModal = async (live: Live) => {
-    setQuestionsModal({ liveId: live.id, liveTitle: live.title, open: true });
-    setIsLoadingQuestions(true);
-    try {
-      const qs = await apiFetch<CustomQuestion[]>(`/lives/${live.id}/custom-questions`);
-      setCustomQuestions(qs.map((q) => ({ ...q, options: q.options ?? null })));
-    } catch { setCustomQuestions([]); }
-    finally { setIsLoadingQuestions(false); }
-  };
-
-  const saveCustomQuestions = async () => {
-    if (!questionsModal.liveId) return;
-    setIsSavingQuestions(true);
-    try {
-      await apiFetch(`/lives/${questionsModal.liveId}/custom-questions`, {
-        method: "PUT",
-        body: JSON.stringify(customQuestions.map((q, i) => ({ ...q, displayOrder: i }))),
-      });
-      toast({ title: "질문 저장 완료" });
-      setQuestionsModal((m) => ({ ...m, open: false }));
-    } catch (err) {
-      toast({ variant: "destructive", title: "저장 실패", description: String(err) });
-    } finally {
-      setIsSavingQuestions(false); }
-  };
-
+  /* ── Custom questions helpers (used inside campaign settings modal) ── */
   const addCustomQuestion = () => {
     setCustomQuestions((qs) => [...qs, { question: "", questionType: "text", options: null, displayOrder: qs.length }]);
   };
@@ -763,9 +742,6 @@ export default function Admin() {
                           <div className="flex justify-end gap-1.5 flex-wrap">
                             <Button variant="outline" size="sm" className="h-8 rounded-lg border-gray-200 text-gray-500 hover:text-purple-600 hover:border-purple-200 text-xs gap-1" onClick={() => openAnalyticsModal(live)}>
                               <BarChart2 className="h-3.5 w-3.5" />신청 현황
-                            </Button>
-                            <Button variant="outline" size="sm" className="h-8 rounded-lg border-gray-200 text-gray-500 hover:text-indigo-600 hover:border-indigo-200 text-xs gap-1" onClick={() => openQuestionsModal(live)}>
-                              <MessageSquare className="h-3.5 w-3.5" />질문 설정
                             </Button>
                             <Button variant="outline" size="sm" className="h-8 rounded-lg border-gray-200 text-gray-500 hover:text-blue-600 hover:border-blue-200 text-xs gap-1" onClick={() => openRulesModal(live)}>
                               <Bell className="h-3.5 w-3.5" />캠페인 설정
@@ -1553,6 +1529,61 @@ export default function Admin() {
                 </Button>
               </div>
             )}
+
+            {/* ── 질문 설정 section ───────────────────── */}
+            <div className="border-t border-gray-100 pt-5 mt-2">
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <h3 className="text-sm font-bold text-gray-800">질문 설정</h3>
+                  <p className="text-xs text-gray-400 mt-0.5">신청 폼에 노출할 맞춤 질문을 설정합니다. (최대 3개)</p>
+                </div>
+              </div>
+              <div className="space-y-3">
+                {customQuestions.map((q, idx) => (
+                  <div key={idx} className="rounded-xl border border-gray-200 p-3 bg-gray-50 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <select
+                        value={q.questionType}
+                        onChange={(e) => updateCustomQuestion(idx, { questionType: e.target.value as CustomQuestion["questionType"], options: null })}
+                        className="text-xs border border-gray-200 rounded-lg px-2 py-1 bg-white text-gray-700"
+                      >
+                        <option value="text">단답형</option>
+                        <option value="textarea">장문형</option>
+                        <option value="radio">단일 선택</option>
+                        <option value="checkbox">다중 선택</option>
+                        <option value="skill_level">실력 수준</option>
+                      </select>
+                      <input
+                        placeholder="질문 내용을 입력하세요"
+                        value={q.question}
+                        onChange={(e) => updateCustomQuestion(idx, { question: e.target.value })}
+                        className="flex-1 text-sm border border-gray-200 rounded-lg px-3 py-1.5 bg-white"
+                      />
+                      <button onClick={() => removeCustomQuestion(idx)} className="text-gray-400 hover:text-red-500 p-1">
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                    {(q.questionType === "radio" || q.questionType === "checkbox") && (
+                      <div className="pl-1">
+                        <p className="text-xs text-gray-500 mb-1">선택지 (줄 구분)</p>
+                        <textarea
+                          rows={3}
+                          placeholder={"옵션 1\n옵션 2\n옵션 3"}
+                          value={(q.options ?? []).join("\n")}
+                          onChange={(e) => updateCustomQuestion(idx, { options: e.target.value.split("\n").filter(Boolean) })}
+                          className="w-full text-xs border border-gray-200 rounded-lg px-2 py-1.5 bg-white resize-none"
+                        />
+                      </div>
+                    )}
+                  </div>
+                ))}
+                {customQuestions.length < 3 && (
+                  <Button variant="outline" size="sm" className="w-full rounded-xl border-dashed border-gray-300 text-gray-500 hover:text-blue-600 hover:border-blue-300" onClick={addCustomQuestion}>
+                    <Plus className="h-4 w-4 mr-2" />질문 추가
+                  </Button>
+                )}
+              </div>
+            </div>
           </div>
 
           <DialogFooter className="flex-none border-t border-gray-100 pt-4">
@@ -1635,20 +1666,20 @@ export default function Admin() {
                     </div>
                   )}
 
-                  {/* Daily signups */}
+                  {/* Daily signups — line chart */}
                   <div className="bg-gray-50 rounded-2xl p-4">
                     <h3 className="text-sm font-bold text-gray-700 mb-3">일자별 신청 추이</h3>
                     {analytics.dailySignups.length === 0 ? (
                       <p className="text-xs text-gray-400 py-4 text-center">데이터 없음</p>
                     ) : (
                       <ResponsiveContainer width="100%" height={180}>
-                        <BarChart data={analytics.dailySignups} margin={{ left: 0, right: 8 }}>
+                        <LineChart data={analytics.dailySignups} margin={{ left: 0, right: 8, top: 4 }}>
                           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
-                          <XAxis dataKey="date" tick={{ fontSize: 10 }} tickFormatter={(v) => v.slice(5)} />
+                          <XAxis dataKey="date" tick={{ fontSize: 10 }} tickFormatter={(v) => String(v).slice(5)} />
                           <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
-                          <Tooltip formatter={(v) => [`${v}명`, "신청자"]} labelFormatter={(l) => `${l}`} />
-                          <Bar dataKey="count" fill="#3b82f6" radius={[4, 4, 0, 0]} name="신청자" />
-                        </BarChart>
+                          <Tooltip formatter={(v) => [`${v}명`, "신청자"]} labelFormatter={(l) => String(l)} />
+                          <Line type="monotone" dataKey="count" stroke="#3b82f6" strokeWidth={2} dot={{ r: 4, fill: "#3b82f6" }} name="신청자" />
+                        </LineChart>
                       </ResponsiveContainer>
                     )}
                   </div>
@@ -1695,84 +1726,6 @@ export default function Admin() {
         </DialogContent>
       </Dialog>
 
-      {/* ═══ Custom Questions Modal ═════════════════════ */}
-      <Dialog open={questionsModal.open} onOpenChange={(open) => setQuestionsModal((m) => ({ ...m, open }))}>
-        <DialogContent className="sm:max-w-[640px] bg-white rounded-2xl border border-gray-100 shadow-xl max-h-[90vh] overflow-hidden flex flex-col">
-          <DialogHeader className="flex-none">
-            <DialogTitle className="text-lg font-bold text-gray-900">맞춤 질문 설정</DialogTitle>
-            <DialogDescription className="text-sm text-gray-500">{questionsModal.liveTitle} — 신청 폼에 표시할 질문을 설정합니다.</DialogDescription>
-          </DialogHeader>
-          <div className="flex-1 overflow-y-auto mt-2 space-y-3 pr-1">
-            {isLoadingQuestions ? (
-              <div className="flex justify-center py-12"><Loader2 className="h-7 w-7 animate-spin text-blue-500" /></div>
-            ) : (
-              <>
-                {customQuestions.length === 0 && (
-                  <div className="py-8 text-center text-gray-400 text-sm">설정된 질문이 없습니다. 아래 버튼으로 추가하세요.</div>
-                )}
-                {customQuestions.map((q, idx) => (
-                  <div key={idx} className="bg-gray-50 rounded-2xl border border-gray-100 p-4 space-y-3">
-                    <div className="flex items-start gap-3">
-                      <span className="text-xs text-gray-400 font-bold mt-2.5">{idx + 1}</span>
-                      <div className="flex-1 space-y-3">
-                        <Input
-                          value={q.question}
-                          onChange={(e) => updateCustomQuestion(idx, { question: e.target.value })}
-                          placeholder="질문 내용을 입력하세요"
-                          className="rounded-xl border-gray-200 text-sm"
-                        />
-                        <div className="flex gap-2 flex-wrap">
-                          {(["text", "radio", "checkbox", "skill_level"] as const).map((type) => {
-                            const labels: Record<string, string> = { text: "주관식", radio: "단답형", checkbox: "복수선택", skill_level: "수준 질문" };
-                            return (
-                              <button
-                                key={type}
-                                onClick={() => updateCustomQuestion(idx, { questionType: type, options: type === "skill_level" ? null : q.options })}
-                                className={`text-xs px-2.5 py-1 rounded-full border font-medium transition-colors ${q.questionType === type ? "bg-blue-600 text-white border-blue-600" : "border-gray-200 text-gray-500 hover:border-blue-300"}`}
-                              >
-                                {labels[type]}
-                              </button>
-                            );
-                          })}
-                        </div>
-                        {(q.questionType === "radio" || q.questionType === "checkbox") && (
-                          <div className="space-y-2">
-                            <Label className="text-xs text-gray-500">보기 (줄 바꿈으로 구분)</Label>
-                            <Textarea
-                              className="resize-none rounded-xl border-gray-200 text-sm"
-                              rows={3}
-                              placeholder={"보기1\n보기2\n보기3"}
-                              value={(q.options ?? []).join("\n")}
-                              onChange={(e) => updateCustomQuestion(idx, { options: e.target.value.split("\n").filter((s) => s.trim()) })}
-                            />
-                          </div>
-                        )}
-                        {q.questionType === "skill_level" && (
-                          <p className="text-xs text-gray-400 bg-blue-50 rounded-lg px-3 py-2">수준 질문은 신청 폼에서 초보/중급/고급 라디오 버튼으로 표시됩니다.</p>
-                        )}
-                      </div>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-red-500" onClick={() => removeCustomQuestion(idx)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-                {customQuestions.length < 5 && (
-                  <Button variant="outline" className="w-full rounded-xl border-dashed border-gray-300 text-gray-500 hover:text-blue-600 hover:border-blue-300" onClick={addCustomQuestion}>
-                    <Plus className="h-4 w-4 mr-2" />질문 추가
-                  </Button>
-                )}
-              </>
-            )}
-          </div>
-          <DialogFooter className="flex-none border-t border-gray-100 pt-4 mt-4">
-            <Button variant="outline" className="rounded-xl border-gray-200" onClick={() => setQuestionsModal((m) => ({ ...m, open: false }))}>취소</Button>
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold" onClick={saveCustomQuestions} disabled={isSavingQuestions}>
-              {isSavingQuestions && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}저장
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

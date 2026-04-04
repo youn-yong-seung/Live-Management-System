@@ -132,6 +132,10 @@ export const CreateRegistrationBody = zod.object({
   phone: zod.string(),
   email: zod.string().nullish(),
   message: zod.string().nullish(),
+  industry: zod.string().nullish(),
+  channelSource: zod.array(zod.string()).nullish(),
+  skillLevel: zod.string().nullish(),
+  customAnswers: zod.record(zod.string(), zod.union([zod.string(), zod.array(zod.string())])).nullish(),
 });
 
 /**
