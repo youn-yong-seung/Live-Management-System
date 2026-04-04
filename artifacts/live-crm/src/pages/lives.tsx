@@ -9,7 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate } from "@/lib/date-utils";
 import { Video, Calendar, Users } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -270,19 +270,19 @@ export default function Lives() {
                 )} />
 
                 {/* ── 어디서 알게 됐나요 */}
-                <Controller control={form.control} name="channelSource" render={({ field }) => (
+                <FormField control={form.control} name="channelSource" render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium text-gray-700">어디서 알게 됐나요? <span className="text-gray-400 font-normal">(복수 선택)</span></FormLabel>
                     <div className="grid grid-cols-2 gap-2 pt-1">
                       {CHANNELS.map((ch) => {
-                        const checked = field.value?.includes(ch) ?? false;
+                        const checked = (field.value as string[] | undefined)?.includes(ch) ?? false;
                         return (
                           <div key={ch} className="flex items-center gap-2">
                             <Checkbox
                               id={`ch-${ch}`}
                               checked={checked}
                               onCheckedChange={(v) => {
-                                const current = field.value ?? [];
+                                const current = (field.value as string[] | undefined) ?? [];
                                 field.onChange(v ? [...current, ch] : current.filter((c) => c !== ch));
                               }}
                               className="rounded border-gray-300"
@@ -297,7 +297,7 @@ export default function Lives() {
 
                 {/* ── 수준 (only if live has skill_level question) */}
                 {hasSkillLevel && (
-                  <Controller control={form.control} name="skillLevel" render={({ field }) => (
+                  <FormField control={form.control} name="skillLevel" render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-sm font-medium text-gray-700">AI/툴 활용 수준 <span className="text-gray-400 font-normal">(선택)</span></FormLabel>
                       <RadioGroup onValueChange={field.onChange} value={field.value} className="pt-1 space-y-2">
@@ -314,7 +314,7 @@ export default function Lives() {
 
                 {/* ── Dynamic custom questions */}
                 {dynamicQuestions.map((q) => (
-                  <Controller
+                  <FormField
                     key={q.id}
                     control={form.control}
                     name={`customAnswers.${q.id}`}
