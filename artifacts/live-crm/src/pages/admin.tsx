@@ -106,7 +106,7 @@ interface YoutubeStats {
 interface CustomQuestion {
   id?: number;
   question: string;
-  questionType: "text" | "radio" | "checkbox" | "skill_level";
+  questionType: "text" | "textarea" | "radio" | "checkbox" | "skill_level";
   options: string[] | null;
   displayOrder: number;
 }
@@ -515,6 +515,15 @@ export default function Admin() {
   /* ── Save notification rules + trigger ─────────── */
   const saveRules = async () => {
     if (!rulesModal.live) return;
+
+    const invalidQ = customQuestions.find(
+      (q) => (q.questionType === "radio" || q.questionType === "checkbox") && (!q.options || q.options.length === 0)
+    );
+    if (invalidQ) {
+      toast({ variant: "destructive", title: "질문 설정 오류", description: `"${invalidQ.question || "선택형 질문"}"에 선택지를 1개 이상 입력해주세요.` });
+      return;
+    }
+
     setIsSavingRules(true);
     try {
       await Promise.all([

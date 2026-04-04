@@ -321,11 +321,12 @@ export default function Lives() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-sm font-medium text-gray-700">{q.question} <span className="text-gray-400 font-normal">(선택)</span></FormLabel>
-                        {q.questionType === "text" && (
+                        {(q.questionType === "text" || q.questionType === "textarea") && (
                           <FormControl>
                             <Textarea
                               className="resize-none rounded-xl border-gray-200 text-sm"
                               placeholder="답변을 입력해주세요"
+                              rows={q.questionType === "textarea" ? 4 : 2}
                               value={typeof field.value === "string" ? field.value : ""}
                               onChange={(e) => field.onChange(e.target.value)}
                             />

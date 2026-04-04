@@ -240,24 +240,28 @@ router.get("/lives/:liveId/custom-questions", async (req: Request, res: Response
 
 type CustomQuestionInput = {
   question: string;
-  questionType: "text" | "radio" | "checkbox" | "skill_level";
+  questionType: "text" | "textarea" | "radio" | "checkbox" | "skill_level";
   options?: string[] | null;
   displayOrder?: number | null;
 };
 
 function parseCustomQuestions(body: unknown): CustomQuestionInput[] {
   if (!Array.isArray(body)) throw new Error("Expected an array of questions");
-  const validTypes = ["text", "radio", "checkbox", "skill_level"] as const;
+  const validTypes = ["text", "textarea", "radio", "checkbox", "skill_level"] as const;
   return body.map((q: unknown, i: number) => {
     if (typeof q !== "object" || q === null) throw new Error(`Question ${i} is not an object`);
     const obj = q as Record<string, unknown>;
     if (typeof obj.question !== "string" || obj.question.trim().length === 0) throw new Error(`Question ${i} missing text`);
     const questionType = (obj.questionType as string) ?? "text";
     if (!validTypes.includes(questionType as typeof validTypes[number])) throw new Error(`Question ${i} has invalid questionType`);
+    const options = Array.isArray(obj.options) ? (obj.options as string[]).filter((o) => typeof o === "string") : null;
+    if ((questionType === "radio" || questionType === "checkbox") && (!options || options.length === 0)) {
+      throw new Error(`Question ${i} (type=${questionType}) requires at least one option`);
+    }
     return {
       question: obj.question.trim(),
       questionType: questionType as CustomQuestionInput["questionType"],
-      options: Array.isArray(obj.options) ? (obj.options as string[]) : null,
+      options,
       displayOrder: typeof obj.displayOrder === "number" ? Math.floor(obj.displayOrder) : i,
     };
   });
