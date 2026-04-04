@@ -10,6 +10,12 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: lives
+    description: Live stream management
+  - name: registrations
+    description: Live registration management
+  - name: dashboard
+    description: Dashboard summary
 paths:
   /healthz:
     get:
@@ -24,6 +30,177 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /lives:
+    get:
+      operationId: getLives
+      tags: [lives]
+      summary: Get all lives
+      description: Returns list of live streams, optionally filtered by status
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/LiveStatus"
+      responses:
+        "200":
+          description: List of lives
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Live"
+    post:
+      operationId: createLive
+      tags: [lives]
+      summary: Create a live (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateLiveBody"
+      responses:
+        "201":
+          description: Created live
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Live"
+
+  /lives/{id}:
+    get:
+      operationId: getLive
+      tags: [lives]
+      summary: Get a single live
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Live detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Live"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    put:
+      operationId: updateLive
+      tags: [lives]
+      summary: Update a live (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateLiveBody"
+      responses:
+        "200":
+          description: Updated live
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Live"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: deleteLive
+      tags: [lives]
+      summary: Delete a live (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /lives/{liveId}/registrations:
+    get:
+      operationId: getRegistrations
+      tags: [registrations]
+      summary: Get registrations for a live (admin)
+      parameters:
+        - name: liveId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of registrations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Registration"
+    post:
+      operationId: createRegistration
+      tags: [registrations]
+      summary: Register for a live
+      parameters:
+        - name: liveId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateRegistrationBody"
+      responses:
+        "201":
+          description: Registration created, KakaoTalk notification sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Registration"
+        "404":
+          description: Live not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /dashboard-summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get dashboard summary
+      description: Returns counts for active lives, upcoming lives this week, and total registrations
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +211,154 @@ components:
       required:
         - status
 
+    LiveStatus:
+      type: string
+      enum: [live, scheduled, ended]
+
+    Live:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        youtubeUrl:
+          type: string
+          nullable: true
+        scheduledAt:
+          type: string
+          format: date-time
+          nullable: true
+        status:
+          $ref: "#/components/schemas/LiveStatus"
+        thumbnailUrl:
+          type: string
+          nullable: true
+        registrationCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - title
+        - status
+        - registrationCount
+        - createdAt
+
+    CreateLiveBody:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        youtubeUrl:
+          type: string
+          nullable: true
+        scheduledAt:
+          type: string
+          format: date-time
+          nullable: true
+        status:
+          $ref: "#/components/schemas/LiveStatus"
+        thumbnailUrl:
+          type: string
+          nullable: true
+      required:
+        - title
+        - status
+
+    UpdateLiveBody:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        youtubeUrl:
+          type: string
+          nullable: true
+        scheduledAt:
+          type: string
+          format: date-time
+          nullable: true
+        status:
+          $ref: "#/components/schemas/LiveStatus"
+        thumbnailUrl:
+          type: string
+          nullable: true
+
+    Registration:
+      type: object
+      properties:
+        id:
+          type: integer
+        liveId:
+          type: integer
+        name:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+          nullable: true
+        message:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - liveId
+        - name
+        - phone
+        - createdAt
+
+    CreateRegistrationBody:
+      type: object
+      properties:
+        name:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+          nullable: true
+        message:
+          type: string
+          nullable: true
+      required:
+        - name
+        - phone
+
+    DashboardSummary:
+      type: object
+      properties:
+        activeLivesCount:
+          type: integer
+        upcomingThisWeekCount:
+          type: integer
+        totalRegistrationsCount:
+          type: integer
+        totalLivesCount:
+          type: integer
+      required:
+        - activeLivesCount
+        - upcomingThisWeekCount
+        - totalRegistrationsCount
+        - totalLivesCount
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error

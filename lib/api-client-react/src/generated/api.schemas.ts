@@ -8,3 +8,73 @@
 export interface HealthStatus {
   status: string;
 }
+
+export type LiveStatus = (typeof LiveStatus)[keyof typeof LiveStatus];
+
+export const LiveStatus = {
+  live: "live",
+  scheduled: "scheduled",
+  ended: "ended",
+} as const;
+
+export interface Live {
+  id: number;
+  title: string;
+  description?: string | null;
+  youtubeUrl?: string | null;
+  scheduledAt?: string | null;
+  status: LiveStatus;
+  thumbnailUrl?: string | null;
+  registrationCount: number;
+  createdAt: string;
+}
+
+export interface CreateLiveBody {
+  title: string;
+  description?: string | null;
+  youtubeUrl?: string | null;
+  scheduledAt?: string | null;
+  status: LiveStatus;
+  thumbnailUrl?: string | null;
+}
+
+export interface UpdateLiveBody {
+  title?: string;
+  description?: string | null;
+  youtubeUrl?: string | null;
+  scheduledAt?: string | null;
+  status?: LiveStatus;
+  thumbnailUrl?: string | null;
+}
+
+export interface Registration {
+  id: number;
+  liveId: number;
+  name: string;
+  phone: string;
+  email?: string | null;
+  message?: string | null;
+  createdAt: string;
+}
+
+export interface CreateRegistrationBody {
+  name: string;
+  phone: string;
+  email?: string | null;
+  message?: string | null;
+}
+
+export interface DashboardSummary {
+  activeLivesCount: number;
+  upcomingThisWeekCount: number;
+  totalRegistrationsCount: number;
+  totalLivesCount: number;
+}
+
+export interface ErrorResponse {
+  error: string;
+}
+
+export type GetLivesParams = {
+  status?: LiveStatus;
+};

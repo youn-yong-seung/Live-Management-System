@@ -5,18 +5,31 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import type {
+  MutationFunction,
   QueryFunction,
   QueryKey,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult,
 } from "@tanstack/react-query";
 
-import type { HealthStatus } from "./api.schemas";
+import type {
+  CreateLiveBody,
+  CreateRegistrationBody,
+  DashboardSummary,
+  ErrorResponse,
+  GetLivesParams,
+  HealthStatus,
+  Live,
+  Registration,
+  UpdateLiveBody,
+} from "./api.schemas";
 
 import { customFetch } from "../custom-fetch";
-import type { ErrorType } from "../custom-fetch";
+import type { ErrorType, BodyType } from "../custom-fetch";
 
 type AwaitedInput<T> = PromiseLike<T> | T;
 
@@ -92,6 +105,686 @@ export function useHealthCheck<
   request?: SecondParameter<typeof customFetch>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getHealthCheckQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Returns list of live streams, optionally filtered by status
+ * @summary Get all lives
+ */
+export const getGetLivesUrl = (params?: GetLivesParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/lives?${stringifiedParams}`
+    : `/api/lives`;
+};
+
+export const getLives = async (
+  params?: GetLivesParams,
+  options?: RequestInit,
+): Promise<Live[]> => {
+  return customFetch<Live[]>(getGetLivesUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetLivesQueryKey = (params?: GetLivesParams) => {
+  return [`/api/lives`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetLivesQueryOptions = <
+  TData = Awaited<ReturnType<typeof getLives>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: GetLivesParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getLives>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetLivesQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getLives>>> = ({
+    signal,
+  }) => getLives(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getLives>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetLivesQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getLives>>
+>;
+export type GetLivesQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get all lives
+ */
+
+export function useGetLives<
+  TData = Awaited<ReturnType<typeof getLives>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: GetLivesParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getLives>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetLivesQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Create a live (admin)
+ */
+export const getCreateLiveUrl = () => {
+  return `/api/lives`;
+};
+
+export const createLive = async (
+  createLiveBody: CreateLiveBody,
+  options?: RequestInit,
+): Promise<Live> => {
+  return customFetch<Live>(getCreateLiveUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(createLiveBody),
+  });
+};
+
+export const getCreateLiveMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createLive>>,
+    TError,
+    { data: BodyType<CreateLiveBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createLive>>,
+  TError,
+  { data: BodyType<CreateLiveBody> },
+  TContext
+> => {
+  const mutationKey = ["createLive"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createLive>>,
+    { data: BodyType<CreateLiveBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createLive(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateLiveMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createLive>>
+>;
+export type CreateLiveMutationBody = BodyType<CreateLiveBody>;
+export type CreateLiveMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Create a live (admin)
+ */
+export const useCreateLive = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createLive>>,
+    TError,
+    { data: BodyType<CreateLiveBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createLive>>,
+  TError,
+  { data: BodyType<CreateLiveBody> },
+  TContext
+> => {
+  return useMutation(getCreateLiveMutationOptions(options));
+};
+
+/**
+ * @summary Get a single live
+ */
+export const getGetLiveUrl = (id: number) => {
+  return `/api/lives/${id}`;
+};
+
+export const getLive = async (
+  id: number,
+  options?: RequestInit,
+): Promise<Live> => {
+  return customFetch<Live>(getGetLiveUrl(id), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetLiveQueryKey = (id: number) => {
+  return [`/api/lives/${id}`] as const;
+};
+
+export const getGetLiveQueryOptions = <
+  TData = Awaited<ReturnType<typeof getLive>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  id: number,
+  options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof getLive>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetLiveQueryKey(id);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getLive>>> = ({
+    signal,
+  }) => getLive(id, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!id,
+    ...queryOptions,
+  } as UseQueryOptions<Awaited<ReturnType<typeof getLive>>, TError, TData> & {
+    queryKey: QueryKey;
+  };
+};
+
+export type GetLiveQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getLive>>
+>;
+export type GetLiveQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Get a single live
+ */
+
+export function useGetLive<
+  TData = Awaited<ReturnType<typeof getLive>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  id: number,
+  options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof getLive>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetLiveQueryOptions(id, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Update a live (admin)
+ */
+export const getUpdateLiveUrl = (id: number) => {
+  return `/api/lives/${id}`;
+};
+
+export const updateLive = async (
+  id: number,
+  updateLiveBody: UpdateLiveBody,
+  options?: RequestInit,
+): Promise<Live> => {
+  return customFetch<Live>(getUpdateLiveUrl(id), {
+    ...options,
+    method: "PUT",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(updateLiveBody),
+  });
+};
+
+export const getUpdateLiveMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateLive>>,
+    TError,
+    { id: number; data: BodyType<UpdateLiveBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateLive>>,
+  TError,
+  { id: number; data: BodyType<UpdateLiveBody> },
+  TContext
+> => {
+  const mutationKey = ["updateLive"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateLive>>,
+    { id: number; data: BodyType<UpdateLiveBody> }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return updateLive(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateLiveMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateLive>>
+>;
+export type UpdateLiveMutationBody = BodyType<UpdateLiveBody>;
+export type UpdateLiveMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Update a live (admin)
+ */
+export const useUpdateLive = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateLive>>,
+    TError,
+    { id: number; data: BodyType<UpdateLiveBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof updateLive>>,
+  TError,
+  { id: number; data: BodyType<UpdateLiveBody> },
+  TContext
+> => {
+  return useMutation(getUpdateLiveMutationOptions(options));
+};
+
+/**
+ * @summary Delete a live (admin)
+ */
+export const getDeleteLiveUrl = (id: number) => {
+  return `/api/lives/${id}`;
+};
+
+export const deleteLive = async (
+  id: number,
+  options?: RequestInit,
+): Promise<void> => {
+  return customFetch<void>(getDeleteLiveUrl(id), {
+    ...options,
+    method: "DELETE",
+  });
+};
+
+export const getDeleteLiveMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteLive>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteLive>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  const mutationKey = ["deleteLive"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteLive>>,
+    { id: number }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return deleteLive(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteLiveMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteLive>>
+>;
+
+export type DeleteLiveMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Delete a live (admin)
+ */
+export const useDeleteLive = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteLive>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof deleteLive>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  return useMutation(getDeleteLiveMutationOptions(options));
+};
+
+/**
+ * @summary Get registrations for a live (admin)
+ */
+export const getGetRegistrationsUrl = (liveId: number) => {
+  return `/api/lives/${liveId}/registrations`;
+};
+
+export const getRegistrations = async (
+  liveId: number,
+  options?: RequestInit,
+): Promise<Registration[]> => {
+  return customFetch<Registration[]>(getGetRegistrationsUrl(liveId), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetRegistrationsQueryKey = (liveId: number) => {
+  return [`/api/lives/${liveId}/registrations`] as const;
+};
+
+export const getGetRegistrationsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getRegistrations>>,
+  TError = ErrorType<unknown>,
+>(
+  liveId: number,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getRegistrations>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetRegistrationsQueryKey(liveId);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getRegistrations>>
+  > = ({ signal }) => getRegistrations(liveId, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!liveId,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getRegistrations>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetRegistrationsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getRegistrations>>
+>;
+export type GetRegistrationsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get registrations for a live (admin)
+ */
+
+export function useGetRegistrations<
+  TData = Awaited<ReturnType<typeof getRegistrations>>,
+  TError = ErrorType<unknown>,
+>(
+  liveId: number,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getRegistrations>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetRegistrationsQueryOptions(liveId, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Register for a live
+ */
+export const getCreateRegistrationUrl = (liveId: number) => {
+  return `/api/lives/${liveId}/registrations`;
+};
+
+export const createRegistration = async (
+  liveId: number,
+  createRegistrationBody: CreateRegistrationBody,
+  options?: RequestInit,
+): Promise<Registration> => {
+  return customFetch<Registration>(getCreateRegistrationUrl(liveId), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(createRegistrationBody),
+  });
+};
+
+export const getCreateRegistrationMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createRegistration>>,
+    TError,
+    { liveId: number; data: BodyType<CreateRegistrationBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createRegistration>>,
+  TError,
+  { liveId: number; data: BodyType<CreateRegistrationBody> },
+  TContext
+> => {
+  const mutationKey = ["createRegistration"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createRegistration>>,
+    { liveId: number; data: BodyType<CreateRegistrationBody> }
+  > = (props) => {
+    const { liveId, data } = props ?? {};
+
+    return createRegistration(liveId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateRegistrationMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createRegistration>>
+>;
+export type CreateRegistrationMutationBody = BodyType<CreateRegistrationBody>;
+export type CreateRegistrationMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Register for a live
+ */
+export const useCreateRegistration = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createRegistration>>,
+    TError,
+    { liveId: number; data: BodyType<CreateRegistrationBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createRegistration>>,
+  TError,
+  { liveId: number; data: BodyType<CreateRegistrationBody> },
+  TContext
+> => {
+  return useMutation(getCreateRegistrationMutationOptions(options));
+};
+
+/**
+ * Returns counts for active lives, upcoming lives this week, and total registrations
+ * @summary Get dashboard summary
+ */
+export const getGetDashboardSummaryUrl = () => {
+  return `/api/dashboard-summary`;
+};
+
+export const getDashboardSummary = async (
+  options?: RequestInit,
+): Promise<DashboardSummary> => {
+  return customFetch<DashboardSummary>(getGetDashboardSummaryUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetDashboardSummaryQueryKey = () => {
+  return [`/api/dashboard-summary`] as const;
+};
+
+export const getGetDashboardSummaryQueryOptions = <
+  TData = Awaited<ReturnType<typeof getDashboardSummary>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getDashboardSummary>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetDashboardSummaryQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getDashboardSummary>>
+  > = ({ signal }) => getDashboardSummary({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getDashboardSummary>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetDashboardSummaryQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getDashboardSummary>>
+>;
+export type GetDashboardSummaryQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get dashboard summary
+ */
+
+export function useGetDashboardSummary<
+  TData = Awaited<ReturnType<typeof getDashboardSummary>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getDashboardSummary>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetDashboardSummaryQueryOptions(options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;

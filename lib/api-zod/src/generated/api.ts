@@ -14,3 +14,133 @@ import * as zod from "zod";
 export const HealthCheckResponse = zod.object({
   status: zod.string(),
 });
+
+/**
+ * Returns list of live streams, optionally filtered by status
+ * @summary Get all lives
+ */
+export const GetLivesQueryParams = zod.object({
+  status: zod.enum(["live", "scheduled", "ended"]).optional(),
+});
+
+export const GetLivesResponseItem = zod.object({
+  id: zod.number(),
+  title: zod.string(),
+  description: zod.string().nullish(),
+  youtubeUrl: zod.string().nullish(),
+  scheduledAt: zod.coerce.date().nullish(),
+  status: zod.enum(["live", "scheduled", "ended"]),
+  thumbnailUrl: zod.string().nullish(),
+  registrationCount: zod.number(),
+  createdAt: zod.coerce.date(),
+});
+export const GetLivesResponse = zod.array(GetLivesResponseItem);
+
+/**
+ * @summary Create a live (admin)
+ */
+export const CreateLiveBody = zod.object({
+  title: zod.string(),
+  description: zod.string().nullish(),
+  youtubeUrl: zod.string().nullish(),
+  scheduledAt: zod.coerce.date().nullish(),
+  status: zod.enum(["live", "scheduled", "ended"]),
+  thumbnailUrl: zod.string().nullish(),
+});
+
+/**
+ * @summary Get a single live
+ */
+export const GetLiveParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const GetLiveResponse = zod.object({
+  id: zod.number(),
+  title: zod.string(),
+  description: zod.string().nullish(),
+  youtubeUrl: zod.string().nullish(),
+  scheduledAt: zod.coerce.date().nullish(),
+  status: zod.enum(["live", "scheduled", "ended"]),
+  thumbnailUrl: zod.string().nullish(),
+  registrationCount: zod.number(),
+  createdAt: zod.coerce.date(),
+});
+
+/**
+ * @summary Update a live (admin)
+ */
+export const UpdateLiveParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const UpdateLiveBody = zod.object({
+  title: zod.string().optional(),
+  description: zod.string().nullish(),
+  youtubeUrl: zod.string().nullish(),
+  scheduledAt: zod.coerce.date().nullish(),
+  status: zod.enum(["live", "scheduled", "ended"]).optional(),
+  thumbnailUrl: zod.string().nullish(),
+});
+
+export const UpdateLiveResponse = zod.object({
+  id: zod.number(),
+  title: zod.string(),
+  description: zod.string().nullish(),
+  youtubeUrl: zod.string().nullish(),
+  scheduledAt: zod.coerce.date().nullish(),
+  status: zod.enum(["live", "scheduled", "ended"]),
+  thumbnailUrl: zod.string().nullish(),
+  registrationCount: zod.number(),
+  createdAt: zod.coerce.date(),
+});
+
+/**
+ * @summary Delete a live (admin)
+ */
+export const DeleteLiveParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+/**
+ * @summary Get registrations for a live (admin)
+ */
+export const GetRegistrationsParams = zod.object({
+  liveId: zod.coerce.number(),
+});
+
+export const GetRegistrationsResponseItem = zod.object({
+  id: zod.number(),
+  liveId: zod.number(),
+  name: zod.string(),
+  phone: zod.string(),
+  email: zod.string().nullish(),
+  message: zod.string().nullish(),
+  createdAt: zod.coerce.date(),
+});
+export const GetRegistrationsResponse = zod.array(GetRegistrationsResponseItem);
+
+/**
+ * @summary Register for a live
+ */
+export const CreateRegistrationParams = zod.object({
+  liveId: zod.coerce.number(),
+});
+
+export const CreateRegistrationBody = zod.object({
+  name: zod.string(),
+  phone: zod.string(),
+  email: zod.string().nullish(),
+  message: zod.string().nullish(),
+});
+
+/**
+ * Returns counts for active lives, upcoming lives this week, and total registrations
+ * @summary Get dashboard summary
+ */
+export const GetDashboardSummaryResponse = zod.object({
+  activeLivesCount: zod.number(),
+  upcomingThisWeekCount: zod.number(),
+  totalRegistrationsCount: zod.number(),
+  totalLivesCount: zod.number(),
+});

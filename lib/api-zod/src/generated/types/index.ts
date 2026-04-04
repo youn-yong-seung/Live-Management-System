@@ -6,4 +6,13 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from "./createLiveBody";
+export * from "./createRegistrationBody";
+export * from "./dashboardSummary";
+export * from "./errorResponse";
+export * from "./getLivesParams";
 export * from "./healthStatus";
+export * from "./live";
+export * from "./liveStatus";
+export * from "./registration";
+export * from "./updateLiveBody";

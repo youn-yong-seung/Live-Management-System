@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "윤자동 라이브 CRM"
+version = "1.0.0"
+id = "artifacts/live-crm"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23253
+
+[services.development]
+run = "pnpm --filter @workspace/live-crm run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/live-crm", "run", "build" ]
+publicDir = "artifacts/live-crm/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23253"
+BASE_PATH = "/"
