@@ -7,10 +7,10 @@ const COURSES = [
     id: 1,
     title: "한 명 인건비로 완성하는 업무 자동화 코칭반",
     platform: "Class101",
-    description: "실무에서 바로 적용 가능한 업무 자동화 코칭반. 노션, Make, 클로드코드 등 핵심 툴을 마스터하고 자동��� 시스템을 구축하세요.",
+    description: "실무에서 바로 적용 가능한 업무 자동화 코칭반. 노션, Make, 클로드코드 등 핵심 툴을 마스터하고 자동화 시스템을 구축하세요.",
     originalPrice: "2,700,000원",
     installment: "12개월 할부 월 204,166원",
-    badge: "얼���버드",
+    badge: "얼리버드",
     badgeColor: "bg-red-500",
     tags: ["자동화", "코칭", "실전"],
     url: "https://class101.net/ko/products/699ad4eb9251eededf8b9711",
@@ -19,7 +19,7 @@ const COURSES = [
     id: 2,
     title: "왕초보를 위한, 바로 써먹는 노션 & 자동화",
     platform: "Class101",
-    description: "모든게 어려운 왕초보를 위한 노션 & 자동화 강의. 기초부터 차근차근 배워 실전에 바�� 적용할 수 있습니다.",
+    description: "모든게 어려운 왕초보를 위한 노션 & 자동화 강의. 기초부터 차근차근 배워 실전에 바로 적용할 수 있습니다.",
     originalPrice: "169,000원",
     discountRate: "30%",
     installment: "5개월 할부 월 23,800원",
@@ -57,8 +57,8 @@ export default function Courses() {
             <GraduationCap className="h-6 w-6 text-[#CC9965]" />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-white mb-1">무료 특강으로 ���족하셨나요?</h2>
-            <p className="text-white/50 text-sm">무료 라이브에서 맛본 내용을 유료 강의에서 깊이 있게 배워보세요. 실전 프로젝트와 1:1 코칭까��� 포함된 프리미엄 과정입니다.</p>
+            <h2 className="text-lg font-bold text-white mb-1">무료 특강으로 부족하셨나요?</h2>
+            <p className="text-white/50 text-sm">무료 라이브에서 맛본 내용을 유료 강의에서 깊이 있게 배워보세요. 실전 프로젝트와 1:1 코칭까지 포함된 프리미엄 과정입니다.</p>
           </div>
         </div>
       </div>

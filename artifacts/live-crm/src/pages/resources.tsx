@@ -57,12 +57,12 @@ const SECTIONS: ResourceSection[] = [
   },
   {
     title: "노션 강의 & 가이드",
-    description: "노션을 체계적으로 배울 수 있는 강의�� 가이드",
+    description: "노션을 체계적으로 배울 수 있는 강의와 가이드",
     icon: GraduationCap,
     iconColor: "text-sky-400",
     items: [
       {
-        title: "��락의 노션 왕초보 영상 강의",
+        title: "프락의 노션 왕초보 영상 강의",
         description: "처음 시작하는 분들을 위한 영상 강의 시리즈",
         url: "https://www.yunjadong.com/shop_view/?idx=159",
         badge: "강의",
