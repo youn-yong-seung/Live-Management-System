@@ -272,7 +272,7 @@ export default function ReviewPage() {
               <p className="text-xs text-gray-400 mt-1">첫 번째 후기를 남겨보세요!</p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="max-h-[600px] overflow-y-auto pr-1 space-y-4">
               {reviews.map((review) => (
                 <ReviewCard key={review.id} review={review} />
               ))}

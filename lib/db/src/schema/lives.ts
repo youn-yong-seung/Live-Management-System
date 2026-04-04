@@ -82,8 +82,9 @@ export const reviewsTable = pgTable("reviews", {
 });
 
 export const insertReviewSchema = createInsertSchema(reviewsTable, {
-  rating: (s) => s.min(1).max(5),
-  content: (s) => s.min(1).max(2000),
+  name: (s) => s.min(1, "이름을 입력해주세요.").max(50, "이름은 50자 이하여야 합니다."),
+  rating: (s) => s.min(1, "별점을 선택해주세요.").max(5, "별점은 5점 이하여야 합니다."),
+  content: (s) => s.min(1, "후기 내용을 입력해주세요.").max(2000, "후기는 2000자 이하여야 합니다."),
 }).omit({ id: true, createdAt: true });
 export type InsertReview = z.infer<typeof insertReviewSchema>;
 export type Review = typeof reviewsTable.$inferSelect;
