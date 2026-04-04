@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   useGetLives, getGetLivesQueryKey,
   useCreateLive, useUpdateLive, useDeleteLive,
-  useGetRegistrations, getGetDashboardSummaryQueryKey
+  useGetRegistrations, getGetDashboardSummaryQueryKey,
 } from "@workspace/api-client-react";
 import type { Live, LiveStatus } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -12,11 +12,92 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { formatDate } from "@/lib/date-utils";
-import { Plus, Edit, Trash2, Users, Loader2, RefreshCw, Settings } from "lucide-react";
+import { Plus, Edit, Trash2, Users, Loader2, RefreshCw, Settings, Bell, Send, Eye, CheckCircle, Clock, AlertCircle, KeyRound } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+
+/* ── Types ─────────────────────────────────────────── */
+
+interface SolapiConfig {
+  apiKey: string | null;
+  senderPhone: string | null;
+  senderKey: string | null;
+  configured: boolean;
+}
+
+interface SolapiTemplate {
+  templateId: string;
+  name: string;
+  content?: string;
+  status?: string;
+}
+
+interface NotificationRule {
+  id: number;
+  liveId: number;
+  offsetMinutes: number;
+  templateId: string | null;
+  templateName: string | null;
+  enabled: boolean;
+}
+
+interface ScheduleEntry {
+  ruleId: number;
+  liveId: number;
+  liveTitle: string;
+  offsetMinutes: number;
+  offsetLabel: string;
+  templateId: string | null;
+  templateName: string | null;
+  fireAt: string | null;
+  recipientCount: number;
+  status: "pending" | "sent" | "overdue";
+  sentAt: string | null;
+  successCount: number | null;
+}
+
+interface NotificationLogEntry {
+  id: number;
+  liveId: number;
+  liveTitle: string;
+  templateId: string | null;
+  templateName: string | null;
+  recipientCount: number;
+  successCount: number;
+  sentAt: string;
+  status: string;
+  isImmediate: boolean;
+  ruleId: number | null;
+}
+
+/* ── API helpers ───────────────────────────────────── */
+
+async function apiFetch<T = unknown>(path: string, options?: RequestInit): Promise<T> {
+  const res = await fetch(`/api${path}`, {
+    headers: { "Content-Type": "application/json" },
+    ...options,
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text || `HTTP ${res.status}`);
+  }
+  return res.json() as Promise<T>;
+}
+
+/* ── Constants ─────────────────────────────────────── */
+
+const OFFSET_LABELS: Record<number, string> = {
+  [-1440]: "1일 전",
+  [-180]: "3시간 전",
+  [-60]: "1시간 전",
+  [-30]: "30분 전",
+  [-10]: "10분 전",
+  [10]: "시작 10분 후",
+};
 
 const statusConfig: Record<string, { label: string; className: string }> = {
   live: { label: "진행중", className: "bg-red-50 text-red-600" },
@@ -24,47 +105,188 @@ const statusConfig: Record<string, { label: string; className: string }> = {
   ended: { label: "종료됨", className: "bg-gray-100 text-gray-500" },
 };
 
+/* ═══════════════════════════════════════════════════ */
+/*  Admin Page                                          */
+/* ═══════════════════════════════════════════════════ */
+
 export default function Admin() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [selectedLiveId, setSelectedLiveId] = useState<number | null>(null);
+
+  /* ── Solapi state ──────────────────────────────── */
+  const [solapiConfig, setSolapiConfig] = useState<SolapiConfig | null>(null);
+  const [templates, setTemplates] = useState<SolapiTemplate[]>([]);
+  const [configForm, setConfigForm] = useState({ apiKey: "", apiSecret: "", senderPhone: "", senderKey: "" });
+  const [isSavingConfig, setIsSavingConfig] = useState(false);
+  const [isFetchingTemplates, setIsFetchingTemplates] = useState(false);
+
+  /* ── Live management state ─────────────────────── */
   const [isLiveModalOpen, setIsLiveModalOpen] = useState(false);
   const [isRegistrationsModalOpen, setIsRegistrationsModalOpen] = useState(false);
+  const [selectedLiveForRegs, setSelectedLiveForRegs] = useState<number | null>(null);
   const [liveForm, setLiveForm] = useState<{
-    id?: number;
-    title: string;
-    description: string;
-    youtubeUrl: string;
-    scheduledAt: string;
-    status: LiveStatus;
-    thumbnailUrl: string;
-  }>({
-    title: "", description: "", youtubeUrl: "", scheduledAt: "", status: "scheduled", thumbnailUrl: "",
-  });
+    id?: number; title: string; description: string; youtubeUrl: string;
+    scheduledAt: string; status: LiveStatus; thumbnailUrl: string;
+  }>({ title: "", description: "", youtubeUrl: "", scheduledAt: "", status: "scheduled", thumbnailUrl: "" });
 
+  /* ── Immediate send state ──────────────────────── */
+  const [sendModal, setSendModal] = useState<{ live: Live | null; open: boolean }>({ live: null, open: false });
+  const [sendTemplateId, setSendTemplateId] = useState("");
+  const [isSending, setIsSending] = useState(false);
+
+  /* ── Notification rules state ──────────────────── */
+  const [rulesModal, setRulesModal] = useState<{ live: Live | null; open: boolean }>({ live: null, open: false });
+  const [notifRules, setNotifRules] = useState<NotificationRule[]>([]);
+  const [isLoadingRules, setIsLoadingRules] = useState(false);
+  const [isSavingRules, setIsSavingRules] = useState(false);
+
+  /* ── Schedule / Log state ──────────────────────── */
+  const [schedule, setSchedule] = useState<ScheduleEntry[]>([]);
+  const [notifLog, setNotifLog] = useState<NotificationLogEntry[]>([]);
+  const [isLoadingSchedule, setIsLoadingSchedule] = useState(false);
+
+  /* ── Existing hooks ────────────────────────────── */
   const { data: lives, isLoading: isLivesLoading, refetch: refetchLives } = useGetLives(
-    {},
-    { query: { queryKey: getGetLivesQueryKey() } }
+    {}, { query: { queryKey: getGetLivesQueryKey() } }
   );
-
   const { data: registrations, isLoading: isRegistrationsLoading } = useGetRegistrations(
-    selectedLiveId || 0,
-    { query: { queryKey: ["registrations", selectedLiveId], enabled: !!selectedLiveId && isRegistrationsModalOpen } }
+    selectedLiveForRegs || 0,
+    { query: { queryKey: ["registrations", selectedLiveForRegs], enabled: !!selectedLiveForRegs && isRegistrationsModalOpen } }
   );
-
   const createLive = useCreateLive();
   const updateLive = useUpdateLive();
   const deleteLive = useDeleteLive();
 
+  /* ── Load solapi config on mount ───────────────── */
+  useEffect(() => {
+    apiFetch<SolapiConfig>("/settings/solapi")
+      .then((cfg) => {
+        setSolapiConfig(cfg);
+        setConfigForm((f) => ({ ...f, apiKey: cfg.apiKey ?? "", senderPhone: cfg.senderPhone ?? "", senderKey: cfg.senderKey ?? "" }));
+      })
+      .catch(() => {});
+  }, []);
+
+  /* ── Fetch templates ───────────────────────────── */
+  const fetchTemplates = useCallback(async () => {
+    setIsFetchingTemplates(true);
+    try {
+      const tpls = await apiFetch<SolapiTemplate[]>("/solapi/templates");
+      setTemplates(tpls);
+      toast({ title: `템플릿 ${tpls.length}개 불러왔습니다.` });
+    } catch (err) {
+      toast({ variant: "destructive", title: "템플릿 불러오기 실패", description: String(err) });
+    } finally {
+      setIsFetchingTemplates(false);
+    }
+  }, [toast]);
+
+  /* ── Save solapi config ────────────────────────── */
+  const saveConfig = async () => {
+    setIsSavingConfig(true);
+    try {
+      await apiFetch("/settings/solapi", { method: "PUT", body: JSON.stringify(configForm) });
+      const cfg = await apiFetch<SolapiConfig>("/settings/solapi");
+      setSolapiConfig(cfg);
+      toast({ title: "저장 완료", description: "Solapi 설정이 저장되었습니다." });
+    } catch (err) {
+      toast({ variant: "destructive", title: "저장 실패", description: String(err) });
+    } finally {
+      setIsSavingConfig(false);
+    }
+  };
+
+  /* ── Load schedule & log ───────────────────────── */
+  const loadSchedule = useCallback(async () => {
+    setIsLoadingSchedule(true);
+    try {
+      const [sched, log] = await Promise.all([
+        apiFetch<ScheduleEntry[]>("/notifications/schedule"),
+        apiFetch<NotificationLogEntry[]>("/notifications/log"),
+      ]);
+      setSchedule(sched);
+      setNotifLog(log);
+    } catch {
+      /* ignore */ } finally {
+      setIsLoadingSchedule(false);
+    }
+  }, []);
+
+  /* ── Open immediate send modal ─────────────────── */
+  const openSendModal = async (live: Live) => {
+    setSendModal({ live, open: true });
+    setSendTemplateId("");
+    if (templates.length === 0 && solapiConfig?.configured) {
+      try {
+        const tpls = await apiFetch<SolapiTemplate[]>("/solapi/templates");
+        setTemplates(tpls);
+      } catch {}
+    }
+  };
+
+  /* ── Immediate send ────────────────────────────── */
+  const handleSendNow = async () => {
+    if (!sendModal.live || !sendTemplateId) return;
+    setIsSending(true);
+    try {
+      const tpl = templates.find((t) => t.templateId === sendTemplateId);
+      const result = await apiFetch<{ successCount: number; recipientCount: number }>(`/lives/${sendModal.live.id}/send-now`, {
+        method: "POST",
+        body: JSON.stringify({ templateId: sendTemplateId, templateName: tpl?.name }),
+      });
+      toast({ title: "발송 완료", description: `${result.successCount}/${result.recipientCount}명에게 알림톡을 발송했습니다.` });
+      setSendModal({ live: null, open: false });
+      loadSchedule();
+    } catch (err) {
+      toast({ variant: "destructive", title: "발송 실패", description: String(err) });
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  /* ── Open notification rules modal ─────────────── */
+  const openRulesModal = async (live: Live) => {
+    setRulesModal({ live, open: true });
+    setIsLoadingRules(true);
+    try {
+      const rules = await apiFetch<NotificationRule[]>(`/lives/${live.id}/notification-rules`);
+      setNotifRules(rules);
+      if (templates.length === 0 && solapiConfig?.configured) {
+        const tpls = await apiFetch<SolapiTemplate[]>("/solapi/templates");
+        setTemplates(tpls);
+      }
+    } catch (err) {
+      toast({ variant: "destructive", title: "오류", description: String(err) });
+    } finally {
+      setIsLoadingRules(false);
+    }
+  };
+
+  /* ── Save notification rules ────────────────────── */
+  const saveRules = async () => {
+    if (!rulesModal.live) return;
+    setIsSavingRules(true);
+    try {
+      await apiFetch(`/lives/${rulesModal.live.id}/notification-rules`, {
+        method: "PUT",
+        body: JSON.stringify(notifRules),
+      });
+      toast({ title: "저장 완료", description: "알림 스케줄이 저장되었습니다." });
+      setRulesModal({ live: null, open: false });
+      loadSchedule();
+    } catch (err) {
+      toast({ variant: "destructive", title: "저장 실패", description: String(err) });
+    } finally {
+      setIsSavingRules(false);
+    }
+  };
+
+  /* ── Live CRUD ─────────────────────────────────── */
   const handleOpenLiveModal = (live?: Live) => {
     if (live) {
       const scheduledAtDate = live.scheduledAt ? new Date(live.scheduledAt) : new Date();
-      const localScheduledAt = new Date(scheduledAtDate.getTime() - scheduledAtDate.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
-      setLiveForm({
-        id: live.id, title: live.title, description: live.description || "",
-        youtubeUrl: live.youtubeUrl || "", scheduledAt: live.scheduledAt ? localScheduledAt : "",
-        status: live.status, thumbnailUrl: live.thumbnailUrl || "",
-      });
+      const local = new Date(scheduledAtDate.getTime() - scheduledAtDate.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+      setLiveForm({ id: live.id, title: live.title, description: live.description || "", youtubeUrl: live.youtubeUrl || "", scheduledAt: live.scheduledAt ? local : "", status: live.status, thumbnailUrl: live.thumbnailUrl || "" });
     } else {
       setLiveForm({ title: "", description: "", youtubeUrl: "", scheduledAt: "", status: "scheduled", thumbnailUrl: "" });
     }
@@ -72,154 +294,294 @@ export default function Admin() {
   };
 
   const handleSaveLive = async () => {
-    if (!liveForm.title) {
-      toast({ variant: "destructive", title: "오류", description: "제목을 입력해주세요." });
-      return;
-    }
+    if (!liveForm.title) { toast({ variant: "destructive", title: "오류", description: "제목을 입력해주세요." }); return; }
     try {
-      const liveData = {
-        title: liveForm.title, description: liveForm.description || null,
-        youtubeUrl: liveForm.youtubeUrl || null,
-        scheduledAt: liveForm.scheduledAt ? new Date(liveForm.scheduledAt).toISOString() : null,
-        status: liveForm.status, thumbnailUrl: liveForm.thumbnailUrl || null,
-      };
-      if (liveForm.id) {
-        await updateLive.mutateAsync({ id: liveForm.id, data: liveData });
-        toast({ title: "수정 완료", description: "라이브가 수정되었습니다." });
-      } else {
-        await createLive.mutateAsync({ data: liveData });
-        toast({ title: "생성 완료", description: "새 라이브가 생성되었습니다." });
-      }
+      const data = { title: liveForm.title, description: liveForm.description || null, youtubeUrl: liveForm.youtubeUrl || null, scheduledAt: liveForm.scheduledAt ? new Date(liveForm.scheduledAt).toISOString() : null, status: liveForm.status, thumbnailUrl: liveForm.thumbnailUrl || null };
+      if (liveForm.id) { await updateLive.mutateAsync({ id: liveForm.id, data }); toast({ title: "수정 완료" }); }
+      else { await createLive.mutateAsync({ data }); toast({ title: "생성 완료" }); }
       setIsLiveModalOpen(false);
       queryClient.invalidateQueries({ queryKey: getGetLivesQueryKey() });
       queryClient.invalidateQueries({ queryKey: getGetDashboardSummaryQueryKey() });
-    } catch {
-      toast({ variant: "destructive", title: "오류", description: "저장 중 문제가 발생했습니다." });
-    }
+    } catch { toast({ variant: "destructive", title: "오류", description: "저장 중 문제가 발생했습니다." }); }
   };
 
   const handleDeleteLive = async (id: number) => {
-    if (!confirm("정말 이 라이브를 삭제하시겠습니까? 신청자 데이터도 함께 삭제될 수 있습니다.")) return;
+    if (!confirm("정말 삭제하시겠습니까?")) return;
     try {
       await deleteLive.mutateAsync({ id });
-      toast({ title: "삭제 완료", description: "라이브가 삭제되었습니다." });
+      toast({ title: "삭제 완료" });
       queryClient.invalidateQueries({ queryKey: getGetLivesQueryKey() });
       queryClient.invalidateQueries({ queryKey: getGetDashboardSummaryQueryKey() });
-    } catch {
-      toast({ variant: "destructive", title: "오류", description: "삭제 중 문제가 발생했습니다." });
-    }
+    } catch { toast({ variant: "destructive", title: "오류", description: "삭제 실패" }); }
   };
 
+  /* ── Helpers ───────────────────────────────────── */
+  const calcFireTime = (live: Live, offsetMinutes: number) => {
+    if (!live.scheduledAt) return null;
+    return new Date(new Date(live.scheduledAt).getTime() + offsetMinutes * 60 * 1000);
+  };
+
+  /* ═══════════════════════════════════════════════ */
+  /* RENDER                                           */
+  /* ═══════════════════════════════════════════════ */
+
   return (
-    <div className="space-y-8">
-      {/* Page Header */}
+    <div className="space-y-6">
+      {/* Header */}
       <div className="pt-2 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 mb-1">관리자</h1>
-          <p className="text-gray-500 text-sm">라이브 스트리밍을 관리하고 신청자 목록을 확인하세요.</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            className="rounded-xl border-gray-200 text-gray-600"
-            onClick={() => refetchLives()}
-            disabled={isLivesLoading}
-            data-testid="btn-refresh"
-          >
-            <RefreshCw className={`mr-2 h-4 w-4 ${isLivesLoading ? "animate-spin" : ""}`} />
-            새로고침
-          </Button>
-          <Button
-            className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold"
-            onClick={() => handleOpenLiveModal()}
-            data-testid="btn-create-live"
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            라이브 생성
-          </Button>
+          <p className="text-gray-500 text-sm">라이브 스트리밍과 알림톡 발송을 관리하세요.</p>
         </div>
       </div>
 
-      {/* Live Table */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-100">
-          <h2 className="font-bold text-gray-900">라이브 목록</h2>
-        </div>
-        {isLivesLoading ? (
-          <div className="p-6 space-y-3">
-            {[1, 2, 3].map(i => <Skeleton key={i} className="h-14 w-full rounded-xl" />)}
+      <Tabs defaultValue="lives">
+        <TabsList className="bg-gray-100 rounded-xl p-1">
+          <TabsTrigger value="lives" className="rounded-lg text-sm font-medium">라이브 관리</TabsTrigger>
+          <TabsTrigger value="settings" className="rounded-lg text-sm font-medium">API 설정</TabsTrigger>
+          <TabsTrigger value="schedule" className="rounded-lg text-sm font-medium" onClick={loadSchedule}>발송 현황</TabsTrigger>
+        </TabsList>
+
+        {/* ── Tab 1: Live Management ─────────────────── */}
+        <TabsContent value="lives" className="mt-6">
+          <div className="flex justify-end gap-2 mb-4">
+            <Button variant="outline" className="rounded-xl border-gray-200 text-gray-600" onClick={() => refetchLives()} disabled={isLivesLoading} data-testid="btn-refresh">
+              <RefreshCw className={`mr-2 h-4 w-4 ${isLivesLoading ? "animate-spin" : ""}`} />새로고침
+            </Button>
+            <Button className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold" onClick={() => handleOpenLiveModal()} data-testid="btn-create-live">
+              <Plus className="mr-2 h-4 w-4" />라이브 생성
+            </Button>
           </div>
-        ) : lives && lives.length > 0 ? (
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-gray-50 hover:bg-gray-50">
-                <TableHead className="text-gray-500 font-medium text-xs">상태</TableHead>
-                <TableHead className="text-gray-500 font-medium text-xs">제목</TableHead>
-                <TableHead className="text-gray-500 font-medium text-xs">예정 일시</TableHead>
-                <TableHead className="text-center text-gray-500 font-medium text-xs">신청자</TableHead>
-                <TableHead className="text-right text-gray-500 font-medium text-xs">관리</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {lives.map((live) => {
-                const s = statusConfig[live.status] ?? { label: live.status, className: "bg-gray-100 text-gray-500" };
-                return (
-                  <TableRow key={live.id} className="hover:bg-gray-50/50">
-                    <TableCell>
-                      <span className={`inline-block text-xs font-semibold px-2.5 py-1 rounded-full ${s.className}`}>
-                        {s.label}
-                      </span>
-                    </TableCell>
-                    <TableCell className="font-medium text-gray-900">{live.title}</TableCell>
-                    <TableCell className="text-gray-500 text-sm">{formatDate(live.scheduledAt)}</TableCell>
-                    <TableCell className="text-center">
-                      <button
-                        className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-blue-600 transition-colors"
-                        onClick={() => { setSelectedLiveId(live.id); setIsRegistrationsModalOpen(true); }}
-                        data-testid={`btn-view-registrations-${live.id}`}
-                      >
-                        <Users className="h-4 w-4" />
-                        {live.registrationCount}
-                      </button>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="h-8 w-8 rounded-lg border-gray-200 text-gray-500 hover:text-blue-600 hover:border-blue-200"
-                          onClick={() => handleOpenLiveModal(live)}
-                          data-testid={`btn-edit-live-${live.id}`}
-                        >
-                          <Edit className="h-3.5 w-3.5" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="h-8 w-8 rounded-lg border-gray-200 text-gray-500 hover:text-red-600 hover:border-red-200"
-                          onClick={() => handleDeleteLive(live.id)}
-                          data-testid={`btn-delete-live-${live.id}`}
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        ) : (
-          <div className="py-16 text-center">
-            <div className="w-14 h-14 bg-gray-50 rounded-2xl border border-gray-100 flex items-center justify-center mx-auto mb-4">
-              <Settings className="h-6 w-6 text-gray-300" />
+
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100">
+              <h2 className="font-bold text-gray-900">라이브 목록</h2>
             </div>
-            <p className="font-medium text-gray-500">등록된 라이브가 없습니다</p>
+            {isLivesLoading ? (
+              <div className="p-6 space-y-3">{[1, 2, 3].map(i => <Skeleton key={i} className="h-14 w-full rounded-xl" />)}</div>
+            ) : lives && lives.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-gray-50 hover:bg-gray-50">
+                    <TableHead className="text-gray-500 font-medium text-xs">상태</TableHead>
+                    <TableHead className="text-gray-500 font-medium text-xs">제목</TableHead>
+                    <TableHead className="text-gray-500 font-medium text-xs">예정 일시</TableHead>
+                    <TableHead className="text-center text-gray-500 font-medium text-xs">신청자</TableHead>
+                    <TableHead className="text-right text-gray-500 font-medium text-xs">관리</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {lives.map((live) => {
+                    const s = statusConfig[live.status] ?? { label: live.status, className: "bg-gray-100 text-gray-500" };
+                    return (
+                      <TableRow key={live.id} className="hover:bg-gray-50/50">
+                        <TableCell><span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${s.className}`}>{s.label}</span></TableCell>
+                        <TableCell className="font-medium text-gray-900">{live.title}</TableCell>
+                        <TableCell className="text-gray-500 text-sm">{formatDate(live.scheduledAt)}</TableCell>
+                        <TableCell className="text-center">
+                          <button className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-blue-600" onClick={() => { setSelectedLiveForRegs(live.id); setIsRegistrationsModalOpen(true); }} data-testid={`btn-view-registrations-${live.id}`}>
+                            <Users className="h-4 w-4" />{live.registrationCount}
+                          </button>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-1.5">
+                            <Button variant="outline" size="sm" className="h-8 rounded-lg border-gray-200 text-gray-500 hover:text-blue-600 hover:border-blue-200 text-xs gap-1" onClick={() => openRulesModal(live)} data-testid={`btn-notif-rules-${live.id}`}>
+                              <Bell className="h-3.5 w-3.5" />알림 설정
+                            </Button>
+                            <Button variant="outline" size="sm" className="h-8 rounded-lg border-gray-200 text-gray-500 hover:text-green-600 hover:border-green-200 text-xs gap-1" onClick={() => openSendModal(live)} data-testid={`btn-send-now-${live.id}`}>
+                              <Send className="h-3.5 w-3.5" />즉시 발송
+                            </Button>
+                            <Button variant="outline" size="icon" className="h-8 w-8 rounded-lg border-gray-200 text-gray-500 hover:text-blue-600 hover:border-blue-200" onClick={() => handleOpenLiveModal(live)} data-testid={`btn-edit-live-${live.id}`}><Edit className="h-3.5 w-3.5" /></Button>
+                            <Button variant="outline" size="icon" className="h-8 w-8 rounded-lg border-gray-200 text-gray-500 hover:text-red-600 hover:border-red-200" onClick={() => handleDeleteLive(live.id)} data-testid={`btn-delete-live-${live.id}`}><Trash2 className="h-3.5 w-3.5" /></Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            ) : (
+              <div className="py-16 text-center">
+                <Settings className="h-6 w-6 text-gray-300 mx-auto mb-3" />
+                <p className="text-gray-400">등록된 라이브가 없습니다.</p>
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        </TabsContent>
 
-      {/* Live Create/Edit Modal */}
+        {/* ── Tab 2: API Settings ────────────────────── */}
+        <TabsContent value="settings" className="mt-6 space-y-6">
+          {/* Credentials Card */}
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center">
+                <KeyRound className="h-4 w-4 text-blue-500" />
+              </div>
+              <div>
+                <h2 className="font-bold text-gray-900">Solapi 자격증명</h2>
+                <p className="text-xs text-gray-400 mt-0.5">알림톡 발송을 위한 API 정보를 입력하세요.</p>
+              </div>
+              {solapiConfig?.configured && (
+                <span className="ml-auto text-xs font-semibold bg-green-50 text-green-600 px-2.5 py-1 rounded-full">연결됨</span>
+              )}
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-2">
+                <Label className="text-sm font-medium text-gray-700">API Key</Label>
+                <Input placeholder="API Key를 입력하세요" value={configForm.apiKey} onChange={(e) => setConfigForm({ ...configForm, apiKey: e.target.value })} className="rounded-xl border-gray-200" />
+              </div>
+              <div className="grid gap-2">
+                <Label className="text-sm font-medium text-gray-700">API Secret {solapiConfig?.configured && <span className="text-gray-400 font-normal">(변경 시에만 입력)</span>}</Label>
+                <Input type="password" placeholder={solapiConfig?.configured ? "••••••••••••" : "API Secret을 입력하세요"} value={configForm.apiSecret} onChange={(e) => setConfigForm({ ...configForm, apiSecret: e.target.value })} className="rounded-xl border-gray-200" />
+              </div>
+              <div className="grid gap-2">
+                <Label className="text-sm font-medium text-gray-700">발신 번호</Label>
+                <Input placeholder="01012345678" value={configForm.senderPhone} onChange={(e) => setConfigForm({ ...configForm, senderPhone: e.target.value })} className="rounded-xl border-gray-200" />
+              </div>
+              <div className="grid gap-2">
+                <Label className="text-sm font-medium text-gray-700">카카오채널 발신 프로필 키 (pfId)</Label>
+                <Input placeholder="KA01PF..." value={configForm.senderKey} onChange={(e) => setConfigForm({ ...configForm, senderKey: e.target.value })} className="rounded-xl border-gray-200" />
+              </div>
+            </div>
+            <div className="flex gap-3 mt-5">
+              <Button className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold" onClick={saveConfig} disabled={isSavingConfig}>
+                {isSavingConfig && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}저장
+              </Button>
+              <Button variant="outline" className="rounded-xl border-gray-200" onClick={fetchTemplates} disabled={isFetchingTemplates || !solapiConfig?.configured}>
+                {isFetchingTemplates ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}템플릿 불러오기
+              </Button>
+            </div>
+          </div>
+
+          {/* Templates Card */}
+          {templates.length > 0 && (
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+              <h2 className="font-bold text-gray-900 mb-4">알림톡 템플릿 목록 <span className="text-sm font-normal text-gray-400 ml-1">{templates.length}개</span></h2>
+              <div className="space-y-3">
+                {templates.map((tpl) => (
+                  <div key={tpl.templateId} className="flex items-start gap-3 p-3 rounded-xl border border-gray-100 hover:border-blue-100 hover:bg-blue-50/30 transition-colors">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-gray-900 text-sm">{tpl.name}</p>
+                      <p className="text-xs text-gray-400 font-mono mt-0.5">{tpl.templateId}</p>
+                      {tpl.content && <p className="text-xs text-gray-500 mt-1 line-clamp-2">{tpl.content}</p>}
+                    </div>
+                    {tpl.status && (
+                      <span className="text-xs font-semibold bg-green-50 text-green-600 px-2 py-0.5 rounded-full flex-none">{tpl.status}</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {!solapiConfig?.configured && (
+            <div className="bg-amber-50 rounded-2xl border border-amber-100 p-5 text-center">
+              <p className="text-amber-700 text-sm font-medium">Solapi 자격증명을 입력하고 저장하면 알림톡 발송이 활성화됩니다.</p>
+            </div>
+          )}
+        </TabsContent>
+
+        {/* ── Tab 3: Schedule & Log ─────────────────── */}
+        <TabsContent value="schedule" className="mt-6 space-y-6">
+          <div className="flex justify-end">
+            <Button variant="outline" className="rounded-xl border-gray-200" onClick={loadSchedule} disabled={isLoadingSchedule}>
+              <RefreshCw className={`mr-2 h-4 w-4 ${isLoadingSchedule ? "animate-spin" : ""}`} />새로고침
+            </Button>
+          </div>
+
+          {/* Upcoming Schedule */}
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-2">
+              <Clock className="h-4 w-4 text-blue-500" />
+              <h2 className="font-bold text-gray-900">예정 발송</h2>
+              <span className="text-sm text-gray-400 ml-1">{schedule.filter(s => s.status === "pending").length}건</span>
+            </div>
+            {isLoadingSchedule ? (
+              <div className="p-6 space-y-3">{[1, 2, 3].map(i => <Skeleton key={i} className="h-12 w-full rounded-xl" />)}</div>
+            ) : schedule.filter(s => s.status === "pending").length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-gray-50 hover:bg-gray-50">
+                    <TableHead className="text-gray-500 font-medium text-xs">라이브</TableHead>
+                    <TableHead className="text-gray-500 font-medium text-xs">발송 시점</TableHead>
+                    <TableHead className="text-gray-500 font-medium text-xs">발송 예정 시각</TableHead>
+                    <TableHead className="text-gray-500 font-medium text-xs">템플릿</TableHead>
+                    <TableHead className="text-center text-gray-500 font-medium text-xs">수신자</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {schedule.filter(s => s.status === "pending").map((entry) => (
+                    <TableRow key={entry.ruleId} className="hover:bg-gray-50/50">
+                      <TableCell className="font-medium text-gray-900 max-w-[180px] truncate">{entry.liveTitle}</TableCell>
+                      <TableCell><span className="text-xs font-semibold bg-blue-50 text-blue-600 px-2.5 py-1 rounded-full">{entry.offsetLabel}</span></TableCell>
+                      <TableCell className="text-gray-600 text-sm">{entry.fireAt ? new Date(entry.fireAt).toLocaleString("ko-KR", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }) : "-"}</TableCell>
+                      <TableCell className="text-gray-600 text-sm">{entry.templateName ?? entry.templateId ?? "-"}</TableCell>
+                      <TableCell className="text-center"><span className="text-sm font-medium text-gray-700">{entry.recipientCount}명</span></TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <div className="py-12 text-center">
+                <Clock className="h-6 w-6 text-gray-200 mx-auto mb-2" />
+                <p className="text-gray-400 text-sm">예정된 발송이 없습니다.<br />라이브별 알림 설정에서 스케줄을 구성하세요.</p>
+              </div>
+            )}
+          </div>
+
+          {/* Send Log */}
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-green-500" />
+              <h2 className="font-bold text-gray-900">발송 기록</h2>
+              <span className="text-sm text-gray-400 ml-1">{notifLog.length}건</span>
+            </div>
+            {notifLog.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-gray-50 hover:bg-gray-50">
+                    <TableHead className="text-gray-500 font-medium text-xs">라이브</TableHead>
+                    <TableHead className="text-gray-500 font-medium text-xs">유형</TableHead>
+                    <TableHead className="text-gray-500 font-medium text-xs">템플릿</TableHead>
+                    <TableHead className="text-center text-gray-500 font-medium text-xs">수신자</TableHead>
+                    <TableHead className="text-center text-gray-500 font-medium text-xs">성공</TableHead>
+                    <TableHead className="text-gray-500 font-medium text-xs">상태</TableHead>
+                    <TableHead className="text-gray-500 font-medium text-xs">발송 시각</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {notifLog.map((entry) => (
+                    <TableRow key={entry.id} className="hover:bg-gray-50/50">
+                      <TableCell className="font-medium text-gray-900 max-w-[150px] truncate">{entry.liveTitle}</TableCell>
+                      <TableCell>
+                        <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${entry.isImmediate ? "bg-orange-50 text-orange-600" : "bg-purple-50 text-purple-600"}`}>
+                          {entry.isImmediate ? "즉시 발송" : "예약 발송"}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-gray-600 text-sm">{entry.templateName ?? entry.templateId ?? "-"}</TableCell>
+                      <TableCell className="text-center text-sm">{entry.recipientCount}명</TableCell>
+                      <TableCell className="text-center text-sm text-green-600 font-medium">{entry.successCount}명</TableCell>
+                      <TableCell>
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${entry.status === "sent" ? "bg-green-50 text-green-600" : entry.status === "partial_fail" ? "bg-amber-50 text-amber-600" : "bg-red-50 text-red-600"}`}>
+                          {entry.status === "sent" ? "완료" : entry.status === "partial_fail" ? "일부 실패" : "실패"}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-gray-400 text-sm">{new Date(entry.sentAt).toLocaleString("ko-KR", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <div className="py-12 text-center">
+                <AlertCircle className="h-6 w-6 text-gray-200 mx-auto mb-2" />
+                <p className="text-gray-400 text-sm">아직 발송 기록이 없습니다.</p>
+              </div>
+            )}
+          </div>
+        </TabsContent>
+      </Tabs>
+
+      {/* ═══ Live CRUD Modal ═══════════════════════════ */}
       <Dialog open={isLiveModalOpen} onOpenChange={setIsLiveModalOpen}>
         <DialogContent className="sm:max-w-[600px] bg-white rounded-2xl border border-gray-100 shadow-xl">
           <DialogHeader>
@@ -227,101 +589,174 @@ export default function Admin() {
             <DialogDescription className="text-sm text-gray-500">라이브 스트리밍의 상세 정보를 입력하세요.</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="title" className="text-sm font-medium text-gray-700">제목</Label>
-              <Input id="title" value={liveForm.title} onChange={(e) => setLiveForm({ ...liveForm, title: e.target.value })} placeholder="라이브 제목을 입력하세요" className="rounded-xl border-gray-200" data-testid="input-live-title" />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="description" className="text-sm font-medium text-gray-700">설명</Label>
-              <Textarea id="description" value={liveForm.description} onChange={(e) => setLiveForm({ ...liveForm, description: e.target.value })} placeholder="라이브 설명을 입력하세요" className="rounded-xl border-gray-200 resize-none" data-testid="input-live-desc" />
-            </div>
+            <div className="grid gap-2"><Label className="text-sm font-medium text-gray-700">제목</Label><Input value={liveForm.title} onChange={(e) => setLiveForm({ ...liveForm, title: e.target.value })} placeholder="라이브 제목" className="rounded-xl border-gray-200" data-testid="input-live-title" /></div>
+            <div className="grid gap-2"><Label className="text-sm font-medium text-gray-700">설명</Label><Textarea value={liveForm.description} onChange={(e) => setLiveForm({ ...liveForm, description: e.target.value })} placeholder="설명" className="rounded-xl border-gray-200 resize-none" data-testid="input-live-desc" /></div>
             <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="status" className="text-sm font-medium text-gray-700">상태</Label>
+              <div className="grid gap-2"><Label className="text-sm font-medium text-gray-700">상태</Label>
                 <Select value={liveForm.status} onValueChange={(val: LiveStatus) => setLiveForm({ ...liveForm, status: val })}>
-                  <SelectTrigger id="status" className="rounded-xl border-gray-200" data-testid="select-live-status">
-                    <SelectValue placeholder="상태 선택" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="scheduled">예정됨</SelectItem>
-                    <SelectItem value="live">진행중</SelectItem>
-                    <SelectItem value="ended">종료됨</SelectItem>
-                  </SelectContent>
+                  <SelectTrigger className="rounded-xl border-gray-200" data-testid="select-live-status"><SelectValue /></SelectTrigger>
+                  <SelectContent><SelectItem value="scheduled">예정됨</SelectItem><SelectItem value="live">진행중</SelectItem><SelectItem value="ended">종료됨</SelectItem></SelectContent>
                 </Select>
               </div>
-              <div className="grid gap-2">
-                <Label htmlFor="scheduledAt" className="text-sm font-medium text-gray-700">예정 일시</Label>
-                <Input id="scheduledAt" type="datetime-local" value={liveForm.scheduledAt} onChange={(e) => setLiveForm({ ...liveForm, scheduledAt: e.target.value })} className="rounded-xl border-gray-200" data-testid="input-live-date" />
-              </div>
+              <div className="grid gap-2"><Label className="text-sm font-medium text-gray-700">예정 일시</Label><Input type="datetime-local" value={liveForm.scheduledAt} onChange={(e) => setLiveForm({ ...liveForm, scheduledAt: e.target.value })} className="rounded-xl border-gray-200" data-testid="input-live-date" /></div>
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="youtubeUrl" className="text-sm font-medium text-gray-700">YouTube URL</Label>
-              <Input id="youtubeUrl" value={liveForm.youtubeUrl} onChange={(e) => setLiveForm({ ...liveForm, youtubeUrl: e.target.value })} placeholder="https://youtube.com/watch?v=..." className="rounded-xl border-gray-200" data-testid="input-live-youtube" />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="thumbnailUrl" className="text-sm font-medium text-gray-700">썸네일 URL</Label>
-              <Input id="thumbnailUrl" value={liveForm.thumbnailUrl} onChange={(e) => setLiveForm({ ...liveForm, thumbnailUrl: e.target.value })} placeholder="https://example.com/image.jpg" className="rounded-xl border-gray-200" data-testid="input-live-thumbnail" />
-            </div>
+            <div className="grid gap-2"><Label className="text-sm font-medium text-gray-700">YouTube URL</Label><Input value={liveForm.youtubeUrl} onChange={(e) => setLiveForm({ ...liveForm, youtubeUrl: e.target.value })} placeholder="https://youtube.com/watch?v=..." className="rounded-xl border-gray-200" data-testid="input-live-youtube" /></div>
+            <div className="grid gap-2"><Label className="text-sm font-medium text-gray-700">썸네일 URL</Label><Input value={liveForm.thumbnailUrl} onChange={(e) => setLiveForm({ ...liveForm, thumbnailUrl: e.target.value })} placeholder="https://example.com/image.jpg" className="rounded-xl border-gray-200" data-testid="input-live-thumbnail" /></div>
           </div>
           <DialogFooter>
             <Button variant="outline" className="rounded-xl border-gray-200" onClick={() => setIsLiveModalOpen(false)}>취소</Button>
             <Button className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold" onClick={handleSaveLive} disabled={createLive.isPending || updateLive.isPending} data-testid="btn-save-live">
-              {(createLive.isPending || updateLive.isPending) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              저장
+              {(createLive.isPending || updateLive.isPending) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}저장
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Registrations Modal */}
+      {/* ═══ Registrations Modal ══════════════════════ */}
       <Dialog open={isRegistrationsModalOpen} onOpenChange={setIsRegistrationsModalOpen}>
         <DialogContent className="sm:max-w-[800px] bg-white rounded-2xl border border-gray-100 shadow-xl max-h-[80vh] overflow-hidden flex flex-col">
-          <DialogHeader className="flex-none">
-            <DialogTitle className="text-lg font-bold text-gray-900">신청자 목록</DialogTitle>
-            <DialogDescription className="text-sm text-gray-500">이 라이브에 등록된 모든 신청자 정보입니다.</DialogDescription>
-          </DialogHeader>
+          <DialogHeader className="flex-none"><DialogTitle className="text-lg font-bold text-gray-900">신청자 목록</DialogTitle></DialogHeader>
           <div className="flex-1 overflow-y-auto mt-4">
-            {isRegistrationsLoading ? (
-              <div className="flex justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+            {isRegistrationsLoading ? <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-blue-500" /></div>
+              : registrations && registrations.length > 0 ? (
+                <div className="rounded-xl border border-gray-100 overflow-hidden">
+                  <Table>
+                    <TableHeader><TableRow className="bg-gray-50"><TableHead className="text-xs text-gray-500">이름</TableHead><TableHead className="text-xs text-gray-500">연락처</TableHead><TableHead className="text-xs text-gray-500">이메일</TableHead><TableHead className="text-xs text-gray-500">신청일시</TableHead></TableRow></TableHeader>
+                    <TableBody>{registrations.map((reg) => (<TableRow key={reg.id}><TableCell className="font-medium text-gray-900">{reg.name}</TableCell><TableCell className="text-sm text-gray-600">{reg.phone}</TableCell><TableCell className="text-sm text-gray-600">{reg.email || "—"}</TableCell><TableCell className="text-sm text-gray-400">{formatDate(reg.createdAt)}</TableCell></TableRow>))}</TableBody>
+                  </Table>
+                </div>
+              ) : <div className="py-16 text-center"><Users className="h-8 w-8 text-gray-200 mx-auto mb-3" /><p className="text-gray-500">아직 신청자가 없습니다.</p></div>}
+          </div>
+          <DialogFooter className="flex-none pt-4 border-t border-gray-100 mt-4">
+            <Button className="bg-gray-900 hover:bg-gray-800 text-white rounded-xl" onClick={() => setIsRegistrationsModalOpen(false)}>닫기</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ═══ Immediate Send Modal ══════════════════════ */}
+      <Dialog open={sendModal.open} onOpenChange={(open) => setSendModal({ ...sendModal, open })}>
+        <DialogContent className="sm:max-w-[480px] bg-white rounded-2xl border border-gray-100 shadow-xl">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-bold text-gray-900">즉시 알림톡 발송</DialogTitle>
+            <DialogDescription className="text-sm text-gray-500">{sendModal.live?.title}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            {!solapiConfig?.configured && (
+              <div className="p-3 bg-amber-50 rounded-xl border border-amber-100 text-sm text-amber-700">
+                ⚠️ Solapi 자격증명을 먼저 설정해주세요.
               </div>
-            ) : registrations && registrations.length > 0 ? (
-              <div className="rounded-xl border border-gray-100 overflow-hidden">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="bg-gray-50 hover:bg-gray-50">
-                      <TableHead className="text-gray-500 font-medium text-xs">이름</TableHead>
-                      <TableHead className="text-gray-500 font-medium text-xs">연락처</TableHead>
-                      <TableHead className="text-gray-500 font-medium text-xs">이메일</TableHead>
-                      <TableHead className="text-gray-500 font-medium text-xs">신청일시</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {registrations.map((reg) => (
-                      <TableRow key={reg.id} className="hover:bg-gray-50/50">
-                        <TableCell className="font-medium text-gray-900">
-                          {reg.name}
-                          {reg.message && (
-                            <p className="text-xs text-gray-400 mt-0.5 truncate max-w-[140px]" title={reg.message}>Q: {reg.message}</p>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-gray-600 text-sm">{reg.phone}</TableCell>
-                        <TableCell className="text-gray-600 text-sm">{reg.email || "—"}</TableCell>
-                        <TableCell className="text-gray-400 text-sm">{formatDate(reg.createdAt)}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+            )}
+            <div className="grid gap-2">
+              <Label className="text-sm font-medium text-gray-700">발송할 템플릿</Label>
+              {templates.length > 0 ? (
+                <Select value={sendTemplateId} onValueChange={setSendTemplateId}>
+                  <SelectTrigger className="rounded-xl border-gray-200"><SelectValue placeholder="템플릿을 선택하세요" /></SelectTrigger>
+                  <SelectContent>{templates.map((t) => <SelectItem key={t.templateId} value={t.templateId}>{t.name}</SelectItem>)}</SelectContent>
+                </Select>
+              ) : (
+                <div className="flex gap-2">
+                  <Input placeholder="Template ID를 직접 입력" value={sendTemplateId} onChange={(e) => setSendTemplateId(e.target.value)} className="rounded-xl border-gray-200" />
+                  <Button variant="outline" className="rounded-xl flex-none" onClick={fetchTemplates} disabled={isFetchingTemplates || !solapiConfig?.configured}>
+                    {isFetchingTemplates ? <Loader2 className="h-4 w-4 animate-spin" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                </div>
+              )}
+            </div>
+            <div className="p-3 bg-blue-50 rounded-xl text-sm text-blue-700">
+              <strong>{sendModal.live?.registrationCount ?? 0}명</strong>의 신청자에게 알림톡이 발송됩니다.
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" className="rounded-xl border-gray-200" onClick={() => setSendModal({ live: null, open: false })}>취소</Button>
+            <Button className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold" onClick={handleSendNow} disabled={!sendTemplateId || isSending || !solapiConfig?.configured}>
+              {isSending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}발송하기
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ═══ Notification Rules Modal ══════════════════ */}
+      <Dialog open={rulesModal.open} onOpenChange={(open) => setRulesModal({ ...rulesModal, open })}>
+        <DialogContent className="sm:max-w-[640px] bg-white rounded-2xl border border-gray-100 shadow-xl max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogHeader className="flex-none">
+            <DialogTitle className="text-lg font-bold text-gray-900">알림 스케줄 설정</DialogTitle>
+            <DialogDescription className="text-sm text-gray-500">{rulesModal.live?.title}</DialogDescription>
+          </DialogHeader>
+
+          {!solapiConfig?.configured && (
+            <div className="mx-4 mt-2 p-3 bg-amber-50 rounded-xl border border-amber-100 text-sm text-amber-700">
+              ⚠️ Solapi 자격증명을 먼저 설정해주세요.
+            </div>
+          )}
+
+          <div className="flex-1 overflow-y-auto px-1 py-4">
+            {isLoadingRules ? (
+              <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-blue-500" /></div>
             ) : (
-              <div className="py-16 text-center">
-                <Users className="h-8 w-8 text-gray-200 mx-auto mb-3" />
-                <p className="text-gray-500 font-medium">아직 신청자가 없습니다</p>
+              <div className="space-y-3">
+                {notifRules.map((rule, idx) => {
+                  const fireTime = rulesModal.live ? calcFireTime(rulesModal.live, rule.offsetMinutes) : null;
+                  const label = OFFSET_LABELS[rule.offsetMinutes] ?? `${Math.abs(rule.offsetMinutes)}분 ${rule.offsetMinutes < 0 ? "전" : "후"}`;
+                  return (
+                    <div key={rule.id} className={`p-4 rounded-xl border transition-colors ${rule.enabled ? "border-blue-100 bg-blue-50/30" : "border-gray-100 bg-white"}`}>
+                      <div className="flex items-start gap-3">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${rule.enabled ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-500"}`}>
+                              {label}
+                            </span>
+                            {fireTime && (
+                              <span className="text-xs text-gray-400">
+                                {fireTime.toLocaleString("ko-KR", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })}
+                              </span>
+                            )}
+                          </div>
+                          {templates.length > 0 ? (
+                            <Select
+                              value={rule.templateId ?? ""}
+                              onValueChange={(val) => {
+                                const tpl = templates.find((t) => t.templateId === val);
+                                setNotifRules((rules) => rules.map((r, i) => i === idx ? { ...r, templateId: val || null, templateName: tpl?.name ?? null } : r));
+                              }}
+                            >
+                              <SelectTrigger className="rounded-lg border-gray-200 h-9 text-sm"><SelectValue placeholder="템플릿 선택" /></SelectTrigger>
+                              <SelectContent>{templates.map((t) => <SelectItem key={t.templateId} value={t.templateId}>{t.name}</SelectItem>)}</SelectContent>
+                            </Select>
+                          ) : (
+                            <Input
+                              placeholder="Template ID 입력"
+                              value={rule.templateId ?? ""}
+                              onChange={(e) => setNotifRules((rules) => rules.map((r, i) => i === idx ? { ...r, templateId: e.target.value || null, templateName: null } : r))}
+                              className="rounded-lg border-gray-200 h-9 text-sm"
+                            />
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 pt-1">
+                          <Switch
+                            checked={rule.enabled}
+                            onCheckedChange={(checked) => setNotifRules((rules) => rules.map((r, i) => i === idx ? { ...r, enabled: checked } : r))}
+                          />
+                          <span className="text-xs text-gray-400">{rule.enabled ? "활성" : "비활성"}</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+            {templates.length === 0 && solapiConfig?.configured && !isLoadingRules && (
+              <div className="mt-3 flex justify-center">
+                <Button variant="outline" size="sm" className="rounded-xl border-gray-200 text-sm" onClick={fetchTemplates} disabled={isFetchingTemplates}>
+                  {isFetchingTemplates ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="mr-2 h-3.5 w-3.5" />}템플릿 불러오기
+                </Button>
               </div>
             )}
           </div>
-          <DialogFooter className="flex-none pt-4 border-t border-gray-100 mt-4">
-            <Button className="bg-gray-900 hover:bg-gray-800 text-white rounded-xl font-semibold" onClick={() => setIsRegistrationsModalOpen(false)}>닫기</Button>
+          <DialogFooter className="flex-none border-t border-gray-100 pt-4">
+            <Button variant="outline" className="rounded-xl border-gray-200" onClick={() => setRulesModal({ live: null, open: false })}>취소</Button>
+            <Button className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold" onClick={saveRules} disabled={isSavingRules}>
+              {isSavingRules && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}저장
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
