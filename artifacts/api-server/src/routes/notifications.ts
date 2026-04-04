@@ -4,6 +4,7 @@ import {
   solapiConfigTable,
   notificationRulesTable,
   notificationLogTable,
+  registrationTriggersTable,
   livesTable,
   registrationsTable,
 } from "@workspace/db";
@@ -266,6 +267,106 @@ router.get("/notifications/schedule", async (_req: Request, res: Response) => {
     return res.status(500).json({ error: "Internal server error" });
   }
 });
+
+/* ── Registration Trigger ───────────────────────────── */
+
+router.get("/lives/:id/registration-trigger", async (req: Request, res: Response) => {
+  try {
+    const liveId = parseInt(String(req.params.id), 10);
+    if (isNaN(liveId)) return res.status(400).json({ error: "Invalid id" });
+
+    const [row] = await db.select().from(registrationTriggersTable)
+      .where(eq(registrationTriggersTable.liveId, liveId));
+
+    if (!row) {
+      return res.json({ liveId, messageType: "alimtalk", templateId: null, templateName: null, messageBody: null, enabled: false });
+    }
+    return res.json(row);
+  } catch (err) {
+    logger.error({ err }, "GET /lives/:id/registration-trigger failed");
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.put("/lives/:id/registration-trigger", async (req: Request, res: Response) => {
+  try {
+    const liveId = parseInt(String(req.params.id), 10);
+    if (isNaN(liveId)) return res.status(400).json({ error: "Invalid id" });
+
+    const { messageType = "alimtalk", templateId, templateName, messageBody, enabled } = req.body as {
+      messageType?: string; templateId?: string | null; templateName?: string | null;
+      messageBody?: string | null; enabled?: boolean;
+    };
+
+    const [existing] = await db.select().from(registrationTriggersTable)
+      .where(eq(registrationTriggersTable.liveId, liveId));
+
+    if (existing) {
+      await db.update(registrationTriggersTable).set({
+        messageType,
+        templateId: templateId ?? null,
+        templateName: templateName ?? null,
+        messageBody: messageBody ?? null,
+        enabled: enabled ?? false,
+        updatedAt: new Date(),
+      }).where(eq(registrationTriggersTable.liveId, liveId));
+    } else {
+      await db.insert(registrationTriggersTable).values({
+        liveId,
+        messageType,
+        templateId: templateId ?? null,
+        templateName: templateName ?? null,
+        messageBody: messageBody ?? null,
+        enabled: enabled ?? false,
+      });
+    }
+
+    const [updated] = await db.select().from(registrationTriggersTable)
+      .where(eq(registrationTriggersTable.liveId, liveId));
+    return res.json(updated);
+  } catch (err) {
+    logger.error({ err }, "PUT /lives/:id/registration-trigger failed");
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+/* ── Registration trigger fire helper (called from lives router) ──── */
+
+export async function fireRegistrationTrigger(
+  liveId: number,
+  registrant: { phone: string; name: string },
+): Promise<void> {
+  try {
+    const [trigger] = await db.select().from(registrationTriggersTable)
+      .where(eq(registrationTriggersTable.liveId, liveId));
+    if (!trigger?.enabled) return;
+
+    const config = await getSolapiConfig();
+    if (!config?.apiKey || !config?.apiSecret || !config?.senderPhone) return;
+
+    const isSms = trigger.messageType === "sms";
+    if (!isSms && (!trigger.templateId || !config.senderKey)) return;
+    if (isSms && !trigger.messageBody) return;
+
+    const { successCount, failCount } = isSms
+      ? await sendSmsBatch(config.apiKey, config.apiSecret, config.senderPhone, trigger.messageBody!, [registrant])
+      : await sendAlimtalkBatch(config.apiKey, config.apiSecret, config.senderKey!, config.senderPhone, trigger.templateId!, [registrant]);
+
+    await db.insert(notificationLogTable).values({
+      liveId,
+      templateId: isSms ? null : (trigger.templateId ?? null),
+      templateName: isSms
+        ? `[신청트리거:SMS] ${(trigger.messageBody ?? "").substring(0, 20)}`
+        : `[신청트리거] ${trigger.templateName ?? trigger.templateId ?? ""}`,
+      recipientCount: 1,
+      successCount,
+      status: failCount === 0 ? "sent" : "failed",
+      isImmediate: true,
+    });
+  } catch (err) {
+    logger.error({ err }, "fireRegistrationTrigger failed");
+  }
+}
 
 /* ── Notification Log ───────────────────────────────── */
 

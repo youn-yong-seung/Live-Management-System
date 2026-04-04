@@ -18,7 +18,7 @@ import {
   CreateRegistrationParams,
   CreateRegistrationBody,
 } from "@workspace/api-zod";
-import { sendKakaoAlimtalk } from "../lib/solapi";
+import { fireRegistrationTrigger } from "./notifications";
 
 const router: IRouter = Router();
 
@@ -266,13 +266,8 @@ router.post(
         .values(insertData)
         .returning();
 
-      sendKakaoAlimtalk({
-        phone: body.phone,
-        name: body.name,
-        liveTitle: live.title,
-        scheduledAt: live.scheduledAt,
-      }).catch((err) => {
-        req.log.error({ err }, "Failed to send KakaoTalk notification");
+      fireRegistrationTrigger(liveId, { phone: body.phone, name: body.name }).catch((err) => {
+        req.log.error({ err }, "Failed to fire registration trigger");
       });
 
       res.status(201).json(registration);

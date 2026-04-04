@@ -48,6 +48,21 @@ export const notificationLogTable = pgTable("notification_log", {
   isImmediate: boolean("is_immediate").notNull().default(false),
 });
 
+export const registrationTriggersTable = pgTable("registration_triggers", {
+  id: serial("id").primaryKey(),
+  liveId: integer("live_id")
+    .notNull()
+    .unique()
+    .references(() => livesTable.id, { onDelete: "cascade" }),
+  messageType: text("message_type").notNull().default("alimtalk"),
+  templateId: text("template_id"),
+  templateName: text("template_name"),
+  messageBody: text("message_body"),
+  enabled: boolean("enabled").notNull().default(false),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 export type SolapiConfig = typeof solapiConfigTable.$inferSelect;
 export type NotificationRule = typeof notificationRulesTable.$inferSelect;
 export type NotificationLog = typeof notificationLogTable.$inferSelect;
+export type RegistrationTrigger = typeof registrationTriggersTable.$inferSelect;

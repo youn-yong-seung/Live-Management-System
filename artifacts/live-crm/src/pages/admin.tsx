@@ -40,6 +40,14 @@ interface SolapiTemplate {
   status?: string;
 }
 
+interface RegistrationTrigger {
+  messageType: string;
+  templateId: string | null;
+  templateName: string | null;
+  messageBody: string | null;
+  enabled: boolean;
+}
+
 interface NotificationRule {
   id: number;
   liveId: number;
@@ -187,6 +195,9 @@ export default function Admin() {
   const [notifRules, setNotifRules] = useState<NotificationRule[]>([]);
   const [isLoadingRules, setIsLoadingRules] = useState(false);
   const [isSavingRules, setIsSavingRules] = useState(false);
+  const [triggerConfig, setTriggerConfig] = useState<RegistrationTrigger>({
+    messageType: "alimtalk", templateId: null, templateName: null, messageBody: null, enabled: false,
+  });
 
   /* ── Offset edit state ─────────────────────────── */
   const [editingOffsetIdx, setEditingOffsetIdx] = useState<number | null>(null);
@@ -321,9 +332,14 @@ export default function Admin() {
   const openRulesModal = async (live: Live) => {
     setRulesModal({ live, open: true });
     setIsLoadingRules(true);
+    setEditingOffsetIdx(null);
     try {
-      const rules = await apiFetch<NotificationRule[]>(`/lives/${live.id}/notification-rules`);
+      const [rules, trigger] = await Promise.all([
+        apiFetch<NotificationRule[]>(`/lives/${live.id}/notification-rules`),
+        apiFetch<RegistrationTrigger>(`/lives/${live.id}/registration-trigger`),
+      ]);
       setNotifRules(rules);
+      setTriggerConfig(trigger);
       if (templates.length === 0 && solapiConfig?.configured) {
         fetchTemplates(true);
       }
@@ -334,15 +350,21 @@ export default function Admin() {
     }
   };
 
-  /* ── Save notification rules ────────────────────── */
+  /* ── Save notification rules + trigger ─────────── */
   const saveRules = async () => {
     if (!rulesModal.live) return;
     setIsSavingRules(true);
     try {
-      await apiFetch(`/lives/${rulesModal.live.id}/notification-rules`, {
-        method: "PUT",
-        body: JSON.stringify(notifRules),
-      });
+      await Promise.all([
+        apiFetch(`/lives/${rulesModal.live.id}/notification-rules`, {
+          method: "PUT",
+          body: JSON.stringify(notifRules),
+        }),
+        apiFetch(`/lives/${rulesModal.live.id}/registration-trigger`, {
+          method: "PUT",
+          body: JSON.stringify(triggerConfig),
+        }),
+      ]);
       toast({ title: "저장 완료", description: "알림 캠페인이 저장되었습니다." });
       setRulesModal({ live: null, open: false });
       loadSchedule();
@@ -807,7 +829,84 @@ export default function Admin() {
             </div>
           )}
 
-          <div className="flex-1 overflow-y-auto px-1 py-4 space-y-3">
+          <div className="flex-1 overflow-y-auto px-1 py-4 space-y-4">
+
+            {/* ═══ 신청 즉시 발송 (Trigger) ══════════════════════ */}
+            <div className="rounded-2xl border-2 border-green-200 bg-green-50/30 p-4">
+              {/* Trigger header */}
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full bg-green-100 text-green-700">
+                    <Zap className="h-3 w-3" />신청 즉시 발송
+                  </span>
+                  <span className="text-xs text-gray-400">신청 완료 시 해당 신청자에게 즉시 발송</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-gray-400">{triggerConfig.enabled ? "활성" : "비활성"}</span>
+                  <Switch
+                    checked={triggerConfig.enabled}
+                    onCheckedChange={(checked) => setTriggerConfig((s) => ({ ...s, enabled: checked }))}
+                  />
+                </div>
+              </div>
+
+              {/* Message type toggle */}
+              <div className="flex gap-2 mb-3">
+                {(["alimtalk", "sms"] as const).map((type) => (
+                  <button
+                    key={type}
+                    onClick={() => setTriggerConfig((s) => ({ ...s, messageType: type }))}
+                    className={`flex-1 py-1.5 text-xs rounded-lg border font-semibold transition-colors ${triggerConfig.messageType === type ? "bg-green-600 border-green-600 text-white" : "border-gray-200 text-gray-500 hover:border-green-300"}`}
+                  >
+                    {type === "alimtalk" ? "🔔 알림톡" : "💬 문자"}
+                  </button>
+                ))}
+              </div>
+
+              {/* Content */}
+              {triggerConfig.messageType !== "sms" ? (
+                templates.length > 0 ? (
+                  <Select
+                    value={triggerConfig.templateId ?? ""}
+                    onValueChange={(val) => {
+                      const tpl = templates.find((t) => t.templateId === val);
+                      setTriggerConfig((s) => ({ ...s, templateId: val || null, templateName: tpl?.name ?? null }));
+                    }}
+                  >
+                    <SelectTrigger className="rounded-lg border-gray-200 h-9 text-sm"><SelectValue placeholder="알림톡 템플릿 선택" /></SelectTrigger>
+                    <SelectContent>{templates.map((t) => <SelectItem key={t.templateId} value={t.templateId}>{t.name}</SelectItem>)}</SelectContent>
+                  </Select>
+                ) : (
+                  <Input
+                    placeholder="Template ID 직접 입력"
+                    value={triggerConfig.templateId ?? ""}
+                    onChange={(e) => setTriggerConfig((s) => ({ ...s, templateId: e.target.value || null, templateName: null }))}
+                    className="rounded-lg border-gray-200 h-9 text-sm"
+                  />
+                )
+              ) : (
+                <div className="space-y-1">
+                  <Textarea
+                    placeholder="신청 완료 후 발송할 문자 내용을 입력하세요..."
+                    value={triggerConfig.messageBody ?? ""}
+                    onChange={(e) => setTriggerConfig((s) => ({ ...s, messageBody: e.target.value || null }))}
+                    className="rounded-lg border-gray-200 text-sm resize-none min-h-[72px]"
+                  />
+                  <p className="text-xs text-gray-400 text-right">{(triggerConfig.messageBody ?? "").length}자</p>
+                </div>
+              )}
+            </div>
+
+            {/* ═══ Divider + scheduled section label ═══════════ */}
+            <div className="flex items-center gap-3 pt-1">
+              <div className="flex-1 h-px bg-gray-200" />
+              <span className="flex items-center gap-1.5 text-xs font-semibold text-gray-400 whitespace-nowrap">
+                <Clock className="h-3.5 w-3.5" />스케줄 발송
+              </span>
+              <div className="flex-1 h-px bg-gray-200" />
+            </div>
+
+            {/* ═══ Scheduled Rules ══════════════════════════════ */}
             {isLoadingRules ? (
               <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-blue-500" /></div>
             ) : notifRules.map((rule, idx) => {
