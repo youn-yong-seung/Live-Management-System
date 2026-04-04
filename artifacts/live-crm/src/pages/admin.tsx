@@ -4,7 +4,7 @@ import {
   useCreateLive, useUpdateLive, useDeleteLive,
   useGetRegistrations, getGetDashboardSummaryQueryKey
 } from "@workspace/api-client-react";
-import type { LiveStatus } from "@workspace/api-client-react";
+import type { Live, LiveStatus } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -57,7 +57,7 @@ export default function Admin() {
   const updateLive = useUpdateLive();
   const deleteLive = useDeleteLive();
 
-  const handleOpenLiveModal = (live?: any) => {
+  const handleOpenLiveModal = (live?: Live) => {
     if (live) {
       // Date formatting for input type="datetime-local"
       const scheduledAtDate = live.scheduledAt ? new Date(live.scheduledAt) : new Date();

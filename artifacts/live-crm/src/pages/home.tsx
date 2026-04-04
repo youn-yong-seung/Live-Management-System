@@ -80,32 +80,41 @@ export default function Home() {
         ) : activeLives && activeLives.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {activeLives.map((live) => (
-              <Card key={live.id} className="border-primary/50 bg-card overflow-hidden">
-                <div className="flex flex-col sm:flex-row h-full">
-                  {live.thumbnailUrl && (
-                    <div className="w-full sm:w-48 h-32 sm:h-auto bg-muted">
-                      <img src={live.thumbnailUrl} alt={live.title} className="w-full h-full object-cover" />
-                    </div>
-                  )}
-                  <div className="p-5 flex-1 flex flex-col">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="flex h-2 w-2 rounded-full bg-destructive animate-pulse"></span>
-                      <span className="text-xs font-medium text-destructive">LIVE</span>
-                    </div>
-                    <h3 className="font-semibold text-lg line-clamp-1">{live.title}</h3>
-                    <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{live.description}</p>
-                    <div className="mt-auto flex items-center justify-between">
-                      <span className="text-xs text-muted-foreground">{formatDate(live.scheduledAt)}</span>
-                      {live.youtubeUrl && (
-                        <a href={live.youtubeUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-sm font-medium flex items-center gap-1">
-                          <PlayCircle className="h-4 w-4" />
-                          입장하기
-                        </a>
-                      )}
+              <a
+                key={live.id}
+                href={live.youtubeUrl ?? undefined}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={live.youtubeUrl ? "cursor-pointer block" : "block pointer-events-none"}
+                data-testid={`live-card-${live.id}`}
+              >
+                <Card className="border-primary/50 bg-card overflow-hidden transition-colors hover:border-primary hover:bg-card/80">
+                  <div className="flex flex-col sm:flex-row h-full">
+                    {live.thumbnailUrl && (
+                      <div className="w-full sm:w-48 h-32 sm:h-auto bg-muted">
+                        <img src={live.thumbnailUrl} alt={live.title} className="w-full h-full object-cover" />
+                      </div>
+                    )}
+                    <div className="p-5 flex-1 flex flex-col">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="flex h-2 w-2 rounded-full bg-destructive animate-pulse"></span>
+                        <span className="text-xs font-medium text-destructive">LIVE</span>
+                      </div>
+                      <h3 className="font-semibold text-lg line-clamp-1">{live.title}</h3>
+                      <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{live.description}</p>
+                      <div className="mt-auto flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground">{formatDate(live.scheduledAt)}</span>
+                        {live.youtubeUrl && (
+                          <span className="text-primary text-sm font-medium flex items-center gap-1">
+                            <PlayCircle className="h-4 w-4" />
+                            입장하기
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </Card>
+                </Card>
+              </a>
             ))}
           </div>
         ) : (

@@ -12,10 +12,11 @@ export async function sendKakaoAlimtalk(options: AlimtalkOptions): Promise<void>
   const apiSecret = process.env.SOLAPI_API_SECRET;
   const senderKey = process.env.SOLAPI_SENDER_KEY;
   const templateId = process.env.SOLAPI_TEMPLATE_ID;
+  const senderPhone = process.env.SOLAPI_SENDER_PHONE;
 
-  if (!apiKey || !apiSecret || !senderKey || !templateId) {
+  if (!apiKey || !apiSecret || !senderKey || !templateId || !senderPhone) {
     logger.warn(
-      "Solapi environment variables not set (SOLAPI_API_KEY, SOLAPI_API_SECRET, SOLAPI_SENDER_KEY, SOLAPI_TEMPLATE_ID). Skipping KakaoTalk notification.",
+      "Solapi environment variables not set (SOLAPI_API_KEY, SOLAPI_API_SECRET, SOLAPI_SENDER_KEY, SOLAPI_TEMPLATE_ID, SOLAPI_SENDER_PHONE). Skipping KakaoTalk notification.",
     );
     return;
   }
@@ -38,7 +39,7 @@ export async function sendKakaoAlimtalk(options: AlimtalkOptions): Promise<void>
 
     await messageService.send({
       to: options.phone,
-      from: process.env.SOLAPI_SENDER_PHONE || "",
+      from: senderPhone,
       kakaoOptions: {
         pfId: senderKey,
         templateId: templateId,
