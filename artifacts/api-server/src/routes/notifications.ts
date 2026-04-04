@@ -11,6 +11,7 @@ import {
 import { eq, and, count, isNotNull, inArray } from "drizzle-orm";
 import { logger } from "../lib/logger";
 import { getSolapiConfig, fetchSolapiTemplates, sendAlimtalkBatch, sendSmsBatch } from "../lib/solapiHelper";
+import { requireAdminAuth } from "../middleware/adminAuth";
 
 const router: IRouter = Router();
 
@@ -25,7 +26,7 @@ const DEFAULT_OFFSETS = [
 
 /* ── Solapi Config ──────────────────────────────────── */
 
-router.get("/settings/solapi", async (_req: Request, res: Response) => {
+router.get("/settings/solapi", requireAdminAuth, async (_req: Request, res: Response) => {
   try {
     const config = await getSolapiConfig();
     if (!config) {
@@ -43,7 +44,7 @@ router.get("/settings/solapi", async (_req: Request, res: Response) => {
   }
 });
 
-router.put("/settings/solapi", async (req: Request, res: Response) => {
+router.put("/settings/solapi", requireAdminAuth, async (req: Request, res: Response) => {
   try {
     const { apiKey, apiSecret, senderPhone, senderKey } = req.body as {
       apiKey?: string; apiSecret?: string; senderPhone?: string; senderKey?: string;
@@ -71,7 +72,7 @@ router.put("/settings/solapi", async (req: Request, res: Response) => {
 
 /* ── Solapi Templates ───────────────────────────────── */
 
-router.get("/solapi/templates", async (_req: Request, res: Response) => {
+router.get("/solapi/templates", requireAdminAuth, async (_req: Request, res: Response) => {
   try {
     const config = await getSolapiConfig();
     if (!config?.apiKey || !config?.apiSecret) {
@@ -87,7 +88,7 @@ router.get("/solapi/templates", async (_req: Request, res: Response) => {
 
 /* ── Notification Rules ─────────────────────────────── */
 
-router.get("/lives/:id/notification-rules", async (req: Request, res: Response) => {
+router.get("/lives/:id/notification-rules", requireAdminAuth, async (req: Request, res: Response) => {
   try {
     const liveId = parseInt(String(req.params.id), 10);
     if (isNaN(liveId)) return res.status(400).json({ error: "Invalid id" });
@@ -115,7 +116,7 @@ router.get("/lives/:id/notification-rules", async (req: Request, res: Response) 
   }
 });
 
-router.put("/lives/:id/notification-rules", async (req: Request, res: Response) => {
+router.put("/lives/:id/notification-rules", requireAdminAuth, async (req: Request, res: Response) => {
   try {
     const liveId = parseInt(String(req.params.id), 10);
     if (isNaN(liveId)) return res.status(400).json({ error: "Invalid id" });
@@ -153,7 +154,7 @@ router.put("/lives/:id/notification-rules", async (req: Request, res: Response) 
 
 /* ── Immediate Send ─────────────────────────────────── */
 
-router.post("/lives/:id/send-now", async (req: Request, res: Response) => {
+router.post("/lives/:id/send-now", requireAdminAuth, async (req: Request, res: Response) => {
   try {
     const liveId = parseInt(String(req.params.id), 10);
     if (isNaN(liveId)) return res.status(400).json({ error: "Invalid id" });
@@ -202,7 +203,7 @@ router.post("/lives/:id/send-now", async (req: Request, res: Response) => {
 
 /* ── Notification Schedule (upcoming + past) ────────── */
 
-router.get("/notifications/schedule", async (_req: Request, res: Response) => {
+router.get("/notifications/schedule", requireAdminAuth, async (_req: Request, res: Response) => {
   try {
     const rules = await db
       .select({
@@ -270,7 +271,7 @@ router.get("/notifications/schedule", async (_req: Request, res: Response) => {
 
 /* ── Registration Trigger ───────────────────────────── */
 
-router.get("/lives/:id/registration-trigger", async (req: Request, res: Response) => {
+router.get("/lives/:id/registration-trigger", requireAdminAuth, async (req: Request, res: Response) => {
   try {
     const liveId = parseInt(String(req.params.id), 10);
     if (isNaN(liveId)) return res.status(400).json({ error: "Invalid id" });
@@ -288,7 +289,7 @@ router.get("/lives/:id/registration-trigger", async (req: Request, res: Response
   }
 });
 
-router.put("/lives/:id/registration-trigger", async (req: Request, res: Response) => {
+router.put("/lives/:id/registration-trigger", requireAdminAuth, async (req: Request, res: Response) => {
   try {
     const liveId = parseInt(String(req.params.id), 10);
     if (isNaN(liveId)) return res.status(400).json({ error: "Invalid id" });
@@ -370,7 +371,7 @@ export async function fireRegistrationTrigger(
 
 /* ── Notification Log ───────────────────────────────── */
 
-router.get("/notifications/log", async (req: Request, res: Response) => {
+router.get("/notifications/log", requireAdminAuth, async (req: Request, res: Response) => {
   try {
     const liveId = req.query.liveId ? parseInt(String(req.query.liveId), 10) : null;
     const conditions = liveId ? [eq(notificationLogTable.liveId, liveId)] : [];

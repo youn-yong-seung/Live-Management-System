@@ -1,36 +1,16 @@
-import { Router, type IRouter, type Request, type Response, type NextFunction } from "express";
-import { randomUUID } from "crypto";
+import { Router, type IRouter, type Request, type Response } from "express";
 import bcrypt from "bcryptjs";
 import { db } from "@workspace/db";
 import { adminConfigTable, liveYoutubeStatsTable, livesTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { logger } from "../lib/logger";
+import { requireAdminAuth, createAdminSession, invalidateAdminSession } from "../middleware/adminAuth";
+
+export { requireAdminAuth };
 
 const router: IRouter = Router();
 
 const DEFAULT_PASSWORD = "admin1234";
-
-/* ── In-memory session store ────────────────────────── */
-// Maps token → expiry (ms). Resets on server restart — acceptable for this single-admin use case.
-const SESSION_TTL_MS = 8 * 60 * 60 * 1000; // 8 hours
-const adminSessions = new Map<string, number>();
-
-/* ── Middleware: require valid admin token ───────────── */
-
-export function requireAdminAuth(req: Request, res: Response, next: NextFunction): void {
-  const token = req.headers["x-admin-token"] as string | undefined;
-  if (!token) {
-    res.status(401).json({ error: "인증이 필요합니다." });
-    return;
-  }
-  const expiry = adminSessions.get(token);
-  if (!expiry || expiry < Date.now()) {
-    adminSessions.delete(token);
-    res.status(401).json({ error: "세션이 만료되었습니다. 다시 로그인하세요." });
-    return;
-  }
-  next();
-}
 
 /* ── Seed initial admin config on startup ───────────── */
 
@@ -60,9 +40,7 @@ router.post("/admin/login", async (req: Request, res: Response) => {
     const valid = await bcrypt.compare(password, config.passwordHash);
     if (!valid) return res.status(401).json({ error: "비밀번호가 틀렸습니다." });
 
-    const token = randomUUID();
-    adminSessions.set(token, Date.now() + SESSION_TTL_MS);
-
+    const token = createAdminSession();
     return res.json({ success: true, token });
   } catch (err) {
     logger.error({ err }, "POST /admin/login failed");
@@ -70,11 +48,17 @@ router.post("/admin/login", async (req: Request, res: Response) => {
   }
 });
 
+/* ── GET /admin/session (validate token) ────────────── */
+
+router.get("/admin/session", requireAdminAuth, (_req: Request, res: Response) => {
+  return res.json({ valid: true });
+});
+
 /* ── POST /admin/logout ─────────────────────────────── */
 
 router.post("/admin/logout", (req: Request, res: Response) => {
   const token = req.headers["x-admin-token"] as string | undefined;
-  if (token) adminSessions.delete(token);
+  if (token) invalidateAdminSession(token);
   return res.json({ success: true });
 });
 

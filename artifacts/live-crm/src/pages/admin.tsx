@@ -348,15 +348,27 @@ export default function Admin() {
     }
   };
 
+  /* ── Validate stored session on mount ──────────── */
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    apiFetch("/admin/session")
+      .catch(() => {
+        sessionStorage.removeItem("crm_admin_auth");
+        sessionStorage.removeItem("crm_admin_token");
+        setIsAuthenticated(false);
+      });
+  }, [isAuthenticated]);
+
   /* ── Load solapi config on mount ───────────────── */
   useEffect(() => {
+    if (!isAuthenticated) return;
     apiFetch<SolapiConfig>("/settings/solapi")
       .then((cfg) => {
         setSolapiConfig(cfg);
         setConfigForm((f) => ({ ...f, apiKey: cfg.apiKey ?? "", senderPhone: cfg.senderPhone ?? "", senderKey: cfg.senderKey ?? "" }));
       })
       .catch(() => {});
-  }, []);
+  }, [isAuthenticated]);
 
   /* ── Fetch templates ───────────────────────────── */
   const fetchTemplates = useCallback(async (silent = false) => {

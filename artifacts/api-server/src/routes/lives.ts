@@ -19,6 +19,7 @@ import {
   CreateRegistrationBody,
 } from "@workspace/api-zod";
 import { fireRegistrationTrigger } from "./notifications";
+import { requireAdminAuth } from "../middleware/adminAuth";
 
 const router: IRouter = Router();
 
@@ -56,7 +57,7 @@ router.get("/lives", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/lives", async (req: Request, res: Response) => {
+router.post("/lives", requireAdminAuth, async (req: Request, res: Response) => {
   try {
     const body = CreateLiveBody.parse(req.body);
     const insertData = insertLiveSchema.parse({
@@ -127,7 +128,7 @@ router.get("/lives/:id", async (req: Request, res: Response) => {
   }
 });
 
-router.put("/lives/:id", async (req: Request, res: Response) => {
+router.put("/lives/:id", requireAdminAuth, async (req: Request, res: Response) => {
   try {
     const { id } = UpdateLiveParams.parse({ id: parseInt(String(req.params.id), 10) });
     const body = UpdateLiveBody.parse(req.body);
@@ -181,7 +182,7 @@ router.put("/lives/:id", async (req: Request, res: Response) => {
   }
 });
 
-router.delete("/lives/:id", async (req: Request, res: Response) => {
+router.delete("/lives/:id", requireAdminAuth, async (req: Request, res: Response) => {
   try {
     const { id } = DeleteLiveParams.parse({ id: parseInt(String(req.params.id), 10) });
 
@@ -204,6 +205,7 @@ router.delete("/lives/:id", async (req: Request, res: Response) => {
 
 router.get(
   "/lives/:liveId/registrations",
+  requireAdminAuth,
   async (req: Request, res: Response) => {
     try {
       const { liveId } = GetRegistrationsParams.parse({
