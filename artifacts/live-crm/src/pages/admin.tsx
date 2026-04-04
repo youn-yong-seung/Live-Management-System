@@ -4,7 +4,7 @@ import {
   useCreateLive, useUpdateLive, useDeleteLive,
   useGetRegistrations, getGetDashboardSummaryQueryKey
 } from "@workspace/api-client-react";
-import { LiveStatus } from "@workspace/api-client-react/src/generated/api.schemas";
+import type { LiveStatus } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

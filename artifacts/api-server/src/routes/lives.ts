@@ -96,7 +96,7 @@ router.post("/lives", async (req: Request, res: Response) => {
 
 router.get("/lives/:id", async (req: Request, res: Response) => {
   try {
-    const { id } = GetLiveParams.parse({ id: parseInt(req.params.id, 10) });
+    const { id } = GetLiveParams.parse({ id: parseInt(String(req.params.id), 10) });
 
     const [live] = await db
       .select({
@@ -129,7 +129,7 @@ router.get("/lives/:id", async (req: Request, res: Response) => {
 
 router.put("/lives/:id", async (req: Request, res: Response) => {
   try {
-    const { id } = UpdateLiveParams.parse({ id: parseInt(req.params.id, 10) });
+    const { id } = UpdateLiveParams.parse({ id: parseInt(String(req.params.id), 10) });
     const body = UpdateLiveBody.parse(req.body);
 
     const updateData: Record<string, unknown> = {};
@@ -183,7 +183,7 @@ router.put("/lives/:id", async (req: Request, res: Response) => {
 
 router.delete("/lives/:id", async (req: Request, res: Response) => {
   try {
-    const { id } = DeleteLiveParams.parse({ id: parseInt(req.params.id, 10) });
+    const { id } = DeleteLiveParams.parse({ id: parseInt(String(req.params.id), 10) });
 
     const [deleted] = await db
       .delete(livesTable)
@@ -207,7 +207,7 @@ router.get(
   async (req: Request, res: Response) => {
     try {
       const { liveId } = GetRegistrationsParams.parse({
-        liveId: parseInt(req.params.liveId, 10),
+        liveId: parseInt(String(req.params.liveId), 10),
       });
 
       const [live] = await db
@@ -239,7 +239,7 @@ router.post(
   async (req: Request, res: Response) => {
     try {
       const { liveId } = CreateRegistrationParams.parse({
-        liveId: parseInt(req.params.liveId, 10),
+        liveId: parseInt(String(req.params.liveId), 10),
       });
       const body = CreateRegistrationBody.parse(req.body);
 

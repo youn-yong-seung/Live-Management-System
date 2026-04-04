@@ -21,7 +21,7 @@ export async function sendKakaoAlimtalk(options: AlimtalkOptions): Promise<void>
   }
 
   try {
-    const { default: SolapiMessageService } = await import("solapi");
+    const { SolapiMessageService } = await import("solapi");
 
     const messageService = new SolapiMessageService(apiKey, apiSecret);
 
