@@ -7,7 +7,7 @@ import {
 } from "@workspace/db";
 import { eq, and, isNotNull } from "drizzle-orm";
 import { logger } from "./logger";
-import { getSolapiConfig, sendAlimtalkBatch } from "./solapiHelper";
+import { getSolapiConfig, sendAlimtalkBatch, sendSmsBatch } from "./solapiHelper";
 
 async function runScheduler(): Promise<void> {
   try {
@@ -22,21 +22,26 @@ async function runScheduler(): Promise<void> {
         liveTitle: livesTable.title,
         liveScheduledAt: livesTable.scheduledAt,
         offsetMinutes: notificationRulesTable.offsetMinutes,
+        messageType: notificationRulesTable.messageType,
         templateId: notificationRulesTable.templateId,
         templateName: notificationRulesTable.templateName,
+        messageBody: notificationRulesTable.messageBody,
       })
       .from(notificationRulesTable)
       .innerJoin(livesTable, eq(notificationRulesTable.liveId, livesTable.id))
       .where(
         and(
           eq(notificationRulesTable.enabled, true),
-          isNotNull(notificationRulesTable.templateId),
           isNotNull(livesTable.scheduledAt)
         )
       );
 
     for (const rule of rules) {
-      if (!rule.liveScheduledAt || !rule.templateId) continue;
+      if (!rule.liveScheduledAt) continue;
+
+      const isSms = rule.messageType === "sms";
+      if (!isSms && !rule.templateId) continue;
+      if (isSms && !rule.messageBody) continue;
 
       const fireAt = new Date(rule.liveScheduledAt.getTime() + rule.offsetMinutes * 60 * 1000);
 
@@ -50,11 +55,15 @@ async function runScheduler(): Promise<void> {
 
       if (alreadySent.length > 0) continue;
 
-      logger.info({ ruleId: rule.ruleId, liveId: rule.liveId, fireAt }, "Firing scheduled notification");
+      logger.info({ ruleId: rule.ruleId, liveId: rule.liveId, fireAt, messageType: rule.messageType }, "Firing scheduled notification");
 
       const config = await getSolapiConfig();
-      if (!config?.apiKey || !config?.apiSecret || !config?.senderPhone || !config?.senderKey) {
+      if (!config?.apiKey || !config?.apiSecret || !config?.senderPhone) {
         logger.warn("Solapi credentials not configured — skipping scheduled send");
+        continue;
+      }
+      if (!isSms && !config.senderKey) {
+        logger.warn("Solapi senderKey not configured for alimtalk — skipping");
         continue;
       }
 
@@ -78,20 +87,15 @@ async function runScheduler(): Promise<void> {
         continue;
       }
 
-      const { successCount, failCount } = await sendAlimtalkBatch(
-        config.apiKey,
-        config.apiSecret,
-        config.senderKey,
-        config.senderPhone,
-        rule.templateId,
-        regs.map((r) => ({ phone: r.phone, name: r.name }))
-      );
+      const { successCount, failCount } = isSms
+        ? await sendSmsBatch(config.apiKey, config.apiSecret, config.senderPhone, rule.messageBody!, regs.map((r) => ({ phone: r.phone, name: r.name })))
+        : await sendAlimtalkBatch(config.apiKey, config.apiSecret, config.senderKey!, config.senderPhone, rule.templateId!, regs.map((r) => ({ phone: r.phone, name: r.name })));
 
       await db.insert(notificationLogTable).values({
         liveId: rule.liveId,
         ruleId: rule.ruleId,
-        templateId: rule.templateId,
-        templateName: rule.templateName,
+        templateId: isSms ? null : rule.templateId,
+        templateName: isSms ? `[SMS] ${(rule.messageBody ?? "").substring(0, 30)}` : rule.templateName,
         recipientCount: regs.length,
         successCount,
         scheduledAt: fireAt,

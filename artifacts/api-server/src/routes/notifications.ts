@@ -9,7 +9,7 @@ import {
 } from "@workspace/db";
 import { eq, and, count, isNotNull, inArray } from "drizzle-orm";
 import { logger } from "../lib/logger";
-import { getSolapiConfig, fetchSolapiTemplates, sendAlimtalkBatch } from "../lib/solapiHelper";
+import { getSolapiConfig, fetchSolapiTemplates, sendAlimtalkBatch, sendSmsBatch } from "../lib/solapiHelper";
 
 const router: IRouter = Router();
 
@@ -120,12 +120,20 @@ router.put("/lives/:id/notification-rules", async (req: Request, res: Response) 
     if (isNaN(liveId)) return res.status(400).json({ error: "Invalid id" });
 
     const updates = req.body as {
-      id: number; offsetMinutes: number; templateId: string | null; templateName: string | null; enabled: boolean;
+      id: number; offsetMinutes: number; messageType?: string;
+      templateId: string | null; templateName: string | null;
+      messageBody?: string | null; enabled: boolean;
     }[];
 
     for (const u of updates) {
       await db.update(notificationRulesTable)
-        .set({ templateId: u.templateId, templateName: u.templateName, enabled: u.enabled })
+        .set({
+          messageType: u.messageType ?? "alimtalk",
+          templateId: u.templateId,
+          templateName: u.templateName,
+          messageBody: u.messageBody ?? null,
+          enabled: u.enabled,
+        })
         .where(and(eq(notificationRulesTable.id, u.id), eq(notificationRulesTable.liveId, liveId)));
     }
 
@@ -147,12 +155,20 @@ router.post("/lives/:id/send-now", async (req: Request, res: Response) => {
     const liveId = parseInt(String(req.params.id), 10);
     if (isNaN(liveId)) return res.status(400).json({ error: "Invalid id" });
 
-    const { templateId, templateName } = req.body as { templateId: string; templateName?: string };
-    if (!templateId) return res.status(400).json({ error: "templateId is required" });
+    const { messageType = "alimtalk", templateId, templateName, messageBody } = req.body as {
+      messageType?: string; templateId?: string; templateName?: string; messageBody?: string;
+    };
+    const isSms = messageType === "sms";
+
+    if (!isSms && !templateId) return res.status(400).json({ error: "templateId is required for alimtalk" });
+    if (isSms && !messageBody) return res.status(400).json({ error: "messageBody is required for sms" });
 
     const config = await getSolapiConfig();
-    if (!config?.apiKey || !config?.apiSecret || !config?.senderPhone || !config?.senderKey) {
+    if (!config?.apiKey || !config?.apiSecret || !config?.senderPhone) {
       return res.status(400).json({ error: "Solapi credentials not configured" });
+    }
+    if (!isSms && !config.senderKey) {
+      return res.status(400).json({ error: "Solapi senderKey (pfId) not configured for alimtalk" });
     }
 
     const regs = await db.select().from(registrationsTable).where(eq(registrationsTable.liveId, liveId));
@@ -160,16 +176,14 @@ router.post("/lives/:id/send-now", async (req: Request, res: Response) => {
       return res.json({ success: true, recipientCount: 0, successCount: 0, message: "No registrants" });
     }
 
-    const { successCount, failCount } = await sendAlimtalkBatch(
-      config.apiKey, config.apiSecret, config.senderKey, config.senderPhone,
-      templateId,
-      regs.map((r) => ({ phone: r.phone, name: r.name }))
-    );
+    const { successCount, failCount } = isSms
+      ? await sendSmsBatch(config.apiKey, config.apiSecret, config.senderPhone, messageBody!, regs.map((r) => ({ phone: r.phone, name: r.name })))
+      : await sendAlimtalkBatch(config.apiKey, config.apiSecret, config.senderKey!, config.senderPhone, templateId!, regs.map((r) => ({ phone: r.phone, name: r.name })));
 
     await db.insert(notificationLogTable).values({
       liveId,
-      templateId,
-      templateName: templateName ?? null,
+      templateId: isSms ? null : (templateId ?? null),
+      templateName: isSms ? `[SMS] ${(messageBody ?? "").substring(0, 30)}` : (templateName ?? null),
       recipientCount: regs.length,
       successCount,
       status: failCount === 0 ? "sent" : successCount > 0 ? "partial_fail" : "failed",

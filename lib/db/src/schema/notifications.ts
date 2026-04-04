@@ -23,8 +23,10 @@ export const notificationRulesTable = pgTable("notification_rules", {
     .notNull()
     .references(() => livesTable.id, { onDelete: "cascade" }),
   offsetMinutes: integer("offset_minutes").notNull(),
+  messageType: text("message_type").notNull().default("alimtalk"),
   templateId: text("template_id"),
   templateName: text("template_name"),
+  messageBody: text("message_body"),
   enabled: boolean("enabled").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });

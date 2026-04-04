@@ -33,6 +33,33 @@ export async function fetchSolapiTemplates(apiKey: string, apiSecret: string): P
   return data.templateList ?? [];
 }
 
+export async function sendSmsBatch(
+  apiKey: string,
+  apiSecret: string,
+  senderPhone: string,
+  messageBody: string,
+  recipients: { phone: string; name: string }[]
+): Promise<{ successCount: number; failCount: number }> {
+  const { SolapiMessageService } = await import("solapi");
+  const service = new SolapiMessageService(apiKey, apiSecret);
+  const byteLen = Buffer.byteLength(messageBody, "utf8");
+  const msgType = byteLen > 90 ? "LMS" : "SMS";
+
+  let successCount = 0;
+  let failCount = 0;
+
+  for (const r of recipients) {
+    try {
+      await service.send({ to: r.phone, from: senderPhone, text: messageBody, type: msgType as "SMS" | "LMS" });
+      successCount++;
+    } catch {
+      failCount++;
+    }
+  }
+
+  return { successCount, failCount };
+}
+
 export async function sendAlimtalkBatch(
   apiKey: string,
   apiSecret: string,
