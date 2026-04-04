@@ -105,13 +105,13 @@ export default function Home() {
               </span>
             </Link>
             <a
-              href="https://open.kakao.com/o/sWtLGs2d"
+              href="https://open.kakao.com/o/gCM9Aehi"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 bg-yellow-400 text-yellow-900 font-semibold text-sm px-5 py-2.5 rounded-xl hover:bg-yellow-300 transition-colors"
             >
               <MessageCircle className="h-4 w-4" />
-              카톡방 참여하기
+              무료 특강 대기방 참여하기
             </a>
           </div>
         </div>
