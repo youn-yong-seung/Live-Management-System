@@ -25,5 +25,8 @@ app.listen(port, (err) => {
 
   logger.info({ port }, "Server listening");
   startScheduler();
-  seedAdminConfig();
+  seedAdminConfig().catch((err) => {
+    logger.fatal({ err }, "Admin config seeding failed — shutting down");
+    process.exit(1);
+  });
 });

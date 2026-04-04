@@ -169,10 +169,27 @@ router.put("/lives/:id/youtube-stats", requireAdminAuth, async (req: Request, re
     const liveId = parseInt(String(req.params.id), 10);
     if (isNaN(liveId)) return res.status(400).json({ error: "Invalid id" });
 
-    const { views = 0, peakConcurrent = 0, watchTimeMinutes = 0, likes = 0, comments = 0 } = req.body as {
-      views?: number; peakConcurrent?: number; watchTimeMinutes?: number;
-      likes?: number; comments?: number;
+    const raw = req.body as {
+      views?: unknown; peakConcurrent?: unknown; watchTimeMinutes?: unknown;
+      likes?: unknown; comments?: unknown;
     };
+
+    const toNonNegativeInt = (v: unknown, field: string): number => {
+      const n = Number(v ?? 0);
+      if (!Number.isFinite(n) || n < 0) throw new Error(`${field} must be a non-negative number`);
+      return Math.floor(n);
+    };
+
+    let views: number, peakConcurrent: number, watchTimeMinutes: number, likes: number, comments: number;
+    try {
+      views = toNonNegativeInt(raw.views, "views");
+      peakConcurrent = toNonNegativeInt(raw.peakConcurrent, "peakConcurrent");
+      watchTimeMinutes = toNonNegativeInt(raw.watchTimeMinutes, "watchTimeMinutes");
+      likes = toNonNegativeInt(raw.likes, "likes");
+      comments = toNonNegativeInt(raw.comments, "comments");
+    } catch (validationErr) {
+      return res.status(400).json({ error: (validationErr as Error).message });
+    }
 
     const [existing] = await db.select().from(liveYoutubeStatsTable)
       .where(eq(liveYoutubeStatsTable.liveId, liveId));
