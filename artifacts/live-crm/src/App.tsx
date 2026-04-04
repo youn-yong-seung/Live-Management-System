@@ -9,6 +9,7 @@ import Lives from "@/pages/lives";
 import Replays from "@/pages/replays";
 import Courses from "@/pages/courses";
 import Resources from "@/pages/resources";
+import TechTree from "@/pages/techtree";
 import Admin from "@/pages/admin";
 import ReviewPage from "@/pages/review";
 import NotFound from "@/pages/not-found";
@@ -25,6 +26,7 @@ function Router() {
         <Route path="/replays" component={Replays} />
         <Route path="/courses" component={Courses} />
         <Route path="/resources" component={Resources} />
+        <Route path="/techtree" component={TechTree} />
         <Route path="/admin" component={Admin} />
         <Route component={NotFound} />
       </Switch>
