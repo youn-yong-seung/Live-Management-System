@@ -128,6 +128,7 @@ router.put("/lives/:id/notification-rules", async (req: Request, res: Response) 
     for (const u of updates) {
       await db.update(notificationRulesTable)
         .set({
+          offsetMinutes: u.offsetMinutes,
           messageType: u.messageType ?? "alimtalk",
           templateId: u.templateId,
           templateName: u.templateName,

@@ -106,6 +106,36 @@ const OFFSET_LABELS: Record<number, string> = {
   [10]: "시작 10분 후",
 };
 
+function formatOffsetLabel(offsetMinutes: number): string {
+  if (OFFSET_LABELS[offsetMinutes]) return OFFSET_LABELS[offsetMinutes];
+  if (offsetMinutes === 0) return "방송 시작 시";
+  const abs = Math.abs(offsetMinutes);
+  const dir = offsetMinutes < 0 ? "전" : "후";
+  const days = Math.floor(abs / 1440);
+  const hours = Math.floor((abs % 1440) / 60);
+  const mins = abs % 60;
+  const parts: string[] = [];
+  if (days > 0) parts.push(`${days}일`);
+  if (hours > 0) parts.push(`${hours}시간`);
+  if (mins > 0) parts.push(`${mins}분`);
+  return (parts.join(" ") || "0분") + " " + dir;
+}
+
+function offsetToComponents(offsetMinutes: number) {
+  const abs = Math.abs(offsetMinutes);
+  return {
+    days: Math.floor(abs / 1440),
+    hours: Math.floor((abs % 1440) / 60),
+    mins: abs % 60,
+    dir: offsetMinutes <= 0 ? "before" : "after" as "before" | "after",
+  };
+}
+
+function componentsToOffset(days: number, hours: number, mins: number, dir: "before" | "after") {
+  const total = days * 1440 + hours * 60 + mins;
+  return dir === "before" ? -total : total;
+}
+
 const statusConfig: Record<string, { label: string; className: string }> = {
   live: { label: "진행중", className: "bg-red-50 text-red-600" },
   scheduled: { label: "예정됨", className: "bg-blue-50 text-blue-600" },
@@ -157,6 +187,10 @@ export default function Admin() {
   const [notifRules, setNotifRules] = useState<NotificationRule[]>([]);
   const [isLoadingRules, setIsLoadingRules] = useState(false);
   const [isSavingRules, setIsSavingRules] = useState(false);
+
+  /* ── Offset edit state ─────────────────────────── */
+  const [editingOffsetIdx, setEditingOffsetIdx] = useState<number | null>(null);
+  const [offsetEdit, setOffsetEdit] = useState({ days: 0, hours: 0, mins: 0, dir: "before" as "before" | "after" });
 
   /* ── Schedule / Log state ──────────────────────── */
   const [schedule, setSchedule] = useState<ScheduleEntry[]>([]);
@@ -782,22 +816,84 @@ export default function Admin() {
                 ? `${String(defaultFireTime.getHours()).padStart(2, "0")}:${String(defaultFireTime.getMinutes()).padStart(2, "0")}`
                 : "";
               const effectiveHHMM = rule.customTime ?? defaultHHMM;
-              const label = OFFSET_LABELS[rule.offsetMinutes] ?? `${Math.abs(rule.offsetMinutes)}분 ${rule.offsetMinutes < 0 ? "전" : "후"}`;
+              const label = formatOffsetLabel(rule.offsetMinutes);
               const isSms = rule.messageType === "sms";
+              const isEditingOffset = editingOffsetIdx === idx;
 
               return (
                 <div key={rule.id} className={`rounded-xl border p-4 transition-colors ${rule.enabled ? "border-blue-100 bg-blue-50/20" : "border-gray-100 bg-white"}`}>
                   {/* Row header */}
                   <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${rule.enabled ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-500"}`}>{label}</span>
-                      {defaultFireTime && (
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      {isEditingOffset ? (
+                        /* ── Inline offset editor ─────────────── */
+                        <div className="flex items-center gap-1.5 bg-white border border-blue-200 rounded-lg px-2 py-1 flex-1">
+                          <input
+                            type="number" min={0} max={99}
+                            value={offsetEdit.days}
+                            onChange={(e) => setOffsetEdit((s) => ({ ...s, days: Math.max(0, parseInt(e.target.value) || 0) }))}
+                            className="w-8 text-sm font-semibold text-center bg-transparent border-none outline-none"
+                          />
+                          <span className="text-xs text-gray-500">일</span>
+                          <input
+                            type="number" min={0} max={23}
+                            value={offsetEdit.hours}
+                            onChange={(e) => setOffsetEdit((s) => ({ ...s, hours: Math.max(0, Math.min(23, parseInt(e.target.value) || 0)) }))}
+                            className="w-8 text-sm font-semibold text-center bg-transparent border-none outline-none"
+                          />
+                          <span className="text-xs text-gray-500">시간</span>
+                          <input
+                            type="number" min={0} max={59}
+                            value={offsetEdit.mins}
+                            onChange={(e) => setOffsetEdit((s) => ({ ...s, mins: Math.max(0, Math.min(59, parseInt(e.target.value) || 0)) }))}
+                            className="w-8 text-sm font-semibold text-center bg-transparent border-none outline-none"
+                          />
+                          <span className="text-xs text-gray-500">분</span>
+                          <div className="flex rounded-md overflow-hidden border border-gray-200 ml-1">
+                            {(["before", "after"] as const).map((d) => (
+                              <button
+                                key={d}
+                                onClick={() => setOffsetEdit((s) => ({ ...s, dir: d }))}
+                                className={`px-2 py-0.5 text-xs font-semibold transition-colors ${offsetEdit.dir === d ? "bg-blue-600 text-white" : "bg-white text-gray-500 hover:bg-gray-50"}`}
+                              >
+                                {d === "before" ? "전" : "후"}
+                              </button>
+                            ))}
+                          </div>
+                          <button
+                            onClick={() => {
+                              const newOffset = componentsToOffset(offsetEdit.days, offsetEdit.hours, offsetEdit.mins, offsetEdit.dir);
+                              updateRule(idx, { offsetMinutes: newOffset });
+                              setEditingOffsetIdx(null);
+                            }}
+                            className="ml-1 text-xs font-bold text-blue-600 hover:text-blue-800 px-1"
+                          >✓</button>
+                          <button
+                            onClick={() => setEditingOffsetIdx(null)}
+                            className="text-xs text-gray-400 hover:text-red-500 px-1"
+                          >✕</button>
+                        </div>
+                      ) : (
+                        /* ── Clickable label badge ─────────────── */
+                        <button
+                          onClick={() => {
+                            const c = offsetToComponents(rule.offsetMinutes);
+                            setOffsetEdit(c);
+                            setEditingOffsetIdx(idx);
+                          }}
+                          className={`text-xs font-bold px-2.5 py-1 rounded-full flex-none transition-all cursor-pointer hover:ring-2 hover:ring-offset-1 ${rule.enabled ? "bg-blue-100 text-blue-700 hover:ring-blue-300" : "bg-gray-100 text-gray-500 hover:ring-gray-300"}`}
+                          title="클릭하여 시간 편집"
+                        >
+                          {label} ✏
+                        </button>
+                      )}
+                      {!isEditingOffset && defaultFireTime && (
                         <span className="text-xs text-gray-400">
                           {defaultFireTime.toLocaleDateString("ko-KR", { month: "2-digit", day: "2-digit" })}
                         </span>
                       )}
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-none">
                       <span className="text-xs text-gray-400">{rule.enabled ? "활성" : "비활성"}</span>
                       <Switch checked={rule.enabled} onCheckedChange={(checked) => updateRule(idx, { enabled: checked })} />
                     </div>
