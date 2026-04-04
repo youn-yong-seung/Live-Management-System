@@ -7,7 +7,6 @@ const navItems = [
   { href: "/", label: "홈" },
   { href: "/lives", label: "라이브 신청" },
   { href: "/replays", label: "다시보기" },
-  { href: "/admin", label: "관리자" },
 ];
 
 const navIcons: Record<string, typeof Home> = {

@@ -1,0 +1,163 @@
+import { Router, type IRouter, type Request, type Response } from "express";
+import bcrypt from "bcryptjs";
+import { db } from "@workspace/db";
+import { adminConfigTable, liveYoutubeStatsTable, livesTable } from "@workspace/db";
+import { eq } from "drizzle-orm";
+import { logger } from "../lib/logger";
+
+const router: IRouter = Router();
+
+const DEFAULT_PASSWORD = "admin1234";
+
+/* ── Seed initial admin config on startup ───────────── */
+
+export async function seedAdminConfig(): Promise<void> {
+  try {
+    const [existing] = await db.select().from(adminConfigTable);
+    if (!existing) {
+      const hash = await bcrypt.hash(DEFAULT_PASSWORD, 10);
+      await db.insert(adminConfigTable).values({ passwordHash: hash });
+      logger.info("Admin config seeded with default password");
+    }
+  } catch (err) {
+    logger.error({ err }, "Failed to seed admin config");
+  }
+}
+
+/* ── POST /admin/login ──────────────────────────────── */
+
+router.post("/admin/login", async (req: Request, res: Response) => {
+  try {
+    const { password } = req.body as { password?: string };
+    if (!password) return res.status(400).json({ error: "password required" });
+
+    const [config] = await db.select().from(adminConfigTable);
+    if (!config) return res.status(500).json({ error: "Admin not configured" });
+
+    const valid = await bcrypt.compare(password, config.passwordHash);
+    if (!valid) return res.status(401).json({ error: "비밀번호가 틀렸습니다." });
+
+    return res.json({ success: true });
+  } catch (err) {
+    logger.error({ err }, "POST /admin/login failed");
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+/* ── PUT /admin/password ────────────────────────────── */
+
+router.put("/admin/password", async (req: Request, res: Response) => {
+  try {
+    const { currentPassword, newPassword } = req.body as {
+      currentPassword?: string; newPassword?: string;
+    };
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: "currentPassword and newPassword required" });
+    }
+    if (newPassword.length < 4) {
+      return res.status(400).json({ error: "비밀번호는 최소 4자 이상이어야 합니다." });
+    }
+
+    const [config] = await db.select().from(adminConfigTable);
+    if (!config) return res.status(500).json({ error: "Admin not configured" });
+
+    const valid = await bcrypt.compare(currentPassword, config.passwordHash);
+    if (!valid) return res.status(401).json({ error: "현재 비밀번호가 틀렸습니다." });
+
+    const newHash = await bcrypt.hash(newPassword, 10);
+    await db.update(adminConfigTable)
+      .set({ passwordHash: newHash, updatedAt: new Date() })
+      .where(eq(adminConfigTable.id, config.id));
+
+    return res.json({ success: true });
+  } catch (err) {
+    logger.error({ err }, "PUT /admin/password failed");
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+/* ── GET /lives/:id/youtube-stats ───────────────────── */
+
+router.get("/lives/:id/youtube-stats", async (req: Request, res: Response) => {
+  try {
+    const liveId = parseInt(String(req.params.id), 10);
+    if (isNaN(liveId)) return res.status(400).json({ error: "Invalid id" });
+
+    const [row] = await db.select().from(liveYoutubeStatsTable)
+      .where(eq(liveYoutubeStatsTable.liveId, liveId));
+
+    if (!row) {
+      return res.json({
+        liveId, views: 0, peakConcurrent: 0,
+        watchTimeMinutes: 0, likes: 0, comments: 0,
+      });
+    }
+    return res.json(row);
+  } catch (err) {
+    logger.error({ err }, "GET /lives/:id/youtube-stats failed");
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+/* ── PUT /lives/:id/youtube-stats ───────────────────── */
+
+router.put("/lives/:id/youtube-stats", async (req: Request, res: Response) => {
+  try {
+    const liveId = parseInt(String(req.params.id), 10);
+    if (isNaN(liveId)) return res.status(400).json({ error: "Invalid id" });
+
+    const { views = 0, peakConcurrent = 0, watchTimeMinutes = 0, likes = 0, comments = 0 } = req.body as {
+      views?: number; peakConcurrent?: number; watchTimeMinutes?: number;
+      likes?: number; comments?: number;
+    };
+
+    const [existing] = await db.select().from(liveYoutubeStatsTable)
+      .where(eq(liveYoutubeStatsTable.liveId, liveId));
+
+    if (existing) {
+      await db.update(liveYoutubeStatsTable).set({
+        views, peakConcurrent, watchTimeMinutes, likes, comments,
+        updatedAt: new Date(),
+      }).where(eq(liveYoutubeStatsTable.liveId, liveId));
+    } else {
+      await db.insert(liveYoutubeStatsTable).values({
+        liveId, views, peakConcurrent, watchTimeMinutes, likes, comments,
+      });
+    }
+
+    const [updated] = await db.select().from(liveYoutubeStatsTable)
+      .where(eq(liveYoutubeStatsTable.liveId, liveId));
+    return res.json(updated);
+  } catch (err) {
+    logger.error({ err }, "PUT /lives/:id/youtube-stats failed");
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+/* ── GET /lives/youtube-stats/all ───────────────────── */
+
+router.get("/youtube-stats/all", async (_req: Request, res: Response) => {
+  try {
+    const rows = await db
+      .select({
+        liveId: liveYoutubeStatsTable.liveId,
+        liveTitle: livesTable.title,
+        scheduledAt: livesTable.scheduledAt,
+        views: liveYoutubeStatsTable.views,
+        peakConcurrent: liveYoutubeStatsTable.peakConcurrent,
+        watchTimeMinutes: liveYoutubeStatsTable.watchTimeMinutes,
+        likes: liveYoutubeStatsTable.likes,
+        comments: liveYoutubeStatsTable.comments,
+        updatedAt: liveYoutubeStatsTable.updatedAt,
+      })
+      .from(liveYoutubeStatsTable)
+      .innerJoin(livesTable, eq(liveYoutubeStatsTable.liveId, livesTable.id))
+      .orderBy(livesTable.scheduledAt);
+    return res.json(rows);
+  } catch (err) {
+    logger.error({ err }, "GET /youtube-stats/all failed");
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+export default router;

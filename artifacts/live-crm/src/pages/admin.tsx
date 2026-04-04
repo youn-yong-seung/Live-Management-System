@@ -19,10 +19,14 @@ import { formatDate } from "@/lib/date-utils";
 import {
   Plus, Edit, Trash2, Users, Loader2, RefreshCw, Settings,
   Bell, Send, Eye, CheckCircle, Clock, AlertCircle, KeyRound,
-  MessageSquare, Zap,
+  MessageSquare, Zap, Lock, Youtube, TrendingUp, ThumbsUp,
+  MessageCircle, PlayCircle, BarChart2,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
+} from "recharts";
 
 /* ── Types ─────────────────────────────────────────── */
 
@@ -87,6 +91,17 @@ interface NotificationLogEntry {
   status: string;
   isImmediate: boolean;
   ruleId: number | null;
+}
+
+interface YoutubeStats {
+  liveId: number;
+  liveTitle?: string;
+  scheduledAt?: string | null;
+  views: number;
+  peakConcurrent: number;
+  watchTimeMinutes: number;
+  likes: number;
+  comments: number;
 }
 
 /* ── API helper ────────────────────────────────────── */
@@ -203,6 +218,24 @@ export default function Admin() {
   const [editingOffsetIdx, setEditingOffsetIdx] = useState<number | null>(null);
   const [offsetEdit, setOffsetEdit] = useState({ days: 0, hours: 0, mins: 0, dir: "before" as "before" | "after" });
 
+  /* ── Auth gate state ───────────────────────────── */
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    try { return sessionStorage.getItem("crm_admin_auth") === "1"; } catch { return false; }
+  });
+  const [loginPwd, setLoginPwd] = useState("");
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+
+  /* ── YouTube stats state ───────────────────────── */
+  const [ytStatsAll, setYtStatsAll] = useState<YoutubeStats[]>([]);
+  const [ytEditLiveId, setYtEditLiveId] = useState<number | null>(null);
+  const [ytForm, setYtForm] = useState({ views: 0, peakConcurrent: 0, watchTimeMinutes: 0, likes: 0, comments: 0 });
+  const [isSavingYt, setIsSavingYt] = useState(false);
+  const [isLoadingYt, setIsLoadingYt] = useState(false);
+
+  /* ── Password change state ─────────────────────── */
+  const [pwdForm, setPwdForm] = useState({ current: "", next: "", confirm: "" });
+  const [isChangingPwd, setIsChangingPwd] = useState(false);
+
   /* ── Schedule / Log state ──────────────────────── */
   const [schedule, setSchedule] = useState<ScheduleEntry[]>([]);
   const [notifLog, setNotifLog] = useState<NotificationLogEntry[]>([]);
@@ -219,6 +252,89 @@ export default function Admin() {
   const createLive = useCreateLive();
   const updateLive = useUpdateLive();
   const deleteLive = useDeleteLive();
+
+  /* ── Login handler ─────────────────────────────── */
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoggingIn(true);
+    try {
+      await apiFetch("/admin/login", { method: "POST", body: JSON.stringify({ password: loginPwd }) });
+      sessionStorage.setItem("crm_admin_auth", "1");
+      setIsAuthenticated(true);
+      setLoginPwd("");
+    } catch (err) {
+      toast({ variant: "destructive", title: "로그인 실패", description: String(err) });
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  /* ── Password change handler ───────────────────── */
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (pwdForm.next !== pwdForm.confirm) {
+      toast({ variant: "destructive", title: "새 비밀번호가 일치하지 않습니다." });
+      return;
+    }
+    setIsChangingPwd(true);
+    try {
+      await apiFetch("/admin/password", {
+        method: "PUT",
+        body: JSON.stringify({ currentPassword: pwdForm.current, newPassword: pwdForm.next }),
+      });
+      toast({ title: "비밀번호 변경 완료" });
+      setPwdForm({ current: "", next: "", confirm: "" });
+    } catch (err) {
+      toast({ variant: "destructive", title: "비밀번호 변경 실패", description: String(err) });
+    } finally {
+      setIsChangingPwd(false);
+    }
+  };
+
+  /* ── YouTube stats functions ───────────────────── */
+  const loadYtStatsAll = useCallback(async () => {
+    setIsLoadingYt(true);
+    try {
+      const rows = await apiFetch<YoutubeStats[]>("/youtube-stats/all");
+      setYtStatsAll(rows);
+    } catch {
+      /* ignore */
+    } finally {
+      setIsLoadingYt(false);
+    }
+  }, []);
+
+  const loadYtStatsForLive = async (liveId: number) => {
+    try {
+      const row = await apiFetch<YoutubeStats>(`/lives/${liveId}/youtube-stats`);
+      setYtForm({
+        views: row.views,
+        peakConcurrent: row.peakConcurrent,
+        watchTimeMinutes: row.watchTimeMinutes,
+        likes: row.likes,
+        comments: row.comments,
+      });
+    } catch {
+      setYtForm({ views: 0, peakConcurrent: 0, watchTimeMinutes: 0, likes: 0, comments: 0 });
+    }
+  };
+
+  const saveYtStats = async () => {
+    if (ytEditLiveId === null) return;
+    setIsSavingYt(true);
+    try {
+      await apiFetch(`/lives/${ytEditLiveId}/youtube-stats`, {
+        method: "PUT",
+        body: JSON.stringify(ytForm),
+      });
+      toast({ title: "YouTube 지표 저장 완료" });
+      loadYtStatsAll();
+    } catch (err) {
+      toast({ variant: "destructive", title: "저장 실패", description: String(err) });
+    } finally {
+      setIsSavingYt(false);
+    }
+  };
 
   /* ── Load solapi config on mount ───────────────── */
   useEffect(() => {
@@ -423,6 +539,45 @@ export default function Admin() {
   /* RENDER                                           */
   /* ═══════════════════════════════════════════════ */
 
+  /* ── Admin Login Gate ─────────────────────────── */
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-[70vh] flex items-center justify-center">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 w-full max-w-sm">
+          <div className="flex flex-col items-center mb-8">
+            <div className="bg-blue-50 rounded-full p-4 mb-4">
+              <Lock className="h-8 w-8 text-blue-600" />
+            </div>
+            <h1 className="text-xl font-bold text-gray-900">관리자 로그인</h1>
+            <p className="text-gray-400 text-sm mt-1">관리자 비밀번호를 입력하세요.</p>
+          </div>
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <Label className="text-sm text-gray-700">비밀번호</Label>
+              <Input
+                type="password"
+                value={loginPwd}
+                onChange={(e) => setLoginPwd(e.target.value)}
+                placeholder="비밀번호 입력"
+                className="mt-1 rounded-xl border-gray-200"
+                autoFocus
+              />
+            </div>
+            <Button
+              type="submit"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold h-11"
+              disabled={isLoggingIn || !loginPwd}
+            >
+              {isLoggingIn ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              로그인
+            </Button>
+          </form>
+          <p className="text-xs text-gray-300 text-center mt-6">초기 비밀번호: admin1234</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -431,6 +586,14 @@ export default function Admin() {
           <h1 className="text-2xl font-bold text-gray-900 mb-1">관리자</h1>
           <p className="text-gray-500 text-sm">라이브 스트리밍과 알림톡 · 문자 캠페인을 관리하세요.</p>
         </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-gray-400 hover:text-red-500 rounded-xl"
+          onClick={() => { sessionStorage.removeItem("crm_admin_auth"); setIsAuthenticated(false); }}
+        >
+          <Lock className="h-4 w-4 mr-1" />로그아웃
+        </Button>
       </div>
 
       <Tabs defaultValue="lives">
@@ -438,6 +601,7 @@ export default function Admin() {
           <TabsTrigger value="lives" className="rounded-lg text-sm font-medium">라이브 관리</TabsTrigger>
           <TabsTrigger value="settings" className="rounded-lg text-sm font-medium">API 설정</TabsTrigger>
           <TabsTrigger value="schedule" className="rounded-lg text-sm font-medium" onClick={loadSchedule}>발송 현황</TabsTrigger>
+          <TabsTrigger value="youtube" className="rounded-lg text-sm font-medium" onClick={loadYtStatsAll}>YouTube 성과</TabsTrigger>
         </TabsList>
 
         {/* ── Tab 1: Live Management ─────────────────── */}
@@ -565,6 +729,36 @@ export default function Admin() {
             </div>
           )}
 
+          {/* ── Password Change ─────────────────────── */}
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-9 h-9 bg-gray-50 rounded-xl flex items-center justify-center">
+                <Lock className="h-4 w-4 text-gray-500" />
+              </div>
+              <div>
+                <h2 className="font-bold text-gray-900">관리자 비밀번호 변경</h2>
+                <p className="text-xs text-gray-400 mt-0.5">새로운 비밀번호를 설정하세요.</p>
+              </div>
+            </div>
+            <form onSubmit={handleChangePassword} className="grid gap-4 max-w-sm">
+              <div className="grid gap-2">
+                <Label className="text-sm font-medium text-gray-700">현재 비밀번호</Label>
+                <Input type="password" value={pwdForm.current} onChange={(e) => setPwdForm({ ...pwdForm, current: e.target.value })} placeholder="현재 비밀번호" className="rounded-xl border-gray-200" />
+              </div>
+              <div className="grid gap-2">
+                <Label className="text-sm font-medium text-gray-700">새 비밀번호</Label>
+                <Input type="password" value={pwdForm.next} onChange={(e) => setPwdForm({ ...pwdForm, next: e.target.value })} placeholder="새 비밀번호 (4자 이상)" className="rounded-xl border-gray-200" />
+              </div>
+              <div className="grid gap-2">
+                <Label className="text-sm font-medium text-gray-700">새 비밀번호 확인</Label>
+                <Input type="password" value={pwdForm.confirm} onChange={(e) => setPwdForm({ ...pwdForm, confirm: e.target.value })} placeholder="새 비밀번호 재입력" className="rounded-xl border-gray-200" />
+              </div>
+              <Button type="submit" className="w-fit bg-gray-900 hover:bg-gray-700 text-white rounded-xl font-semibold" disabled={isChangingPwd || !pwdForm.current || !pwdForm.next || !pwdForm.confirm}>
+                {isChangingPwd && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}비밀번호 변경
+              </Button>
+            </form>
+          </div>
+
           {templates.length > 0 && (
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
               <h2 className="font-bold text-gray-900 mb-4">
@@ -682,6 +876,163 @@ export default function Admin() {
             )}
           </div>
         </TabsContent>
+
+        {/* ── Tab 4: YouTube 성과 ───────────────────── */}
+        <TabsContent value="youtube" className="mt-6 space-y-6">
+          <div className="flex justify-end">
+            <Button variant="outline" className="rounded-xl border-gray-200" onClick={loadYtStatsAll} disabled={isLoadingYt}>
+              <RefreshCw className={`mr-2 h-4 w-4 ${isLoadingYt ? "animate-spin" : ""}`} />새로고침
+            </Button>
+          </div>
+
+          {/* Stat input card */}
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-9 h-9 bg-red-50 rounded-xl flex items-center justify-center">
+                <Youtube className="h-4 w-4 text-red-500" />
+              </div>
+              <div>
+                <h2 className="font-bold text-gray-900">라이브별 YouTube 지표 입력</h2>
+                <p className="text-xs text-gray-400 mt-0.5">라이브를 선택하고 지표를 입력 후 저장하세요.</p>
+              </div>
+            </div>
+
+            <div className="mb-5">
+              <Label className="text-sm font-medium text-gray-700 mb-1.5 block">라이브 선택</Label>
+              <Select
+                value={ytEditLiveId !== null ? String(ytEditLiveId) : ""}
+                onValueChange={(val) => {
+                  const id = parseInt(val, 10);
+                  setYtEditLiveId(id);
+                  loadYtStatsForLive(id);
+                }}
+              >
+                <SelectTrigger className="rounded-xl border-gray-200 max-w-sm">
+                  <SelectValue placeholder="라이브 선택..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {(lives ?? []).map((live) => (
+                    <SelectItem key={live.id} value={String(live.id)}>
+                      {live.title} <span className="text-gray-400 ml-1">({formatDate(live.scheduledAt)})</span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {ytEditLiveId !== null && (
+              <>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-5">
+                  {[
+                    { key: "views", label: "총 조회수", icon: <Eye className="h-4 w-4 text-blue-500" />, placeholder: "0" },
+                    { key: "peakConcurrent", label: "최고 동시시청자", icon: <TrendingUp className="h-4 w-4 text-green-500" />, placeholder: "0" },
+                    { key: "watchTimeMinutes", label: "총 시청시간 (분)", icon: <PlayCircle className="h-4 w-4 text-purple-500" />, placeholder: "0.0", isFloat: true },
+                    { key: "likes", label: "좋아요", icon: <ThumbsUp className="h-4 w-4 text-yellow-500" />, placeholder: "0" },
+                    { key: "comments", label: "댓글 수", icon: <MessageCircle className="h-4 w-4 text-pink-500" />, placeholder: "0" },
+                  ].map(({ key, label, icon, placeholder, isFloat }) => (
+                    <div key={key} className="grid gap-1.5">
+                      <Label className="text-xs font-medium text-gray-600 flex items-center gap-1.5">{icon}{label}</Label>
+                      <Input
+                        type="number"
+                        min={0}
+                        step={isFloat ? "0.1" : "1"}
+                        value={ytForm[key as keyof typeof ytForm]}
+                        onChange={(e) => setYtForm({ ...ytForm, [key]: isFloat ? parseFloat(e.target.value) || 0 : parseInt(e.target.value, 10) || 0 })}
+                        placeholder={placeholder}
+                        className="rounded-xl border-gray-200"
+                      />
+                    </div>
+                  ))}
+                </div>
+                <Button className="bg-red-500 hover:bg-red-600 text-white rounded-xl font-semibold" onClick={saveYtStats} disabled={isSavingYt}>
+                  {isSavingYt ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Youtube className="mr-2 h-4 w-4" />}지표 저장
+                </Button>
+              </>
+            )}
+          </div>
+
+          {/* Comparison chart */}
+          {ytStatsAll.length > 0 && (
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center">
+                  <BarChart2 className="h-4 w-4 text-blue-500" />
+                </div>
+                <div>
+                  <h2 className="font-bold text-gray-900">라이브별 성과 비교</h2>
+                  <p className="text-xs text-gray-400 mt-0.5">전체 라이브의 YouTube 지표를 한눈에 비교하세요.</p>
+                </div>
+              </div>
+
+              <div className="mb-8">
+                <p className="text-xs text-gray-400 font-medium mb-3 uppercase tracking-wide">조회수 · 최고 동시시청자</p>
+                <ResponsiveContainer width="100%" height={240}>
+                  <BarChart data={ytStatsAll.map((r) => ({ name: r.liveTitle ?? `라이브 ${r.liveId}`, 조회수: r.views, 동시시청자: r.peakConcurrent }))}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
+                    <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#9ca3af" }} />
+                    <YAxis tick={{ fontSize: 11, fill: "#9ca3af" }} />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="조회수" fill="#2563EB" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="동시시청자" fill="#10b981" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+
+              <div>
+                <p className="text-xs text-gray-400 font-medium mb-3 uppercase tracking-wide">좋아요 · 댓글</p>
+                <ResponsiveContainer width="100%" height={200}>
+                  <BarChart data={ytStatsAll.map((r) => ({ name: r.liveTitle ?? `라이브 ${r.liveId}`, 좋아요: r.likes, 댓글: r.comments }))}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
+                    <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#9ca3af" }} />
+                    <YAxis tick={{ fontSize: 11, fill: "#9ca3af" }} />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="좋아요" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="댓글" fill="#ec4899" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Stats summary table */}
+              <div className="mt-6 overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-gray-100">
+                      <TableHead className="text-xs text-gray-500">라이브</TableHead>
+                      <TableHead className="text-xs text-gray-500 text-right">조회수</TableHead>
+                      <TableHead className="text-xs text-gray-500 text-right">동시시청자</TableHead>
+                      <TableHead className="text-xs text-gray-500 text-right">시청시간(분)</TableHead>
+                      <TableHead className="text-xs text-gray-500 text-right">좋아요</TableHead>
+                      <TableHead className="text-xs text-gray-500 text-right">댓글</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {ytStatsAll.map((row) => (
+                      <TableRow key={row.liveId} className="border-gray-50">
+                        <TableCell className="font-medium text-sm text-gray-800">{row.liveTitle ?? `라이브 ${row.liveId}`}</TableCell>
+                        <TableCell className="text-right text-sm">{row.views.toLocaleString()}</TableCell>
+                        <TableCell className="text-right text-sm">{row.peakConcurrent.toLocaleString()}</TableCell>
+                        <TableCell className="text-right text-sm">{row.watchTimeMinutes.toLocaleString()}</TableCell>
+                        <TableCell className="text-right text-sm">{row.likes.toLocaleString()}</TableCell>
+                        <TableCell className="text-right text-sm">{row.comments.toLocaleString()}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+          )}
+
+          {ytStatsAll.length === 0 && !isLoadingYt && (
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm py-16 text-center">
+              <Youtube className="h-8 w-8 text-gray-200 mx-auto mb-3" />
+              <p className="text-gray-400 text-sm">아직 입력된 YouTube 지표가 없습니다.</p>
+              <p className="text-gray-300 text-xs mt-1">위에서 라이브를 선택하고 지표를 입력해 보세요.</p>
+            </div>
+          )}
+        </TabsContent>
+
       </Tabs>
 
       {/* ═══ Live CRUD Modal ═══════════════════════════ */}

@@ -5,6 +5,7 @@ import {
   timestamp,
   integer,
   boolean,
+  real,
 } from "drizzle-orm/pg-core";
 import { livesTable } from "./lives";
 
@@ -62,7 +63,29 @@ export const registrationTriggersTable = pgTable("registration_triggers", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+export const adminConfigTable = pgTable("admin_config", {
+  id: serial("id").primaryKey(),
+  passwordHash: text("password_hash").notNull(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const liveYoutubeStatsTable = pgTable("live_youtube_stats", {
+  id: serial("id").primaryKey(),
+  liveId: integer("live_id")
+    .notNull()
+    .unique()
+    .references(() => livesTable.id, { onDelete: "cascade" }),
+  views: integer("views").notNull().default(0),
+  peakConcurrent: integer("peak_concurrent").notNull().default(0),
+  watchTimeMinutes: real("watch_time_minutes").notNull().default(0),
+  likes: integer("likes").notNull().default(0),
+  comments: integer("comments").notNull().default(0),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 export type SolapiConfig = typeof solapiConfigTable.$inferSelect;
 export type NotificationRule = typeof notificationRulesTable.$inferSelect;
 export type NotificationLog = typeof notificationLogTable.$inferSelect;
 export type RegistrationTrigger = typeof registrationTriggersTable.$inferSelect;
+export type AdminConfig = typeof adminConfigTable.$inferSelect;
+export type LiveYoutubeStats = typeof liveYoutubeStatsTable.$inferSelect;
