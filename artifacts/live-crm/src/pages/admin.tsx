@@ -786,7 +786,7 @@ export default function Admin() {
             ) : (
               <div className="grid gap-2">
                 <Label className="text-sm font-medium text-gray-700">
-                  문자 내용 <span className="text-gray-400 font-normal">{sendMsgBody.length}자 · {Buffer.byteLength(sendMsgBody, "utf8") > 90 ? "LMS" : "SMS"}</span>
+                  문자 내용 <span className="text-gray-400 font-normal">{sendMsgBody.length}자 · {new TextEncoder().encode(sendMsgBody).length > 90 ? "LMS" : "SMS"}</span>
                 </Label>
                 <Textarea
                   placeholder="발송할 문자 내용을 입력하세요..."
