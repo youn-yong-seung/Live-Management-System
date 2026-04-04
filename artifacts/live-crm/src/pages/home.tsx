@@ -17,32 +17,29 @@ const FREE_RESOURCES = [
     title: "클로드코드 시작 가이드",
     description: "설치부터 첫 자동화까지 한 번에",
     icon: BookOpen,
-    color: "bg-blue-50 text-blue-600",
-    url: "#",
+    color: "text-[#CC9965]",
   },
   {
     title: "노션 업무 템플릿 모음",
     description: "바로 복제해서 쓰는 실전 템플릿",
     icon: Download,
-    color: "bg-purple-50 text-purple-600",
-    url: "#",
+    color: "text-[#CC9965]",
   },
   {
     title: "자동화 아이디어 30선",
     description: "지금 바로 적용 가능한 자동화 리스트",
     icon: Zap,
-    color: "bg-amber-50 text-amber-600",
-    url: "#",
+    color: "text-[#CC9965]",
   },
 ];
 
 /* ── Category config ────────────────────────────────── */
 
 const CATEGORY_SECTIONS = [
-  { label: "입문자 추천", tag: "입문", icon: Sparkles, color: "text-green-600 bg-green-50" },
-  { label: "자동화", tag: "자동화", icon: Zap, color: "text-amber-600 bg-amber-50" },
-  { label: "노션", tag: "노션", icon: BookOpen, color: "text-purple-600 bg-purple-50" },
-  { label: "클로드코드", tag: "클로드코드", icon: TrendingUp, color: "text-blue-600 bg-blue-50" },
+  { label: "입문자 추천", tag: "입문", icon: Sparkles, color: "text-emerald-400" },
+  { label: "자동화", tag: "자동화", icon: Zap, color: "text-amber-400" },
+  { label: "노션", tag: "노션", icon: BookOpen, color: "text-purple-400" },
+  { label: "클로드코드", tag: "클로드코드", icon: TrendingUp, color: "text-sky-400" },
 ];
 
 /* ── Helpers ─────────────────────────────────────────── */
@@ -56,6 +53,11 @@ function youtubeThumbnail(url: string) {
   const id = extractYoutubeId(url);
   return id ? `https://img.youtube.com/vi/${id}/mqdefault.jpg` : null;
 }
+
+/* ── Glass Card ──────────────────────────────────────── */
+
+const glassCard = "backdrop-blur-xl bg-white/[0.05] border border-white/[0.1] rounded-2xl";
+const glassCardHover = `${glassCard} hover:bg-white/[0.08] hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(0,0,0,0.3)] transition-all duration-300`;
 
 /* ── Component ──────────────────────────────────────── */
 
@@ -74,35 +76,34 @@ export default function Home() {
   );
 
   const replays = endedLives ?? [];
-
-  // Pick top 4 replays as "recommended"
   const recommended = replays.slice(0, 4);
-
-  // Group by category
   const getByTag = (tag: string) =>
     replays.filter((r) => ((r as any).tags as string[] | null)?.includes(tag)).slice(0, 4);
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-16">
 
       {/* ── Hero Section ──────────────────────────────── */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-700 rounded-3xl p-8 sm:p-10 text-white">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMSIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjA1KSIvPjwvc3ZnPg==')] opacity-50" />
+      <div className={`relative overflow-hidden rounded-3xl p-8 sm:p-12 ${glassCard} border-white/[0.08]`}>
+        <div className="absolute inset-0 bg-gradient-to-br from-[#005051] via-[#004040] to-[#003030] opacity-60" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-[#CC9965]/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3" />
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#005051]/50 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/4" />
+
         <div className="relative">
-          <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm rounded-full px-4 py-1.5 text-sm font-medium mb-4">
+          <div className="inline-flex items-center gap-2 bg-[#CC9965]/15 backdrop-blur-sm rounded-full px-4 py-1.5 text-sm font-medium mb-6 text-[#CC9965] border border-[#CC9965]/20">
             <Sparkles className="h-4 w-4" />
             무료 라이브 특강
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold leading-tight mb-3">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white leading-tight mb-4" style={{ textShadow: "0 2px 20px rgba(0,0,0,0.3)" }}>
             AI와 자동화로<br />일하는 방식을 바꾸세요
           </h1>
-          <p className="text-blue-100 text-sm sm:text-base mb-6 max-w-lg">
+          <p className="text-white/60 text-sm sm:text-base mb-8 max-w-lg leading-relaxed">
             클로드코드, 노션, Make 등 실전 툴을 활용한 무료 라이브 강의를 제공합니다.
             지금 바로 시작하세요.
           </p>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-4">
             <Link href="/lives">
-              <span className="inline-flex items-center gap-2 bg-white text-blue-700 font-semibold text-sm px-5 py-2.5 rounded-xl hover:bg-blue-50 transition-colors cursor-pointer">
+              <span className="inline-flex items-center gap-2 bg-[#CC9965] text-black font-bold text-sm px-6 py-3 rounded-xl hover:bg-[#d4a570] transition-colors cursor-pointer shadow-[0_4px_20px_rgba(204,153,101,0.3)]">
                 <Video className="h-4 w-4" />
                 라이브 신청하기
               </span>
@@ -111,7 +112,7 @@ export default function Home() {
               href="https://open.kakao.com/o/gCM9Aehi"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-yellow-400 text-yellow-900 font-semibold text-sm px-5 py-2.5 rounded-xl hover:bg-yellow-300 transition-colors"
+              className="inline-flex items-center gap-2 border border-white/20 text-white/80 font-semibold text-sm px-6 py-3 rounded-xl hover:bg-white/5 hover:border-white/30 transition-all"
             >
               <MessageCircle className="h-4 w-4" />
               무료 특강 대기방 참여하기
@@ -120,13 +121,13 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ── Upcoming Live Banner ──────────────────────── */}
+      {/* ── Upcoming Live ─────────────────────────────── */}
       {scheduledLives && scheduledLives.length > 0 && (
         <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-gray-900">예정된 라이브</h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-lg font-bold text-white">예정된 라이브</h2>
             <Link href="/lives">
-              <span className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 cursor-pointer">
+              <span className="text-sm text-[#CC9965] hover:text-[#d4a570] font-medium flex items-center gap-1 cursor-pointer">
                 전체 보기 <ArrowRight className="h-3.5 w-3.5" />
               </span>
             </Link>
@@ -136,15 +137,15 @@ export default function Home() {
               <div
                 key={live.id}
                 onClick={() => navigate("/lives")}
-                className="bg-blue-50 border border-blue-100 rounded-2xl p-5 cursor-pointer hover:bg-blue-100/60 transition-colors"
+                className={`${glassCardHover} p-6 cursor-pointer`}
               >
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
-                  <span className="text-xs font-bold text-blue-600 uppercase tracking-wide">UPCOMING</span>
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="h-2 w-2 rounded-full bg-[#CC9965] animate-pulse" />
+                  <span className="text-xs font-bold text-[#CC9965] uppercase tracking-wide">UPCOMING</span>
                 </div>
-                <h3 className="font-bold text-gray-900 mb-1 line-clamp-1">{live.title}</h3>
-                <p className="text-sm text-gray-500 line-clamp-1 mb-2">{live.description}</p>
-                <span className="text-xs text-blue-600 font-medium">{formatDate(live.scheduledAt)}</span>
+                <h3 className="font-bold text-white mb-1 line-clamp-1">{live.title}</h3>
+                <p className="text-sm text-white/50 line-clamp-1 mb-3">{live.description}</p>
+                <span className="text-xs text-[#CC9965]/80 font-medium">{formatDate(live.scheduledAt)}</span>
               </div>
             ))}
           </div>
@@ -153,20 +154,16 @@ export default function Home() {
 
       {/* ── Free Resources ────────────────────────────── */}
       <div>
-        <h2 className="text-lg font-bold text-gray-900 mb-4">무료 자료 나눔</h2>
+        <h2 className="text-lg font-bold text-white mb-6">무료 자료 나눔</h2>
         <div className="grid gap-4 sm:grid-cols-3">
           {FREE_RESOURCES.map((res) => (
-            <a
-              key={res.title}
-              href={res.url}
-              className="group bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:shadow-md hover:border-gray-200 transition-all"
-            >
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 ${res.color}`}>
-                <res.icon className="h-5 w-5" />
+            <div key={res.title} className={`${glassCardHover} p-6 cursor-pointer group`}>
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-4 bg-white/5 border border-white/10`}>
+                <res.icon className={`h-5 w-5 ${res.color}`} />
               </div>
-              <h3 className="font-bold text-gray-900 text-sm mb-1 group-hover:text-blue-600 transition-colors">{res.title}</h3>
-              <p className="text-xs text-gray-500">{res.description}</p>
-            </a>
+              <h3 className="font-bold text-white text-sm mb-1 group-hover:text-[#CC9965] transition-colors">{res.title}</h3>
+              <p className="text-xs text-white/40">{res.description}</p>
+            </div>
           ))}
         </div>
       </div>
@@ -174,13 +171,13 @@ export default function Home() {
       {/* ── Recommended Replays ───────────────────────── */}
       {!isLoading && recommended.length > 0 && (
         <div>
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
-              <Star className="h-5 w-5 text-amber-500" />
-              <h2 className="text-lg font-bold text-gray-900">추천 다시보기</h2>
+              <Star className="h-5 w-5 text-[#CC9965]" />
+              <h2 className="text-lg font-bold text-white">추천 다시보기</h2>
             </div>
             <Link href="/replays">
-              <span className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 cursor-pointer">
+              <span className="text-sm text-[#CC9965] hover:text-[#d4a570] font-medium flex items-center gap-1 cursor-pointer">
                 전체 보기 <ArrowRight className="h-3.5 w-3.5" />
               </span>
             </Link>
@@ -192,23 +189,28 @@ export default function Home() {
                 <div
                   key={replay.id}
                   onClick={() => setModalReplay(replay)}
-                  className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-gray-200 transition-all overflow-hidden cursor-pointer"
+                  className={`${glassCardHover} overflow-hidden cursor-pointer group`}
                 >
-                  <div className="aspect-video bg-gray-100 overflow-hidden">
+                  <div className="aspect-video bg-black/30 overflow-hidden relative">
                     {thumb ? (
-                      <img src={thumb} alt={replay.title} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+                      <img src={thumb} alt={replay.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 opacity-80 group-hover:opacity-100" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
-                        <PlayCircle className="h-8 w-8 text-gray-300" />
+                        <PlayCircle className="h-8 w-8 text-white/20" />
                       </div>
                     )}
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="w-12 h-12 bg-[#CC9965]/90 rounded-full flex items-center justify-center shadow-lg">
+                        <PlayCircle className="h-6 w-6 text-black" />
+                      </div>
+                    </div>
                   </div>
                   <div className="p-4">
-                    <h3 className="font-bold text-gray-900 text-sm leading-snug line-clamp-2 mb-2">{replay.title}</h3>
+                    <h3 className="font-bold text-white text-sm leading-snug line-clamp-2 mb-2">{replay.title}</h3>
                     {((replay as any).tags as string[] | null)?.length ? (
                       <div className="flex flex-wrap gap-1">
                         {((replay as any).tags as string[]).slice(0, 3).map((tag) => (
-                          <span key={tag} className="text-[11px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">{tag}</span>
+                          <span key={tag} className="text-[11px] bg-white/5 text-white/40 px-2 py-0.5 rounded-full border border-white/5">{tag}</span>
                         ))}
                       </div>
                     ) : null}
@@ -226,15 +228,15 @@ export default function Home() {
         if (items.length === 0) return null;
         return (
           <div key={section.tag}>
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${section.color}`}>
-                  <section.icon className="h-4 w-4" />
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center bg-white/5 border border-white/10`}>
+                  <section.icon className={`h-4 w-4 ${section.color}`} />
                 </div>
-                <h2 className="text-lg font-bold text-gray-900">{section.label}</h2>
+                <h2 className="text-lg font-bold text-white">{section.label}</h2>
               </div>
               <Link href="/replays">
-                <span className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 cursor-pointer">
+                <span className="text-sm text-[#CC9965] hover:text-[#d4a570] font-medium flex items-center gap-1 cursor-pointer">
                   더보기 <ArrowRight className="h-3.5 w-3.5" />
                 </span>
               </Link>
@@ -246,19 +248,19 @@ export default function Home() {
                   <div
                     key={replay.id}
                     onClick={() => setModalReplay(replay)}
-                    className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-gray-200 transition-all overflow-hidden cursor-pointer"
+                    className={`${glassCardHover} overflow-hidden cursor-pointer group`}
                   >
-                    <div className="aspect-video bg-gray-100 overflow-hidden">
+                    <div className="aspect-video bg-black/30 overflow-hidden relative">
                       {thumb ? (
-                        <img src={thumb} alt={replay.title} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+                        <img src={thumb} alt={replay.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 opacity-80 group-hover:opacity-100" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                          <PlayCircle className="h-8 w-8 text-gray-300" />
+                          <PlayCircle className="h-8 w-8 text-white/20" />
                         </div>
                       )}
                     </div>
                     <div className="p-4">
-                      <h3 className="font-bold text-gray-900 text-sm leading-snug line-clamp-2">{replay.title}</h3>
+                      <h3 className="font-bold text-white text-sm leading-snug line-clamp-2">{replay.title}</h3>
                     </div>
                   </div>
                 );
@@ -268,15 +270,15 @@ export default function Home() {
         );
       })}
 
-      {/* ── Loading State ─────────────────────────────── */}
+      {/* ── Loading ─────────────────────────────────────── */}
       {isLoading && (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-              <Skeleton className="aspect-video w-full" />
+            <div key={i} className={`${glassCard} overflow-hidden`}>
+              <Skeleton className="aspect-video w-full bg-white/5" />
               <div className="p-4 space-y-2">
-                <Skeleton className="h-4 w-3/4" />
-                <Skeleton className="h-3 w-1/2" />
+                <Skeleton className="h-4 w-3/4 bg-white/5" />
+                <Skeleton className="h-3 w-1/2 bg-white/5" />
               </div>
             </div>
           ))}

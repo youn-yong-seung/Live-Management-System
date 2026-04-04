@@ -135,22 +135,22 @@ export default function Lives() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       {/* Page Header */}
       <div className="pt-2">
-        <h1 className="text-2xl font-bold text-gray-900 mb-1">라이브 신청</h1>
-        <p className="text-gray-500 text-sm">예정된 라이브 일정을 확인하고 참가 신청하세요. 신청 시 카카오 알림톡이 발송됩니다.</p>
+        <h1 className="text-2xl font-bold text-white mb-1">라이브 신청</h1>
+        <p className="text-white/50 text-sm">예정된 라이브 일정을 확인하고 참가 신청하세요. 신청 시 카카오 알림톡이 발송됩니다.</p>
       </div>
 
       {isLoading ? (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3].map(i => (
-            <div key={i} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-              <Skeleton className="h-44 w-full" />
+            <div key={i} className="backdrop-blur-xl bg-white/[0.05] border border-white/[0.1] rounded-2xl overflow-hidden">
+              <Skeleton className="h-44 w-full bg-white/5" />
               <div className="p-5 space-y-3">
-                <Skeleton className="h-5 w-3/4" />
-                <Skeleton className="h-4 w-1/2" />
-                <Skeleton className="h-10 w-full rounded-xl" />
+                <Skeleton className="h-5 w-3/4 bg-white/5" />
+                <Skeleton className="h-4 w-1/2 bg-white/5" />
+                <Skeleton className="h-10 w-full rounded-xl bg-white/5" />
               </div>
             </div>
           ))}
@@ -158,32 +158,32 @@ export default function Lives() {
       ) : lives && lives.length > 0 ? (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {lives.map((live) => (
-            <div key={live.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-gray-200 transition-all duration-200 overflow-hidden flex flex-col">
+            <div key={live.id} className="backdrop-blur-xl bg-white/[0.05] border border-white/[0.1] rounded-2xl hover:bg-white/[0.08] hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(0,0,0,0.3)] transition-all duration-300 overflow-hidden flex flex-col">
               {live.thumbnailUrl ? (
-                <div className="h-44 w-full bg-gray-50 overflow-hidden">
+                <div className="h-44 w-full bg-black/30 overflow-hidden">
                   <img src={live.thumbnailUrl} alt={live.title} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
                 </div>
               ) : (
-                <div className="h-44 w-full bg-gray-50 flex items-center justify-center">
-                  <Video className="h-10 w-10 text-gray-200" />
+                <div className="h-44 w-full bg-black/20 flex items-center justify-center">
+                  <Video className="h-10 w-10 text-white/20" />
                 </div>
               )}
               <div className="p-5 flex flex-col flex-1">
-                <div className="flex items-center gap-1.5 text-xs text-blue-600 font-medium mb-2">
+                <div className="flex items-center gap-1.5 text-xs text-[#CC9965] font-medium mb-2">
                   <Calendar className="h-3.5 w-3.5" />
                   <span>{formatDate(live.scheduledAt)}</span>
                 </div>
-                <h3 className="font-bold text-gray-900 leading-snug line-clamp-2 mb-2">{live.title}</h3>
-                <p className="text-sm text-gray-500 line-clamp-3 flex-1 mb-4">{live.description || "설명이 없습니다."}</p>
+                <h3 className="font-bold text-white leading-snug line-clamp-2 mb-2">{live.title}</h3>
+                <p className="text-sm text-white/50 line-clamp-3 flex-1 mb-4">{live.description || "설명이 없습니다."}</p>
                 <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-1.5 text-xs text-gray-400">
+                  <div className="flex items-center gap-1.5 text-xs text-white/30">
                     <Users className="h-3.5 w-3.5" />
                     <span>신청자 {live.registrationCount}명</span>
                   </div>
-                  <span className="inline-block bg-blue-50 text-blue-600 text-xs font-semibold px-2.5 py-1 rounded-full">예정됨</span>
+                  <span className="inline-block bg-[#CC9965]/15 text-[#CC9965] text-xs font-semibold px-2.5 py-1 rounded-full border border-[#CC9965]/20">예정됨</span>
                 </div>
                 <Button
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl"
+                  className="w-full bg-[#CC9965] hover:bg-[#d4a570] text-black font-bold rounded-xl shadow-[0_4px_20px_rgba(204,153,101,0.2)]"
                   onClick={() => { setSelectedLiveId(live.id); setIsDialogOpen(true); }}
                   data-testid={`btn-register-${live.id}`}
                 >
@@ -194,12 +194,12 @@ export default function Lives() {
           ))}
         </div>
       ) : (
-        <div className="bg-gray-50 rounded-2xl border border-gray-100 py-20 text-center">
-          <div className="w-14 h-14 bg-white rounded-2xl border border-gray-100 flex items-center justify-center mx-auto mb-4">
-            <Calendar className="h-6 w-6 text-gray-300" />
+        <div className="backdrop-blur-xl bg-white/[0.05] border border-white/[0.1] rounded-2xl py-20 text-center">
+          <div className="w-14 h-14 bg-white/5 rounded-2xl border border-white/10 flex items-center justify-center mx-auto mb-4">
+            <Calendar className="h-6 w-6 text-white/20" />
           </div>
-          <p className="font-semibold text-gray-600 mb-1">예정된 라이브가 없습니다</p>
-          <p className="text-sm text-gray-400">새 라이브 일정이 등록되면 이 곳에 표시됩니다.</p>
+          <p className="font-semibold text-white/60 mb-1">예정된 라이브가 없습니다</p>
+          <p className="text-sm text-white/30">새 라이브 일정이 등록되면 이 곳에 표시됩니다.</p>
         </div>
       )}
 

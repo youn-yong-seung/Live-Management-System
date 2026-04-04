@@ -5,6 +5,9 @@ import { formatDate } from "@/lib/date-utils";
 import { ReplayModal } from "@/components/replay-modal";
 import { PlaySquare, Calendar, Users, PlayCircle } from "lucide-react";
 
+const glassCard = "backdrop-blur-xl bg-white/[0.05] border border-white/[0.1] rounded-2xl";
+const glassCardHover = `${glassCard} hover:bg-white/[0.08] hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(0,0,0,0.3)] transition-all duration-300`;
+
 function extractYoutubeId(url: string) {
   const m = url.match(/(?:youtu\.be\/|v=|\/embed\/|\/live\/)([^#&?]{11})/);
   return m ? m[1] : null;
@@ -33,18 +36,20 @@ export default function Replays() {
     : replays;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       <div className="pt-2">
-        <h1 className="text-2xl font-bold text-gray-900 mb-1">다시보기</h1>
-        <p className="text-gray-500 text-sm">종료된 라이브를 언제든지 다시 시청하세요.</p>
+        <h1 className="text-2xl font-bold text-white mb-1">다시보기</h1>
+        <p className="text-white/50 text-sm">종료된 라이브를 언제든지 다시 시청하세요.</p>
       </div>
 
       {!isLoading && allCategories.length > 0 && (
         <div className="flex flex-wrap gap-2">
           <button
             onClick={() => setSelectedCategory(null)}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-              selectedCategory === null ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+              selectedCategory === null
+                ? "bg-[#CC9965] text-black"
+                : "bg-white/5 text-white/60 border border-white/10 hover:bg-white/10"
             }`}
           >
             전체
@@ -53,8 +58,10 @@ export default function Replays() {
             <button
               key={cat}
               onClick={() => setSelectedCategory(selectedCategory === cat ? null : cat)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                selectedCategory === cat ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                selectedCategory === cat
+                  ? "bg-[#CC9965] text-black"
+                  : "bg-white/5 text-white/60 border border-white/10 hover:bg-white/10"
               }`}
             >
               {cat}
@@ -66,11 +73,11 @@ export default function Replays() {
       {isLoading ? (
         <div className="grid gap-6 sm:grid-cols-2">
           {[1, 2, 3, 4].map(i => (
-            <div key={i} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-              <Skeleton className="aspect-video w-full" />
+            <div key={i} className={`${glassCard} overflow-hidden`}>
+              <Skeleton className="aspect-video w-full bg-white/5" />
               <div className="p-5 space-y-3">
-                <Skeleton className="h-5 w-3/4" />
-                <Skeleton className="h-4 w-1/2" />
+                <Skeleton className="h-5 w-3/4 bg-white/5" />
+                <Skeleton className="h-4 w-1/2 bg-white/5" />
               </div>
             </div>
           ))}
@@ -82,25 +89,25 @@ export default function Replays() {
             return (
               <div
                 key={replay.id}
-                className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-gray-200 transition-all duration-200 overflow-hidden flex flex-col cursor-pointer group"
+                className={`${glassCardHover} overflow-hidden flex flex-col cursor-pointer group`}
                 onClick={() => setModalReplay(replay)}
               >
-                <div className="w-full aspect-video bg-gray-100 overflow-hidden relative">
+                <div className="w-full aspect-video bg-black/30 overflow-hidden relative">
                   {thumb ? (
-                    <img src={thumb} alt={replay.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    <img src={thumb} alt={replay.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 opacity-80 group-hover:opacity-100" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                      <PlaySquare className="h-10 w-10 text-gray-200" />
+                      <PlaySquare className="h-10 w-10 text-white/20" />
                     </div>
                   )}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                    <div className="w-14 h-14 bg-white/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">
-                      <PlayCircle className="h-8 w-8 text-blue-600 ml-0.5" />
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="w-14 h-14 bg-[#CC9965]/90 rounded-full flex items-center justify-center shadow-lg">
+                      <PlayCircle className="h-8 w-8 text-black" />
                     </div>
                   </div>
                 </div>
                 <div className="p-5 flex flex-col flex-1">
-                  <div className="flex items-center justify-between text-xs text-gray-400 mb-2">
+                  <div className="flex items-center justify-between text-xs text-white/30 mb-2">
                     <span className="flex items-center gap-1.5">
                       <Calendar className="h-3.5 w-3.5" />
                       {formatDate(replay.scheduledAt)}
@@ -110,33 +117,33 @@ export default function Replays() {
                       {replay.registrationCount}명 참석
                     </span>
                   </div>
-                  <h3 className="font-bold text-gray-900 leading-snug line-clamp-1 mb-2">{replay.title}</h3>
+                  <h3 className="font-bold text-white leading-snug line-clamp-1 mb-2">{replay.title}</h3>
                   {((replay as any).tags as string[] | null)?.length ? (
                     <div className="flex flex-wrap gap-1.5 mb-3">
                       {((replay as any).tags as string[]).map((tag) => (
                         <span
                           key={tag}
                           onClick={(e) => { e.stopPropagation(); setSelectedCategory(selectedCategory === tag ? null : tag); }}
-                          className="inline-block bg-gray-100 text-gray-600 text-xs font-medium px-2.5 py-1 rounded-full cursor-pointer hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                          className="inline-block bg-white/5 text-white/50 text-xs font-medium px-2.5 py-1 rounded-full border border-white/5 cursor-pointer hover:bg-[#CC9965]/10 hover:text-[#CC9965] hover:border-[#CC9965]/20 transition-all"
                         >
                           {tag}
                         </span>
                       ))}
                     </div>
                   ) : null}
-                  <p className="text-sm text-gray-500 line-clamp-2 flex-1">{replay.description || "설명이 없습니다."}</p>
+                  <p className="text-sm text-white/40 line-clamp-2 flex-1">{replay.description || "설명이 없습니다."}</p>
                 </div>
               </div>
             );
           })}
         </div>
       ) : (
-        <div className="bg-gray-50 rounded-2xl border border-gray-100 py-20 text-center">
-          <div className="w-14 h-14 bg-white rounded-2xl border border-gray-100 flex items-center justify-center mx-auto mb-4">
-            <PlaySquare className="h-6 w-6 text-gray-300" />
+        <div className={`${glassCard} py-20 text-center`}>
+          <div className="w-14 h-14 bg-white/5 rounded-2xl border border-white/10 flex items-center justify-center mx-auto mb-4">
+            <PlaySquare className="h-6 w-6 text-white/20" />
           </div>
-          <p className="font-semibold text-gray-600 mb-1">다시보기 영상이 없습니다</p>
-          <p className="text-sm text-gray-400">아직 종료된 라이브 스트리밍이 없습니다.</p>
+          <p className="font-semibold text-white/60 mb-1">다시보기 영상이 없습니다</p>
+          <p className="text-sm text-white/30">아직 종료된 라이브 스트리밍이 없습니다.</p>
         </div>
       )}
 
