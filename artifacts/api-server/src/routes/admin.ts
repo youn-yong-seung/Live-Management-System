@@ -1,4 +1,5 @@
-import { Router, type IRouter, type Request, type Response } from "express";
+import { Router, type IRouter, type Request, type Response, type NextFunction } from "express";
+import { randomUUID } from "crypto";
 import bcrypt from "bcryptjs";
 import { db } from "@workspace/db";
 import { adminConfigTable, liveYoutubeStatsTable, livesTable } from "@workspace/db";
@@ -8,6 +9,28 @@ import { logger } from "../lib/logger";
 const router: IRouter = Router();
 
 const DEFAULT_PASSWORD = "admin1234";
+
+/* ── In-memory session store ────────────────────────── */
+// Maps token → expiry (ms). Resets on server restart — acceptable for this single-admin use case.
+const SESSION_TTL_MS = 8 * 60 * 60 * 1000; // 8 hours
+const adminSessions = new Map<string, number>();
+
+/* ── Middleware: require valid admin token ───────────── */
+
+export function requireAdminAuth(req: Request, res: Response, next: NextFunction): void {
+  const token = req.headers["x-admin-token"] as string | undefined;
+  if (!token) {
+    res.status(401).json({ error: "인증이 필요합니다." });
+    return;
+  }
+  const expiry = adminSessions.get(token);
+  if (!expiry || expiry < Date.now()) {
+    adminSessions.delete(token);
+    res.status(401).json({ error: "세션이 만료되었습니다. 다시 로그인하세요." });
+    return;
+  }
+  next();
+}
 
 /* ── Seed initial admin config on startup ───────────── */
 
@@ -37,16 +60,27 @@ router.post("/admin/login", async (req: Request, res: Response) => {
     const valid = await bcrypt.compare(password, config.passwordHash);
     if (!valid) return res.status(401).json({ error: "비밀번호가 틀렸습니다." });
 
-    return res.json({ success: true });
+    const token = randomUUID();
+    adminSessions.set(token, Date.now() + SESSION_TTL_MS);
+
+    return res.json({ success: true, token });
   } catch (err) {
     logger.error({ err }, "POST /admin/login failed");
     return res.status(500).json({ error: "Internal server error" });
   }
 });
 
-/* ── PUT /admin/password ────────────────────────────── */
+/* ── POST /admin/logout ─────────────────────────────── */
 
-router.put("/admin/password", async (req: Request, res: Response) => {
+router.post("/admin/logout", (req: Request, res: Response) => {
+  const token = req.headers["x-admin-token"] as string | undefined;
+  if (token) adminSessions.delete(token);
+  return res.json({ success: true });
+});
+
+/* ── PUT /admin/password (protected) ───────────────── */
+
+router.put("/admin/password", requireAdminAuth, async (req: Request, res: Response) => {
   try {
     const { currentPassword, newPassword } = req.body as {
       currentPassword?: string; newPassword?: string;
@@ -76,9 +110,9 @@ router.put("/admin/password", async (req: Request, res: Response) => {
   }
 });
 
-/* ── GET /lives/:id/youtube-stats ───────────────────── */
+/* ── GET /lives/:id/youtube-stats (protected) ───────── */
 
-router.get("/lives/:id/youtube-stats", async (req: Request, res: Response) => {
+router.get("/lives/:id/youtube-stats", requireAdminAuth, async (req: Request, res: Response) => {
   try {
     const liveId = parseInt(String(req.params.id), 10);
     if (isNaN(liveId)) return res.status(400).json({ error: "Invalid id" });
@@ -99,9 +133,9 @@ router.get("/lives/:id/youtube-stats", async (req: Request, res: Response) => {
   }
 });
 
-/* ── PUT /lives/:id/youtube-stats ───────────────────── */
+/* ── PUT /lives/:id/youtube-stats (protected) ───────── */
 
-router.put("/lives/:id/youtube-stats", async (req: Request, res: Response) => {
+router.put("/lives/:id/youtube-stats", requireAdminAuth, async (req: Request, res: Response) => {
   try {
     const liveId = parseInt(String(req.params.id), 10);
     if (isNaN(liveId)) return res.status(400).json({ error: "Invalid id" });
@@ -134,9 +168,9 @@ router.put("/lives/:id/youtube-stats", async (req: Request, res: Response) => {
   }
 });
 
-/* ── GET /lives/youtube-stats/all ───────────────────── */
+/* ── GET /youtube-stats/all (protected) ─────────────── */
 
-router.get("/youtube-stats/all", async (_req: Request, res: Response) => {
+router.get("/youtube-stats/all", requireAdminAuth, async (_req: Request, res: Response) => {
   try {
     const rows = await db
       .select({

@@ -106,9 +106,17 @@ interface YoutubeStats {
 
 /* ── API helper ────────────────────────────────────── */
 
+function getAdminToken(): string {
+  try { return sessionStorage.getItem("crm_admin_token") ?? ""; } catch { return ""; }
+}
+
 async function apiFetch<T = unknown>(path: string, options?: RequestInit): Promise<T> {
+  const token = getAdminToken();
   const res = await fetch(`/api${path}`, {
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { "x-admin-token": token } : {}),
+    },
     ...options,
   });
   if (!res.ok) {
@@ -258,8 +266,12 @@ export default function Admin() {
     e.preventDefault();
     setIsLoggingIn(true);
     try {
-      await apiFetch("/admin/login", { method: "POST", body: JSON.stringify({ password: loginPwd }) });
+      const result = await apiFetch<{ token: string }>("/admin/login", {
+        method: "POST",
+        body: JSON.stringify({ password: loginPwd }),
+      });
       sessionStorage.setItem("crm_admin_auth", "1");
+      sessionStorage.setItem("crm_admin_token", result.token);
       setIsAuthenticated(true);
       setLoginPwd("");
     } catch (err) {
@@ -572,7 +584,7 @@ export default function Admin() {
               로그인
             </Button>
           </form>
-          <p className="text-xs text-gray-300 text-center mt-6">초기 비밀번호: admin1234</p>
+          <p className="text-xs text-gray-300 text-center mt-6">관리자만 접근할 수 있습니다.</p>
         </div>
       </div>
     );
@@ -590,7 +602,11 @@ export default function Admin() {
           variant="ghost"
           size="sm"
           className="text-gray-400 hover:text-red-500 rounded-xl"
-          onClick={() => { sessionStorage.removeItem("crm_admin_auth"); setIsAuthenticated(false); }}
+          onClick={() => {
+            sessionStorage.removeItem("crm_admin_auth");
+            sessionStorage.removeItem("crm_admin_token");
+            setIsAuthenticated(false);
+          }}
         >
           <Lock className="h-4 w-4 mr-1" />로그아웃
         </Button>
