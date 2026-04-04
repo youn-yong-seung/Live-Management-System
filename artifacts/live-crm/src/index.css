@@ -164,27 +164,17 @@
   }
 }
 
-/* Glass card with metallic top border */
-.glass-card {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid transparent;
-  border-image: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.12) 0%,
-    rgba(255, 255, 255, 0.04) 40%,
-    rgba(255, 255, 255, 0.02) 100%
-  ) 1;
-  border-radius: 1rem;
-  /* border-image breaks border-radius, so use outline trick */
-}
+/* ── Tinted Glassmorphism ─────────────────────────────── */
 
-/* Workaround: use pseudo-element for gradient border + rounded corners */
+/* Green-tinted glass (default) */
 .glass-card {
   position: relative;
-  border: none;
-  border-radius: 1rem;
+  background: rgba(0, 80, 81, 0.2);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(0, 80, 81, 0.3);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
   overflow: hidden;
 }
 
@@ -196,29 +186,84 @@
   padding: 1px;
   background: linear-gradient(
     180deg,
-    rgba(255, 255, 255, 0.12) 0%,
-    rgba(255, 255, 255, 0.04) 40%,
-    rgba(255, 255, 255, 0.01) 100%
+    rgba(0, 120, 121, 0.4) 0%,
+    rgba(0, 80, 81, 0.15) 50%,
+    transparent 100%
   );
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+.glass-card:hover {
+  background: rgba(0, 80, 81, 0.28);
+  border-color: rgba(0, 100, 101, 0.4);
 }
 
 .glass-card:hover::before {
   background: linear-gradient(
     180deg,
-    rgba(204, 153, 101, 0.25) 0%,
-    rgba(255, 255, 255, 0.06) 40%,
-    rgba(255, 255, 255, 0.02) 100%
+    rgba(204, 153, 101, 0.5) 0%,
+    rgba(204, 153, 101, 0.1) 40%,
+    transparent 100%
   );
 }
 
+/* Gold-tinted glass (accent — for LIVE / featured) */
+.glass-card-gold {
+  position: relative;
+  background: rgba(204, 153, 101, 0.15);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(204, 153, 101, 0.4);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.glass-card-gold::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    180deg,
+    rgba(204, 153, 101, 0.5) 0%,
+    rgba(204, 153, 101, 0.15) 50%,
+    transparent 100%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+.glass-card-gold:hover {
+  background: rgba(204, 153, 101, 0.22);
+  border-color: rgba(204, 153, 101, 0.5);
+  box-shadow: 0 0 20px rgba(204, 153, 101, 0.2), 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+}
+
+.glass-card-gold:hover::before {
+  background: linear-gradient(
+    180deg,
+    rgba(204, 153, 101, 0.7) 0%,
+    rgba(204, 153, 101, 0.2) 50%,
+    transparent 100%
+  );
+}
+
+/* Gold glow for buttons */
 .gold-glow {
   box-shadow: 0 0 15px rgba(204, 153, 101, 0.3);
+  transition: box-shadow 0.3s ease;
 }
 
 .gold-glow:hover {
-  box-shadow: 0 0 25px rgba(204, 153, 101, 0.45);
+  box-shadow: 0 0 25px rgba(204, 153, 101, 0.5);
 }

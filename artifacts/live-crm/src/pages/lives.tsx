@@ -180,7 +180,7 @@ export default function Lives() {
                     <Users className="h-3.5 w-3.5" />
                     <span>신청자 {live.registrationCount}명</span>
                   </div>
-                  <span className="inline-block bg-[#CC9965]/15 text-[#CC9965] text-xs font-semibold px-2.5 py-1 rounded-full border border-[#CC9965]/20">예정됨</span>
+                  <span className="inline-block bg-[#CC9965]/15 text-[#CC9965] text-xs font-semibold px-2.5 py-1 rounded-full border border-[#CC9965]/30">예정됨</span>
                 </div>
                 <Button
                   className="w-full bg-[#CC9965] hover:bg-[#d4a570] text-black font-bold rounded-xl gold-glow"

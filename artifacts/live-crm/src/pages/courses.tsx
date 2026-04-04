@@ -51,7 +51,7 @@ export default function Courses() {
       </div>
 
       {/* Banner */}
-      <div className={`glass-card p-6 sm:p-8 border-[#CC9965]/20`}>
+      <div className="glass-card-gold p-6 sm:p-8">
         <div className="flex items-start gap-4">
           <div className="w-12 h-12 bg-[#CC9965]/15 rounded-xl flex items-center justify-center flex-shrink-0">
             <GraduationCap className="h-6 w-6 text-[#CC9965]" />

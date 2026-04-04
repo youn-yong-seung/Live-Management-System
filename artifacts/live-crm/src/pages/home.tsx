@@ -39,10 +39,10 @@ const FREE_RESOURCES = [
 /* ── Category config ────────────────────────────────── */
 
 const CATEGORY_SECTIONS = [
-  { label: "입문자 추천", tag: "입문", icon: Sparkles, color: "text-emerald-400" },
-  { label: "자동화", tag: "자동화", icon: Zap, color: "text-amber-400" },
-  { label: "노션", tag: "노션", icon: BookOpen, color: "text-purple-400" },
-  { label: "클로드코드", tag: "클로드코드", icon: TrendingUp, color: "text-sky-400" },
+  { label: "입문자 추천", tag: "입문", icon: Sparkles, color: "text-[#CC9965]" },
+  { label: "자동화", tag: "자동화", icon: Zap, color: "text-[#CC9965]" },
+  { label: "노션", tag: "노션", icon: BookOpen, color: "text-[#CC9965]" },
+  { label: "클로드코드", tag: "클로드코드", icon: TrendingUp, color: "text-[#CC9965]" },
 ];
 
 /* ── Helpers ─────────────────────────────────────────── */
@@ -87,7 +87,7 @@ export default function Home() {
     <div className="space-y-16">
 
       {/* ── Hero Section ──────────────────────────────── */}
-      <div className={`relative overflow-hidden rounded-3xl p-8 sm:p-12 ${gc} border-white/[0.08]`}>
+      <div className="relative overflow-hidden rounded-3xl p-8 sm:p-12 glass-card-gold">
         <div className="absolute inset-0 bg-gradient-to-br from-[#0a1a1a] via-[#071515] to-[#050A0A] opacity-80" />
         <div className="absolute top-0 right-0 w-96 h-96 bg-[#CC9965]/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3" />
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#005051]/50 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/4" />
@@ -140,7 +140,7 @@ export default function Home() {
               <div
                 key={live.id}
                 onClick={() => navigate("/lives")}
-                className={`${gcHover} p-6 cursor-pointer`}
+                className="glass-card-gold hover:-translate-y-1 transition-all duration-300 p-6 cursor-pointer"
               >
                 <div className="flex items-center gap-2 mb-3">
                   <span className="h-2 w-2 rounded-full bg-[#CC9965] animate-pulse" />
