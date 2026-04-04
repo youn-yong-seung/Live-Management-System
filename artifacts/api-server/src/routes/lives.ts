@@ -43,6 +43,7 @@ router.get("/lives", async (req: Request, res: Response) => {
         scheduledAt: livesTable.scheduledAt,
         status: livesTable.status,
         thumbnailUrl: livesTable.thumbnailUrl,
+        tags: livesTable.tags,
         createdAt: livesTable.createdAt,
         registrationCount: count(registrationsTable.id),
       })
@@ -62,6 +63,7 @@ router.get("/lives", async (req: Request, res: Response) => {
 router.post("/lives", requireAdminAuth, async (req: Request, res: Response) => {
   try {
     const body = CreateLiveBody.parse(req.body);
+    const rawBody = req.body as Record<string, unknown>;
     const insertData = insertLiveSchema.parse({
       title: body.title,
       description: body.description ?? null,
@@ -69,6 +71,7 @@ router.post("/lives", requireAdminAuth, async (req: Request, res: Response) => {
       scheduledAt: body.scheduledAt ? new Date(body.scheduledAt) : null,
       status: body.status,
       thumbnailUrl: body.thumbnailUrl ?? null,
+      tags: Array.isArray(rawBody.tags) ? rawBody.tags : null,
     });
 
     const [live] = await db.insert(livesTable).values(insertData).returning();
@@ -82,6 +85,7 @@ router.post("/lives", requireAdminAuth, async (req: Request, res: Response) => {
         scheduledAt: livesTable.scheduledAt,
         status: livesTable.status,
         thumbnailUrl: livesTable.thumbnailUrl,
+        tags: livesTable.tags,
         createdAt: livesTable.createdAt,
         registrationCount: count(registrationsTable.id),
       })
@@ -110,6 +114,7 @@ router.get("/lives/:id", async (req: Request, res: Response) => {
         scheduledAt: livesTable.scheduledAt,
         status: livesTable.status,
         thumbnailUrl: livesTable.thumbnailUrl,
+        tags: livesTable.tags,
         createdAt: livesTable.createdAt,
         registrationCount: count(registrationsTable.id),
       })
@@ -142,6 +147,8 @@ router.put("/lives/:id", requireAdminAuth, async (req: Request, res: Response) =
     if (body.scheduledAt !== undefined) updateData.scheduledAt = body.scheduledAt ? new Date(body.scheduledAt) : null;
     if (body.status !== undefined) updateData.status = body.status;
     if (body.thumbnailUrl !== undefined) updateData.thumbnailUrl = body.thumbnailUrl ?? null;
+    const rawBody = req.body as Record<string, unknown>;
+    if (rawBody.tags !== undefined) updateData.tags = Array.isArray(rawBody.tags) ? rawBody.tags : null;
 
     const [updated] = await db.update(livesTable).set(updateData).where(eq(livesTable.id, id)).returning();
 
@@ -159,6 +166,7 @@ router.put("/lives/:id", requireAdminAuth, async (req: Request, res: Response) =
         scheduledAt: livesTable.scheduledAt,
         status: livesTable.status,
         thumbnailUrl: livesTable.thumbnailUrl,
+        tags: livesTable.tags,
         createdAt: livesTable.createdAt,
         registrationCount: count(registrationsTable.id),
       })

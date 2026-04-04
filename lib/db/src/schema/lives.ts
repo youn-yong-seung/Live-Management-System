@@ -24,6 +24,7 @@ export const livesTable = pgTable("lives", {
   scheduledAt: timestamp("scheduled_at"),
   status: liveStatusEnum("status").notNull().default("scheduled"),
   thumbnailUrl: text("thumbnail_url"),
+  tags: jsonb("tags").$type<string[]>(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
