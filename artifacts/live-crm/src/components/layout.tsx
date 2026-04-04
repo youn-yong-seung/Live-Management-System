@@ -26,7 +26,7 @@ export function Layout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Top Navigation — Glass Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-xl bg-[rgba(0,50,51,0.8)] border-b border-white/10">
+      <header className="sticky top-0 z-50 backdrop-blur-2xl bg-[rgba(5,10,10,0.85)] border-b border-white/[0.06]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5" data-testid="nav-home">
             <span className="text-xl font-black text-[#CC9965] tracking-tight">윤자동</span>
@@ -63,7 +63,7 @@ export function Layout({ children }: { children: ReactNode }) {
         </div>
 
         {mobileOpen && (
-          <div className="md:hidden border-t border-white/10 bg-[rgba(0,50,51,0.95)] backdrop-blur-xl">
+          <div className="md:hidden border-t border-white/[0.06] bg-[rgba(5,10,10,0.95)] backdrop-blur-2xl">
             <nav className="max-w-6xl mx-auto px-4 py-2 flex flex-col gap-1">
               {navItems.map((item) => {
                 const Icon = navIcons[item.href];
@@ -94,7 +94,7 @@ export function Layout({ children }: { children: ReactNode }) {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-white/10 py-8">
+      <footer className="border-t border-white/[0.06] py-8">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center text-sm text-white/30">
           © 2026 윤자동 클래스. All rights reserved.
         </div>

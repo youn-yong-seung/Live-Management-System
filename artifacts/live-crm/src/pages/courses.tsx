@@ -1,7 +1,6 @@
 import { ExternalLink, GraduationCap, Star } from "lucide-react";
 
-const glassCard = "backdrop-blur-xl bg-white/[0.05] border border-white/[0.1] rounded-2xl";
-const glassCardHover = `${glassCard} hover:bg-white/[0.08] hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(0,0,0,0.3)] transition-all duration-300`;
+const gcHover = "glass-card hover:bg-white/[0.06] hover:-translate-y-1 transition-all duration-300";
 
 const COURSES = [
   {
@@ -52,7 +51,7 @@ export default function Courses() {
       </div>
 
       {/* Banner */}
-      <div className={`${glassCard} p-6 sm:p-8 border-[#CC9965]/20`}>
+      <div className={`glass-card p-6 sm:p-8 border-[#CC9965]/20`}>
         <div className="flex items-start gap-4">
           <div className="w-12 h-12 bg-[#CC9965]/15 rounded-xl flex items-center justify-center flex-shrink-0">
             <GraduationCap className="h-6 w-6 text-[#CC9965]" />
@@ -74,7 +73,7 @@ export default function Courses() {
             rel="noopener noreferrer"
             className="block group"
           >
-            <div className={`${glassCardHover} overflow-hidden`}>
+            <div className={`${gcHover} overflow-hidden`}>
               <div className="p-6 sm:p-8">
                 <div className="flex items-center gap-2 mb-4">
                   <span className={`${course.badgeColor} text-white text-xs font-bold px-3 py-1 rounded-full`}>
@@ -116,7 +115,7 @@ export default function Courses() {
                     )}
                   </div>
 
-                  <div className="flex items-center gap-2 bg-[#CC9965] text-black px-5 py-2.5 rounded-xl font-bold text-sm group-hover:bg-[#d4a570] transition-colors shadow-[0_4px_20px_rgba(204,153,101,0.2)]">
+                  <div className="flex items-center gap-2 bg-[#CC9965] text-black px-5 py-2.5 rounded-xl font-bold text-sm group-hover:bg-[#d4a570] transition-colors gold-glow">
                     자세히 보기
                     <ExternalLink className="h-4 w-4" />
                   </div>

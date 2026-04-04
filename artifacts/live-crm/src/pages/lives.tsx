@@ -145,7 +145,7 @@ export default function Lives() {
       {isLoading ? (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3].map(i => (
-            <div key={i} className="backdrop-blur-xl bg-white/[0.05] border border-white/[0.1] rounded-2xl overflow-hidden">
+            <div key={i} className="glass-card overflow-hidden">
               <Skeleton className="h-44 w-full bg-white/5" />
               <div className="p-5 space-y-3">
                 <Skeleton className="h-5 w-3/4 bg-white/5" />
@@ -158,7 +158,7 @@ export default function Lives() {
       ) : lives && lives.length > 0 ? (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {lives.map((live) => (
-            <div key={live.id} className="backdrop-blur-xl bg-white/[0.05] border border-white/[0.1] rounded-2xl hover:bg-white/[0.08] hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(0,0,0,0.3)] transition-all duration-300 overflow-hidden flex flex-col">
+            <div key={live.id} className="glass-card hover:bg-white/[0.06] hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col">
               {live.thumbnailUrl ? (
                 <div className="h-44 w-full bg-black/30 overflow-hidden">
                   <img src={live.thumbnailUrl} alt={live.title} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
@@ -183,7 +183,7 @@ export default function Lives() {
                   <span className="inline-block bg-[#CC9965]/15 text-[#CC9965] text-xs font-semibold px-2.5 py-1 rounded-full border border-[#CC9965]/20">예정됨</span>
                 </div>
                 <Button
-                  className="w-full bg-[#CC9965] hover:bg-[#d4a570] text-black font-bold rounded-xl shadow-[0_4px_20px_rgba(204,153,101,0.2)]"
+                  className="w-full bg-[#CC9965] hover:bg-[#d4a570] text-black font-bold rounded-xl gold-glow"
                   onClick={() => { setSelectedLiveId(live.id); setIsDialogOpen(true); }}
                   data-testid={`btn-register-${live.id}`}
                 >
@@ -194,7 +194,7 @@ export default function Lives() {
           ))}
         </div>
       ) : (
-        <div className="backdrop-blur-xl bg-white/[0.05] border border-white/[0.1] rounded-2xl py-20 text-center">
+        <div className="glass-card py-20 text-center">
           <div className="w-14 h-14 bg-white/5 rounded-2xl border border-white/10 flex items-center justify-center mx-auto mb-4">
             <Calendar className="h-6 w-6 text-white/20" />
           </div>

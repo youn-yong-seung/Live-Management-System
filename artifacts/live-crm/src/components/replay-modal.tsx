@@ -102,7 +102,7 @@ export function ReplayModal({
 
   return (
     <Dialog open={!!replay} onOpenChange={(open) => { if (!open) onClose(); }}>
-      <DialogContent className="max-w-5xl w-[95vw] h-[90vh] p-0 bg-[#003a3b] border border-white/10 rounded-2xl overflow-hidden flex flex-col lg:flex-row">
+      <DialogContent className="max-w-5xl w-[95vw] h-[90vh] p-0 bg-[#080E0E] border border-white/[0.08] rounded-2xl overflow-hidden flex flex-col lg:flex-row">
         {replay && (
           <>
             {/* Left: Video */}

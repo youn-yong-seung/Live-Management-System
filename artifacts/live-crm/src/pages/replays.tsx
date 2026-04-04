@@ -5,8 +5,7 @@ import { formatDate } from "@/lib/date-utils";
 import { ReplayModal } from "@/components/replay-modal";
 import { PlaySquare, Calendar, Users, PlayCircle } from "lucide-react";
 
-const glassCard = "backdrop-blur-xl bg-white/[0.05] border border-white/[0.1] rounded-2xl";
-const glassCardHover = `${glassCard} hover:bg-white/[0.08] hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(0,0,0,0.3)] transition-all duration-300`;
+const gcHover = "glass-card hover:bg-white/[0.06] hover:-translate-y-1 transition-all duration-300";
 
 function extractYoutubeId(url: string) {
   const m = url.match(/(?:youtu\.be\/|v=|\/embed\/|\/live\/)([^#&?]{11})/);
@@ -73,7 +72,7 @@ export default function Replays() {
       {isLoading ? (
         <div className="grid gap-6 sm:grid-cols-2">
           {[1, 2, 3, 4].map(i => (
-            <div key={i} className={`${glassCard} overflow-hidden`}>
+            <div key={i} className={`glass-card overflow-hidden`}>
               <Skeleton className="aspect-video w-full bg-white/5" />
               <div className="p-5 space-y-3">
                 <Skeleton className="h-5 w-3/4 bg-white/5" />
@@ -89,7 +88,7 @@ export default function Replays() {
             return (
               <div
                 key={replay.id}
-                className={`${glassCardHover} overflow-hidden flex flex-col cursor-pointer group`}
+                className={`${gcHover} overflow-hidden flex flex-col cursor-pointer group`}
                 onClick={() => setModalReplay(replay)}
               >
                 <div className="w-full aspect-video bg-black/30 overflow-hidden relative">
@@ -138,7 +137,7 @@ export default function Replays() {
           })}
         </div>
       ) : (
-        <div className={`${glassCard} py-20 text-center`}>
+        <div className={`glass-card py-20 text-center`}>
           <div className="w-14 h-14 bg-white/5 rounded-2xl border border-white/10 flex items-center justify-center mx-auto mb-4">
             <PlaySquare className="h-6 w-6 text-white/20" />
           </div>

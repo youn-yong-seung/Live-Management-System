@@ -1,7 +1,6 @@
 import { ExternalLink, BookOpen, Download, GraduationCap, FileText, Crown } from "lucide-react";
 
-const glassCard = "backdrop-blur-xl bg-white/[0.05] border border-white/[0.1] rounded-2xl";
-const glassCardHover = `${glassCard} hover:bg-white/[0.08] hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(0,0,0,0.3)] transition-all duration-300`;
+const gcHover = "glass-card hover:bg-white/[0.06] hover:-translate-y-1 transition-all duration-300";
 
 interface Resource {
   title: string;
@@ -122,7 +121,7 @@ export default function Resources() {
                 href={item.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`${glassCardHover} p-5 group block`}
+                className={`${gcHover} p-5 group block`}
               >
                 <div className="flex items-start justify-between mb-3">
                   {item.badge && (

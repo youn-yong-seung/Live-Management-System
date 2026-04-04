@@ -59,8 +59,8 @@ function youtubeThumbnail(url: string) {
 
 /* ── Glass Card ──────────────────────────────────────── */
 
-const glassCard = "backdrop-blur-xl bg-white/[0.05] border border-white/[0.1] rounded-2xl";
-const glassCardHover = `${glassCard} hover:bg-white/[0.08] hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(0,0,0,0.3)] transition-all duration-300`;
+const gc = "glass-card";
+const gcHover = "glass-card hover:bg-white/[0.06] hover:-translate-y-1 transition-all duration-300";
 
 /* ── Component ──────────────────────────────────────── */
 
@@ -87,8 +87,8 @@ export default function Home() {
     <div className="space-y-16">
 
       {/* ── Hero Section ──────────────────────────────── */}
-      <div className={`relative overflow-hidden rounded-3xl p-8 sm:p-12 ${glassCard} border-white/[0.08]`}>
-        <div className="absolute inset-0 bg-gradient-to-br from-[#005051] via-[#004040] to-[#003030] opacity-60" />
+      <div className={`relative overflow-hidden rounded-3xl p-8 sm:p-12 ${gc} border-white/[0.08]`}>
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0a1a1a] via-[#071515] to-[#050A0A] opacity-80" />
         <div className="absolute top-0 right-0 w-96 h-96 bg-[#CC9965]/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3" />
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#005051]/50 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/4" />
 
@@ -106,7 +106,7 @@ export default function Home() {
           </p>
           <div className="flex flex-wrap gap-4">
             <Link href="/lives">
-              <span className="inline-flex items-center gap-2 bg-[#CC9965] text-black font-bold text-sm px-6 py-3 rounded-xl hover:bg-[#d4a570] transition-colors cursor-pointer shadow-[0_4px_20px_rgba(204,153,101,0.3)]">
+              <span className="inline-flex items-center gap-2 bg-[#CC9965] text-black font-bold text-sm px-6 py-3 rounded-xl hover:bg-[#d4a570] transition-all cursor-pointer gold-glow">
                 <Video className="h-4 w-4" />
                 라이브 신청하기
               </span>
@@ -140,7 +140,7 @@ export default function Home() {
               <div
                 key={live.id}
                 onClick={() => navigate("/lives")}
-                className={`${glassCardHover} p-6 cursor-pointer`}
+                className={`${gcHover} p-6 cursor-pointer`}
               >
                 <div className="flex items-center gap-2 mb-3">
                   <span className="h-2 w-2 rounded-full bg-[#CC9965] animate-pulse" />
@@ -169,7 +169,7 @@ export default function Home() {
           {FREE_RESOURCES.map((res) => {
             const isExternal = res.url.startsWith("http");
             const inner = (
-              <div className={`${glassCardHover} p-6 cursor-pointer group`}>
+              <div className={`${gcHover} p-6 cursor-pointer group`}>
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4 bg-white/5 border border-white/10">
                   <res.icon className={`h-5 w-5 ${res.color}`} />
                 </div>
@@ -207,7 +207,7 @@ export default function Home() {
                 <div
                   key={replay.id}
                   onClick={() => setModalReplay(replay)}
-                  className={`${glassCardHover} overflow-hidden cursor-pointer group`}
+                  className={`${gcHover} overflow-hidden cursor-pointer group`}
                 >
                   <div className="aspect-video bg-black/30 overflow-hidden relative">
                     {thumb ? (
@@ -266,7 +266,7 @@ export default function Home() {
                   <div
                     key={replay.id}
                     onClick={() => setModalReplay(replay)}
-                    className={`${glassCardHover} overflow-hidden cursor-pointer group`}
+                    className={`${gcHover} overflow-hidden cursor-pointer group`}
                   >
                     <div className="aspect-video bg-black/30 overflow-hidden relative">
                       {thumb ? (
@@ -292,7 +292,7 @@ export default function Home() {
       {isLoading && (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className={`${glassCard} overflow-hidden`}>
+            <div key={i} className={`${gc} overflow-hidden`}>
               <Skeleton className="aspect-video w-full bg-white/5" />
               <div className="p-4 space-y-2">
                 <Skeleton className="h-4 w-3/4 bg-white/5" />
