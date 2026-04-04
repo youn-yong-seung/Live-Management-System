@@ -89,8 +89,8 @@ export default function Lives() {
     if (!isDialogOpen || !selectedLiveId) { setCustomQuestions([]); return; }
     setIsLoadingQuestions(true);
     fetch(`/api/lives/${selectedLiveId}/custom-questions`)
-      .then((r) => r.json() as Promise<CustomQuestion[]>)
-      .then((qs) => setCustomQuestions(qs))
+      .then((r) => { if (!r.ok) throw new Error(); return r.json() as Promise<CustomQuestion[]>; })
+      .then((qs) => Array.isArray(qs) ? setCustomQuestions(qs) : setCustomQuestions([]))
       .catch(() => setCustomQuestions([]))
       .finally(() => setIsLoadingQuestions(false));
   }, [isDialogOpen, selectedLiveId]);

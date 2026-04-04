@@ -276,7 +276,7 @@ export default function Admin() {
 
   /* ── Existing hooks ────────────────────────────── */
   const { data: lives, isLoading: isLivesLoading, refetch: refetchLives } = useGetLives(
-    {}, { query: { queryKey: getGetLivesQueryKey() } }
+    undefined, { query: { queryKey: getGetLivesQueryKey() } }
   );
   const [registrations, setRegistrations] = useState<Array<{ id: number; name: string; phone: string; email: string | null; createdAt: string | null }>>([]);
   const [isRegistrationsLoading, setIsRegistrationsLoading] = useState(false);

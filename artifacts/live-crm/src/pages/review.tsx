@@ -132,7 +132,7 @@ export default function ReviewPage() {
   const [errors, setErrors] = useState<{ name?: string; rating?: string; content?: string }>({});
 
   useEffect(() => {
-    if (isNaN(liveId)) return;
+    if (isNaN(liveId)) { setIsLoadingLive(false); return; }
     setIsLoadingLive(true);
     apiFetch<LiveInfo>(`/lives/${liveId}`)
       .then((l) => setLive(l))
@@ -141,7 +141,7 @@ export default function ReviewPage() {
   }, [liveId]);
 
   const loadReviews = () => {
-    if (isNaN(liveId)) return;
+    if (isNaN(liveId)) { setIsLoadingReviews(false); return; }
     setIsLoadingReviews(true);
     apiFetch<Review[]>(`/lives/${liveId}/reviews`)
       .then((r) => setReviews(r))
