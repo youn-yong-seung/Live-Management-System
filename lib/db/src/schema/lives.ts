@@ -69,3 +69,21 @@ export const liveCustomQuestionsTable = pgTable("live_custom_questions", {
 });
 
 export type LiveCustomQuestion = typeof liveCustomQuestionsTable.$inferSelect;
+
+export const reviewsTable = pgTable("reviews", {
+  id: serial("id").primaryKey(),
+  liveId: integer("live_id")
+    .notNull()
+    .references(() => livesTable.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  rating: integer("rating").notNull(),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertReviewSchema = createInsertSchema(reviewsTable, {
+  rating: (s) => s.min(1).max(5),
+  content: (s) => s.min(1).max(2000),
+}).omit({ id: true, createdAt: true });
+export type InsertReview = z.infer<typeof insertReviewSchema>;
+export type Review = typeof reviewsTable.$inferSelect;

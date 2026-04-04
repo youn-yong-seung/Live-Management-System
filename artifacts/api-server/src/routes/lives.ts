@@ -4,8 +4,10 @@ import {
   livesTable,
   registrationsTable,
   liveCustomQuestionsTable,
+  reviewsTable,
   insertLiveSchema,
   insertRegistrationSchema,
+  insertReviewSchema,
 } from "@workspace/db";
 import { eq, count, sql, and, gte, lte, asc } from "drizzle-orm";
 import {
@@ -432,6 +434,55 @@ router.post("/lives/:liveId/registrations", async (req: Request, res: Response) 
   } catch (error) {
     req.log.error({ error }, "Error creating registration");
     res.status(400).json({ error: "Bad request" });
+  }
+});
+
+/* ── GET /lives/:liveId/reviews (public) ──────────── */
+
+router.get("/lives/:liveId/reviews", async (req: Request, res: Response) => {
+  try {
+    const liveId = parseInt(String(req.params.liveId), 10);
+    if (isNaN(liveId)) return res.status(400).json({ error: "Invalid liveId" });
+
+    const [live] = await db.select({ id: livesTable.id }).from(livesTable).where(eq(livesTable.id, liveId));
+    if (!live) return res.status(404).json({ error: "Live not found" });
+
+    const reviews = await db
+      .select()
+      .from(reviewsTable)
+      .where(eq(reviewsTable.liveId, liveId))
+      .orderBy(sql`${reviewsTable.createdAt} DESC`);
+
+    return res.json(reviews);
+  } catch (error) {
+    req.log.error({ error }, "Error fetching reviews");
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+/* ── POST /lives/:liveId/reviews (public) ─────────── */
+
+router.post("/lives/:liveId/reviews", async (req: Request, res: Response) => {
+  try {
+    const liveId = parseInt(String(req.params.liveId), 10);
+    if (isNaN(liveId)) return res.status(400).json({ error: "Invalid liveId" });
+
+    const [live] = await db.select({ id: livesTable.id, status: livesTable.status }).from(livesTable).where(eq(livesTable.id, liveId));
+    if (!live) return res.status(404).json({ error: "Live not found" });
+    if (live.status !== "ended") return res.status(400).json({ error: "종료된 라이브에만 후기를 남길 수 있습니다." });
+
+    const insertData = insertReviewSchema.parse({
+      liveId,
+      name: req.body.name,
+      rating: Number(req.body.rating),
+      content: req.body.content,
+    });
+
+    const [review] = await db.insert(reviewsTable).values(insertData).returning();
+    return res.status(201).json(review);
+  } catch (error) {
+    req.log.error({ error }, "Error creating review");
+    return res.status(400).json({ error: "Bad request" });
   }
 });
 

@@ -1,9 +1,11 @@
 import { useGetLives, getGetLivesQueryKey } from "@workspace/api-client-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate } from "@/lib/date-utils";
-import { PlaySquare, Calendar, Users, ExternalLink } from "lucide-react";
+import { PlaySquare, Calendar, Users, ExternalLink, MessageSquare } from "lucide-react";
+import { useLocation } from "wouter";
 
 export default function Replays() {
+  const [, navigate] = useLocation();
   const { data: replays, isLoading } = useGetLives(
     { status: "ended" },
     { query: { queryKey: getGetLivesQueryKey({ status: "ended" }) } }
@@ -96,6 +98,14 @@ export default function Replays() {
                       위 영상 재생
                     </span>
                   )}
+                  <button
+                    onClick={() => navigate(`/lives/${replay.id}/review`)}
+                    className="w-full flex items-center justify-center gap-2 border border-gray-200 text-gray-600 hover:bg-purple-50 hover:border-purple-200 hover:text-purple-600 rounded-xl py-2.5 text-sm font-medium transition-colors"
+                    data-testid={`btn-review-${replay.id}`}
+                  >
+                    <MessageSquare className="h-4 w-4" />
+                    후기 남기기
+                  </button>
                 </div>
               </div>
             );
