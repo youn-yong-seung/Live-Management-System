@@ -14,22 +14,25 @@ import {
 
 const FREE_RESOURCES = [
   {
-    title: "클로드코드 시작 가이드",
-    description: "설치부터 첫 자동화까지 한 번에",
+    title: "노션 템플릿 & 전자책",
+    description: "할 일 관리, 가계부 등 무료 템플릿",
     icon: BookOpen,
-    color: "text-[#CC9965]",
+    color: "text-purple-400",
+    url: "/resources",
   },
   {
-    title: "노션 업무 템플릿 모음",
-    description: "바로 복제해서 쓰는 실전 템플릿",
+    title: "노션 왕초보 영상 강의",
+    description: "처음 시작하는 분들을 위한 강의",
     icon: Download,
-    color: "text-[#CC9965]",
+    color: "text-sky-400",
+    url: "https://www.yunjadong.com/shop_view/?idx=159",
   },
   {
-    title: "자동화 아이디어 30선",
-    description: "지금 바로 적용 가능한 자동화 리스트",
+    title: "노션 무료 전자책",
+    description: "기초부터 차근차근 알려주는 전자책",
     icon: Zap,
-    color: "text-[#CC9965]",
+    color: "text-emerald-400",
+    url: "https://www.notion.so/yunjadong/2b8ec2501aa180eeac9ee3e98904f630?v=2b8ec2501aa180d4b80b000cef37f646",
   },
 ];
 
@@ -154,17 +157,32 @@ export default function Home() {
 
       {/* ── Free Resources ────────────────────────────── */}
       <div>
-        <h2 className="text-lg font-bold text-white mb-6">무료 자료 나눔</h2>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-lg font-bold text-white">무료 자료 나눔</h2>
+          <Link href="/resources">
+            <span className="text-sm text-[#CC9965] hover:text-[#d4a570] font-medium flex items-center gap-1 cursor-pointer">
+              전체 보기 <ArrowRight className="h-3.5 w-3.5" />
+            </span>
+          </Link>
+        </div>
         <div className="grid gap-4 sm:grid-cols-3">
-          {FREE_RESOURCES.map((res) => (
-            <div key={res.title} className={`${glassCardHover} p-6 cursor-pointer group`}>
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-4 bg-white/5 border border-white/10`}>
-                <res.icon className={`h-5 w-5 ${res.color}`} />
+          {FREE_RESOURCES.map((res) => {
+            const isExternal = res.url.startsWith("http");
+            const inner = (
+              <div className={`${glassCardHover} p-6 cursor-pointer group`}>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4 bg-white/5 border border-white/10">
+                  <res.icon className={`h-5 w-5 ${res.color}`} />
+                </div>
+                <h3 className="font-bold text-white text-sm mb-1 group-hover:text-[#CC9965] transition-colors">{res.title}</h3>
+                <p className="text-xs text-white/40">{res.description}</p>
               </div>
-              <h3 className="font-bold text-white text-sm mb-1 group-hover:text-[#CC9965] transition-colors">{res.title}</h3>
-              <p className="text-xs text-white/40">{res.description}</p>
-            </div>
-          ))}
+            );
+            return isExternal ? (
+              <a key={res.title} href={res.url} target="_blank" rel="noopener noreferrer">{inner}</a>
+            ) : (
+              <Link key={res.title} href={res.url}>{inner}</Link>
+            );
+          })}
         </div>
       </div>
 
