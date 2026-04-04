@@ -69,6 +69,12 @@ export const adminConfigTable = pgTable("admin_config", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+export const adminSessionsTable = pgTable("admin_sessions", {
+  token: text("token").primaryKey(),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 export const liveYoutubeStatsTable = pgTable("live_youtube_stats", {
   id: serial("id").primaryKey(),
   liveId: integer("live_id")
@@ -88,4 +94,5 @@ export type NotificationRule = typeof notificationRulesTable.$inferSelect;
 export type NotificationLog = typeof notificationLogTable.$inferSelect;
 export type RegistrationTrigger = typeof registrationTriggersTable.$inferSelect;
 export type AdminConfig = typeof adminConfigTable.$inferSelect;
+export type AdminSession = typeof adminSessionsTable.$inferSelect;
 export type LiveYoutubeStats = typeof liveYoutubeStatsTable.$inferSelect;

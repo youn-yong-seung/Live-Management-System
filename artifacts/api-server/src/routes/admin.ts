@@ -85,7 +85,7 @@ router.post("/admin/login", async (req: Request, res: Response) => {
     if (!valid) return res.status(401).json({ error: "비밀번호가 틀렸습니다." });
 
     resetLoginAttempts(ip);
-    const token = createAdminSession();
+    const token = await createAdminSession();
     return res.json({ success: true, token });
   } catch (err) {
     logger.error({ err }, "POST /admin/login failed");
@@ -101,9 +101,9 @@ router.get("/admin/session", requireAdminAuth, (_req: Request, res: Response) =>
 
 /* ── POST /admin/logout ─────────────────────────────── */
 
-router.post("/admin/logout", (req: Request, res: Response) => {
+router.post("/admin/logout", async (req: Request, res: Response) => {
   const token = req.headers["x-admin-token"] as string | undefined;
-  if (token) invalidateAdminSession(token);
+  if (token) await invalidateAdminSession(token);
   return res.json({ success: true });
 });
 
