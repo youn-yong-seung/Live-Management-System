@@ -3,10 +3,11 @@ import { db } from "@workspace/db";
 import {
   livesTable,
   registrationsTable,
+  liveCustomQuestionsTable,
   insertLiveSchema,
   insertRegistrationSchema,
 } from "@workspace/db";
-import { eq, count, sql, and, gte, lte } from "drizzle-orm";
+import { eq, count, sql, and, gte, lte, asc } from "drizzle-orm";
 import {
   GetLivesQueryParams,
   CreateLiveBody,
@@ -20,7 +21,6 @@ import {
 } from "@workspace/api-zod";
 import { fireRegistrationTrigger } from "./notifications";
 import { requireAdminAuth } from "../middleware/adminAuth";
-
 const router: IRouter = Router();
 
 router.get("/lives", async (req: Request, res: Response) => {
@@ -135,23 +135,13 @@ router.put("/lives/:id", requireAdminAuth, async (req: Request, res: Response) =
 
     const updateData: Record<string, unknown> = {};
     if (body.title !== undefined) updateData.title = body.title;
-    if (body.description !== undefined)
-      updateData.description = body.description ?? null;
-    if (body.youtubeUrl !== undefined)
-      updateData.youtubeUrl = body.youtubeUrl ?? null;
-    if (body.scheduledAt !== undefined)
-      updateData.scheduledAt = body.scheduledAt
-        ? new Date(body.scheduledAt)
-        : null;
+    if (body.description !== undefined) updateData.description = body.description ?? null;
+    if (body.youtubeUrl !== undefined) updateData.youtubeUrl = body.youtubeUrl ?? null;
+    if (body.scheduledAt !== undefined) updateData.scheduledAt = body.scheduledAt ? new Date(body.scheduledAt) : null;
     if (body.status !== undefined) updateData.status = body.status;
-    if (body.thumbnailUrl !== undefined)
-      updateData.thumbnailUrl = body.thumbnailUrl ?? null;
+    if (body.thumbnailUrl !== undefined) updateData.thumbnailUrl = body.thumbnailUrl ?? null;
 
-    const [updated] = await db
-      .update(livesTable)
-      .set(updateData)
-      .where(eq(livesTable.id, id))
-      .returning();
+    const [updated] = await db.update(livesTable).set(updateData).where(eq(livesTable.id, id)).returning();
 
     if (!updated) {
       res.status(404).json({ error: "Live not found" });
@@ -186,10 +176,7 @@ router.delete("/lives/:id", requireAdminAuth, async (req: Request, res: Response
   try {
     const { id } = DeleteLiveParams.parse({ id: parseInt(String(req.params.id), 10) });
 
-    const [deleted] = await db
-      .delete(livesTable)
-      .where(eq(livesTable.id, id))
-      .returning();
+    const [deleted] = await db.delete(livesTable).where(eq(livesTable.id, id)).returning();
 
     if (!deleted) {
       res.status(404).json({ error: "Live not found" });
@@ -203,82 +190,247 @@ router.delete("/lives/:id", requireAdminAuth, async (req: Request, res: Response
   }
 });
 
-router.get(
-  "/lives/:liveId/registrations",
-  requireAdminAuth,
-  async (req: Request, res: Response) => {
-    try {
-      const { liveId } = GetRegistrationsParams.parse({
-        liveId: parseInt(String(req.params.liveId), 10),
-      });
+/* ── GET /lives/:liveId/registrations (admin) ─────── */
 
-      const [live] = await db
-        .select({ id: livesTable.id })
-        .from(livesTable)
-        .where(eq(livesTable.id, liveId));
+router.get("/lives/:liveId/registrations", requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const { liveId } = GetRegistrationsParams.parse({ liveId: parseInt(String(req.params.liveId), 10) });
 
-      if (!live) {
-        res.status(404).json({ error: "Live not found" });
-        return;
-      }
+    const [live] = await db.select({ id: livesTable.id }).from(livesTable).where(eq(livesTable.id, liveId));
 
-      const registrations = await db
-        .select()
-        .from(registrationsTable)
-        .where(eq(registrationsTable.liveId, liveId))
-        .orderBy(sql`${registrationsTable.createdAt} DESC`);
-
-      res.json(registrations);
-    } catch (error) {
-      req.log.error({ error }, "Error fetching registrations");
-      res.status(500).json({ error: "Internal server error" });
+    if (!live) {
+      res.status(404).json({ error: "Live not found" });
+      return;
     }
-  },
-);
 
-router.post(
-  "/lives/:liveId/registrations",
-  async (req: Request, res: Response) => {
-    try {
-      const { liveId } = CreateRegistrationParams.parse({
-        liveId: parseInt(String(req.params.liveId), 10),
-      });
-      const body = CreateRegistrationBody.parse(req.body);
+    const registrations = await db
+      .select()
+      .from(registrationsTable)
+      .where(eq(registrationsTable.liveId, liveId))
+      .orderBy(sql`${registrationsTable.createdAt} DESC`);
 
-      const [live] = await db
-        .select()
-        .from(livesTable)
-        .where(eq(livesTable.id, liveId));
+    res.json(registrations);
+  } catch (error) {
+    req.log.error({ error }, "Error fetching registrations");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
 
-      if (!live) {
-        res.status(404).json({ error: "Live not found" });
-        return;
-      }
+/* ── GET /lives/:liveId/custom-questions (public) ─── */
 
-      const insertData = insertRegistrationSchema.parse({
-        liveId,
-        name: body.name,
-        phone: body.phone,
-        email: body.email ?? null,
-        message: body.message ?? null,
-      });
+router.get("/lives/:liveId/custom-questions", async (req: Request, res: Response) => {
+  try {
+    const liveId = parseInt(String(req.params.liveId), 10);
+    if (isNaN(liveId)) return res.status(400).json({ error: "Invalid liveId" });
 
-      const [registration] = await db
-        .insert(registrationsTable)
-        .values(insertData)
-        .returning();
+    const questions = await db
+      .select()
+      .from(liveCustomQuestionsTable)
+      .where(eq(liveCustomQuestionsTable.liveId, liveId))
+      .orderBy(asc(liveCustomQuestionsTable.displayOrder));
 
-      fireRegistrationTrigger(liveId, { phone: body.phone, name: body.name }).catch((err) => {
-        req.log.error({ err }, "Failed to fire registration trigger");
-      });
+    return res.json(questions);
+  } catch (error) {
+    req.log.error({ error }, "Error fetching custom questions");
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
 
-      res.status(201).json(registration);
-    } catch (error) {
-      req.log.error({ error }, "Error creating registration");
-      res.status(400).json({ error: "Bad request" });
+/* ── PUT /lives/:liveId/custom-questions (admin) ─── */
+
+type CustomQuestionInput = {
+  question: string;
+  questionType: "text" | "radio" | "checkbox" | "skill_level";
+  options?: string[] | null;
+  displayOrder?: number | null;
+};
+
+function parseCustomQuestions(body: unknown): CustomQuestionInput[] {
+  if (!Array.isArray(body)) throw new Error("Expected an array of questions");
+  const validTypes = ["text", "radio", "checkbox", "skill_level"] as const;
+  return body.map((q: unknown, i: number) => {
+    if (typeof q !== "object" || q === null) throw new Error(`Question ${i} is not an object`);
+    const obj = q as Record<string, unknown>;
+    if (typeof obj.question !== "string" || obj.question.trim().length === 0) throw new Error(`Question ${i} missing text`);
+    const questionType = (obj.questionType as string) ?? "text";
+    if (!validTypes.includes(questionType as typeof validTypes[number])) throw new Error(`Question ${i} has invalid questionType`);
+    return {
+      question: obj.question.trim(),
+      questionType: questionType as CustomQuestionInput["questionType"],
+      options: Array.isArray(obj.options) ? (obj.options as string[]) : null,
+      displayOrder: typeof obj.displayOrder === "number" ? Math.floor(obj.displayOrder) : i,
+    };
+  });
+}
+
+router.put("/lives/:liveId/custom-questions", requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const liveId = parseInt(String(req.params.liveId), 10);
+    if (isNaN(liveId)) return res.status(400).json({ error: "Invalid liveId" });
+
+    let questions: CustomQuestionInput[];
+    try { questions = parseCustomQuestions(req.body); }
+    catch (err) { return res.status(400).json({ error: (err as Error).message }); }
+
+    await db.delete(liveCustomQuestionsTable).where(eq(liveCustomQuestionsTable.liveId, liveId));
+
+    if (questions.length > 0) {
+      await db.insert(liveCustomQuestionsTable).values(
+        questions.map((q: { question: string; questionType: string; options?: string[] | null; displayOrder?: number | null }, i: number) => ({
+          liveId,
+          question: q.question,
+          questionType: q.questionType,
+          options: q.options ?? null,
+          displayOrder: q.displayOrder ?? i,
+        }))
+      );
     }
-  },
-);
+
+    const saved = await db
+      .select()
+      .from(liveCustomQuestionsTable)
+      .where(eq(liveCustomQuestionsTable.liveId, liveId))
+      .orderBy(asc(liveCustomQuestionsTable.displayOrder));
+
+    return res.json(saved);
+  } catch (error) {
+    req.log.error({ error }, "Error saving custom questions");
+    return res.status(400).json({ error: "Bad request" });
+  }
+});
+
+/* ── GET /lives/:liveId/registration-analytics (admin) */
+
+router.get("/lives/:liveId/registration-analytics", requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const liveId = parseInt(String(req.params.liveId), 10);
+    if (isNaN(liveId)) return res.status(400).json({ error: "Invalid liveId" });
+
+    // Check live exists
+    const [live] = await db.select({ id: livesTable.id }).from(livesTable).where(eq(livesTable.id, liveId));
+    if (!live) return res.status(404).json({ error: "Live not found" });
+
+    // Industry breakdown
+    const industryRows = await db.execute(sql`
+      SELECT industry, COUNT(*)::int AS count
+      FROM registrations
+      WHERE live_id = ${liveId} AND industry IS NOT NULL AND industry != ''
+      GROUP BY industry
+      ORDER BY count DESC
+    `);
+
+    // Channel source breakdown (unnest jsonb array)
+    const channelRows = await db.execute(sql`
+      SELECT ch AS channel, COUNT(*)::int AS count
+      FROM registrations, jsonb_array_elements_text(channel_source) AS ch
+      WHERE live_id = ${liveId} AND channel_source IS NOT NULL
+      GROUP BY ch
+      ORDER BY count DESC
+    `);
+
+    // Skill level breakdown
+    const skillRows = await db.execute(sql`
+      SELECT skill_level, COUNT(*)::int AS count
+      FROM registrations
+      WHERE live_id = ${liveId} AND skill_level IS NOT NULL AND skill_level != ''
+      GROUP BY skill_level
+      ORDER BY count DESC
+    `);
+
+    // Daily signups (last 30 days)
+    const dailyRows = await db.execute(sql`
+      SELECT DATE(created_at AT TIME ZONE 'Asia/Seoul') AS date, COUNT(*)::int AS count
+      FROM registrations
+      WHERE live_id = ${liveId}
+      GROUP BY DATE(created_at AT TIME ZONE 'Asia/Seoul')
+      ORDER BY date ASC
+    `);
+
+    // Custom questions + answers summary
+    const questions = await db
+      .select()
+      .from(liveCustomQuestionsTable)
+      .where(eq(liveCustomQuestionsTable.liveId, liveId))
+      .orderBy(asc(liveCustomQuestionsTable.displayOrder));
+
+    const regs = await db
+      .select({ customAnswers: registrationsTable.customAnswers })
+      .from(registrationsTable)
+      .where(eq(registrationsTable.liveId, liveId));
+
+    const customAnswersSummary = questions.map((q) => {
+      const tally: Record<string, number> = {};
+      for (const reg of regs) {
+        const ans = reg.customAnswers?.[String(q.id)];
+        if (!ans) continue;
+        const vals = Array.isArray(ans) ? ans : [ans];
+        for (const v of vals) {
+          const key = String(v);
+          tally[key] = (tally[key] ?? 0) + 1;
+        }
+      }
+      return { questionId: q.id, question: q.question, questionType: q.questionType, answers: tally };
+    });
+
+    return res.json({
+      industryBreakdown: industryRows.rows,
+      channelBreakdown: channelRows.rows,
+      skillLevelBreakdown: skillRows.rows,
+      dailySignups: dailyRows.rows,
+      customAnswersSummary,
+    });
+  } catch (error) {
+    req.log.error({ error }, "Error fetching registration analytics");
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+/* ── POST /lives/:liveId/registrations (public) ───── */
+
+router.post("/lives/:liveId/registrations", async (req: Request, res: Response) => {
+  try {
+    const { liveId } = CreateRegistrationParams.parse({ liveId: parseInt(String(req.params.liveId), 10) });
+    const body = CreateRegistrationBody.parse(req.body);
+
+    const [live] = await db.select().from(livesTable).where(eq(livesTable.id, liveId));
+
+    if (!live) {
+      res.status(404).json({ error: "Live not found" });
+      return;
+    }
+
+    // Extra optional analytics fields from body (beyond Zod schema)
+    const rawBody = req.body as {
+      industry?: string;
+      channelSource?: string[];
+      skillLevel?: string;
+      customAnswers?: Record<string, string | string[]>;
+    };
+
+    const insertData = insertRegistrationSchema.parse({
+      liveId,
+      name: body.name,
+      phone: body.phone,
+      email: body.email ?? null,
+      message: body.message ?? null,
+      industry: rawBody.industry ?? null,
+      channelSource: Array.isArray(rawBody.channelSource) ? rawBody.channelSource : null,
+      skillLevel: rawBody.skillLevel ?? null,
+      customAnswers: rawBody.customAnswers ?? null,
+    });
+
+    const [registration] = await db.insert(registrationsTable).values(insertData).returning();
+
+    fireRegistrationTrigger(liveId, { phone: body.phone, name: body.name }).catch((err) => {
+      req.log.error({ err }, "Failed to fire registration trigger");
+    });
+
+    res.status(201).json(registration);
+  } catch (error) {
+    req.log.error({ error }, "Error creating registration");
+    res.status(400).json({ error: "Bad request" });
+  }
+});
 
 router.get("/dashboard-summary", async (_req: Request, res: Response) => {
   try {
@@ -288,20 +440,8 @@ router.get("/dashboard-summary", async (_req: Request, res: Response) => {
 
     const [[activeLivesResult], [upcomingResult], [totalRegResult], [totalLivesResult]] =
       await Promise.all([
-        db
-          .select({ count: count() })
-          .from(livesTable)
-          .where(eq(livesTable.status, "live")),
-        db
-          .select({ count: count() })
-          .from(livesTable)
-          .where(
-            and(
-              eq(livesTable.status, "scheduled"),
-              gte(livesTable.scheduledAt, now),
-              lte(livesTable.scheduledAt, weekEnd),
-            ),
-          ),
+        db.select({ count: count() }).from(livesTable).where(eq(livesTable.status, "live")),
+        db.select({ count: count() }).from(livesTable).where(and(eq(livesTable.status, "scheduled"), gte(livesTable.scheduledAt, now), lte(livesTable.scheduledAt, weekEnd))),
         db.select({ count: count() }).from(registrationsTable),
         db.select({ count: count() }).from(livesTable),
       ]);
