@@ -446,7 +446,7 @@ export default function TechTree() {
 
       {/* Tree */}
       {currentPath && (
-        <div ref={treeRef} className="glass-card p-6 sm:p-10" style={{ overflow: "visible" }}>
+        <div ref={treeRef} className="p-6 sm:p-10 rounded-2xl" style={{ background: "rgba(0, 80, 81, 0.2)", backdropFilter: "blur(16px) saturate(180%)", border: "1px solid rgba(0, 80, 81, 0.3)", boxShadow: "0 8px 32px 0 rgba(0, 0, 0, 0.5)" }}>
           {/* Path header */}
           <div className="text-center mb-10">
             <span className="text-3xl mb-2 block">{currentPath.emoji}</span>
