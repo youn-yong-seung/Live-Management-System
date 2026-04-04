@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { Star, Play, ChevronDown, Sparkles, ExternalLink, Users, MessageSquare } from "lucide-react";
+import { ReplayModal } from "@/components/replay-modal";
 
 /* ── Types ──────────────────────────────────────────── */
 
@@ -344,6 +345,7 @@ export default function TechTree() {
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
   const [activeNodes, setActiveNodes] = useState<Set<string>>(new Set());
   const [hoveredNode, setHoveredNode] = useState<string | null>(null);
+  const [modalReplay, setModalReplay] = useState<{ id: number; title: string; description: string | null; youtubeUrl: string | null; tags?: string[] | null } | null>(null);
   const treeRef = useRef<HTMLDivElement>(null);
 
   const currentPath = PATHS.find((p) => p.id === selectedPath);
@@ -351,14 +353,16 @@ export default function TechTree() {
   const handleNodeClick = (node: TreeNode) => {
     setActiveNodes((prev) => {
       const next = new Set(prev);
-      if (next.has(node.id)) {
-        next.delete(node.id);
-      } else {
-        next.add(node.id);
-      }
+      next.add(node.id);
       return next;
     });
-    window.open(node.youtubeUrl, "_blank");
+    setModalReplay({
+      id: node.liveId,
+      title: node.title,
+      description: node.description,
+      youtubeUrl: node.youtubeUrl,
+      tags: node.tags,
+    });
   };
 
   const handleSelectPath = (pathId: string) => {
@@ -527,6 +531,8 @@ export default function TechTree() {
           <p className="text-sm text-white/30 mt-2">위에서 시작할 테크트리를 선택하세요</p>
         </div>
       )}
+
+      <ReplayModal replay={modalReplay} onClose={() => setModalReplay(null)} />
     </div>
   );
 }
