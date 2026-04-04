@@ -1,4 +1,5 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { randomUUID } from "crypto";
 import bcrypt from "bcryptjs";
 import { db } from "@workspace/db";
 import { adminConfigTable, liveYoutubeStatsTable, livesTable } from "@workspace/db";
@@ -10,27 +11,70 @@ export { requireAdminAuth };
 
 const router: IRouter = Router();
 
-const DEFAULT_PASSWORD = "admin1234";
-
 /* ── Seed initial admin config on startup ───────────── */
 
 export async function seedAdminConfig(): Promise<void> {
   try {
     const [existing] = await db.select().from(adminConfigTable);
-    if (!existing) {
-      const hash = await bcrypt.hash(DEFAULT_PASSWORD, 10);
-      await db.insert(adminConfigTable).values({ passwordHash: hash });
-      logger.info("Admin config seeded with default password");
+    if (existing) return; // already configured
+
+    const envPassword = process.env["ADMIN_INITIAL_PASSWORD"];
+
+    if (!envPassword && process.env["NODE_ENV"] === "production") {
+      throw new Error(
+        "ADMIN_INITIAL_PASSWORD env var must be set for production admin initialization."
+      );
+    }
+
+    // In development: fall back to a random password printed once to logs
+    const generatedPassword = envPassword ?? randomUUID().replace(/-/g, "").slice(0, 16);
+    const hash = await bcrypt.hash(generatedPassword, 10);
+    await db.insert(adminConfigTable).values({ passwordHash: hash });
+
+    if (envPassword) {
+      logger.info("Admin config seeded from ADMIN_INITIAL_PASSWORD env var");
+    } else {
+      // Log generated password prominently — admin MUST change it immediately
+      logger.warn(
+        `\n\n  *** ADMIN INITIAL PASSWORD ***\n  ${generatedPassword}\n  Change this immediately via the API 설정 > 비밀번호 변경 section.\n`
+      );
     }
   } catch (err) {
     logger.error({ err }, "Failed to seed admin config");
+    if (process.env["NODE_ENV"] === "production") throw err;
   }
+}
+
+/* ── Simple in-memory rate limiter for login ─────────── */
+const loginAttempts = new Map<string, { count: number; resetAt: number }>();
+const MAX_ATTEMPTS = 10;
+const WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+
+function checkLoginRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const entry = loginAttempts.get(ip);
+  if (!entry || entry.resetAt < now) {
+    loginAttempts.set(ip, { count: 1, resetAt: now + WINDOW_MS });
+    return true;
+  }
+  if (entry.count >= MAX_ATTEMPTS) return false;
+  entry.count++;
+  return true;
+}
+
+function resetLoginAttempts(ip: string): void {
+  loginAttempts.delete(ip);
 }
 
 /* ── POST /admin/login ──────────────────────────────── */
 
 router.post("/admin/login", async (req: Request, res: Response) => {
   try {
+    const ip = (req.ip ?? req.socket.remoteAddress ?? "unknown");
+    if (!checkLoginRateLimit(ip)) {
+      return res.status(429).json({ error: "너무 많은 시도입니다. 잠시 후 다시 시도해주세요." });
+    }
+
     const { password } = req.body as { password?: string };
     if (!password) return res.status(400).json({ error: "password required" });
 
@@ -40,6 +84,7 @@ router.post("/admin/login", async (req: Request, res: Response) => {
     const valid = await bcrypt.compare(password, config.passwordHash);
     if (!valid) return res.status(401).json({ error: "비밀번호가 틀렸습니다." });
 
+    resetLoginAttempts(ip);
     const token = createAdminSession();
     return res.json({ success: true, token });
   } catch (err) {
