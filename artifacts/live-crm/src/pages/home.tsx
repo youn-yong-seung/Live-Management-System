@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { useGetLives, getGetLivesQueryKey } from "@workspace/api-client-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate } from "@/lib/date-utils";
+import { ReplayModal } from "@/components/replay-modal";
 import { Link } from "wouter";
 import { useLocation } from "wouter";
 import {
@@ -59,6 +61,7 @@ function youtubeThumbnail(url: string) {
 
 export default function Home() {
   const [, navigate] = useLocation();
+  const [modalReplay, setModalReplay] = useState<any>(null);
 
   const { data: endedLives, isLoading } = useGetLives(
     { status: "ended" },
@@ -188,7 +191,7 @@ export default function Home() {
               return (
                 <div
                   key={replay.id}
-                  onClick={() => navigate("/replays")}
+                  onClick={() => setModalReplay(replay)}
                   className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-gray-200 transition-all overflow-hidden cursor-pointer"
                 >
                   <div className="aspect-video bg-gray-100 overflow-hidden">
@@ -242,7 +245,7 @@ export default function Home() {
                 return (
                   <div
                     key={replay.id}
-                    onClick={() => navigate("/replays")}
+                    onClick={() => setModalReplay(replay)}
                     className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-gray-200 transition-all overflow-hidden cursor-pointer"
                   >
                     <div className="aspect-video bg-gray-100 overflow-hidden">
@@ -279,6 +282,8 @@ export default function Home() {
           ))}
         </div>
       )}
+
+      <ReplayModal replay={modalReplay} onClose={() => setModalReplay(null)} />
     </div>
   );
 }
