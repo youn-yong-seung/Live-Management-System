@@ -1,18 +1,20 @@
 import { ReactNode, useState } from "react";
 import { Link, useLocation } from "wouter";
-import { Home, Video, PlaySquare, Settings, Menu, X } from "lucide-react";
+import { Home, Video, PlaySquare, GraduationCap, Settings, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const navItems = [
   { href: "/", label: "홈" },
   { href: "/lives", label: "라이브 신청" },
   { href: "/replays", label: "다시보기" },
+  { href: "/courses", label: "유료 강의" },
 ];
 
 const navIcons: Record<string, typeof Home> = {
   "/": Home,
   "/lives": Video,
   "/replays": PlaySquare,
+  "/courses": GraduationCap,
   "/admin": Settings,
 };
 
