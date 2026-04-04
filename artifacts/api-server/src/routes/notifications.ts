@@ -122,7 +122,7 @@ router.put("/lives/:id/notification-rules", async (req: Request, res: Response) 
     const updates = req.body as {
       id: number; offsetMinutes: number; messageType?: string;
       templateId: string | null; templateName: string | null;
-      messageBody?: string | null; enabled: boolean;
+      messageBody?: string | null; customTime?: string | null; enabled: boolean;
     }[];
 
     for (const u of updates) {
@@ -132,6 +132,7 @@ router.put("/lives/:id/notification-rules", async (req: Request, res: Response) 
           templateId: u.templateId,
           templateName: u.templateName,
           messageBody: u.messageBody ?? null,
+          customTime: u.customTime && u.customTime.trim() !== "" ? u.customTime.trim() : null,
           enabled: u.enabled,
         })
         .where(and(eq(notificationRulesTable.id, u.id), eq(notificationRulesTable.liveId, liveId)));
@@ -210,6 +211,7 @@ router.get("/notifications/schedule", async (_req: Request, res: Response) => {
         offsetMinutes: notificationRulesTable.offsetMinutes,
         templateId: notificationRulesTable.templateId,
         templateName: notificationRulesTable.templateName,
+        customTime: notificationRulesTable.customTime,
         enabled: notificationRulesTable.enabled,
       })
       .from(notificationRulesTable)
@@ -229,9 +231,14 @@ router.get("/notifications/schedule", async (_req: Request, res: Response) => {
     const sentRuleIds = new Set(logs.map((l) => l.ruleId).filter(Boolean));
 
     const schedule = rules.map((r) => {
-      const fireAt = r.liveScheduledAt
+      let fireAt = r.liveScheduledAt
         ? new Date(r.liveScheduledAt.getTime() + r.offsetMinutes * 60 * 1000)
         : null;
+      if (fireAt && r.customTime && /^\d{2}:\d{2}$/.test(r.customTime)) {
+        const [hh, mm] = r.customTime.split(":").map(Number);
+        fireAt = new Date(fireAt);
+        fireAt.setHours(hh, mm, 0, 0);
+      }
       const isSent = sentRuleIds.has(r.ruleId);
       const sentLog = isSent ? logs.find((l) => l.ruleId === r.ruleId) : null;
       return {

@@ -27,6 +27,7 @@ export const notificationRulesTable = pgTable("notification_rules", {
   templateId: text("template_id"),
   templateName: text("template_name"),
   messageBody: text("message_body"),
+  customTime: text("custom_time"),
   enabled: boolean("enabled").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });

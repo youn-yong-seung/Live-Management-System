@@ -26,6 +26,7 @@ async function runScheduler(): Promise<void> {
         templateId: notificationRulesTable.templateId,
         templateName: notificationRulesTable.templateName,
         messageBody: notificationRulesTable.messageBody,
+        customTime: notificationRulesTable.customTime,
       })
       .from(notificationRulesTable)
       .innerJoin(livesTable, eq(notificationRulesTable.liveId, livesTable.id))
@@ -43,7 +44,12 @@ async function runScheduler(): Promise<void> {
       if (!isSms && !rule.templateId) continue;
       if (isSms && !rule.messageBody) continue;
 
-      const fireAt = new Date(rule.liveScheduledAt.getTime() + rule.offsetMinutes * 60 * 1000);
+      let fireAt = new Date(rule.liveScheduledAt.getTime() + rule.offsetMinutes * 60 * 1000);
+      if (rule.customTime && /^\d{2}:\d{2}$/.test(rule.customTime)) {
+        const [hh, mm] = rule.customTime.split(":").map(Number);
+        fireAt = new Date(fireAt);
+        fireAt.setHours(hh, mm, 0, 0);
+      }
 
       if (fireAt < windowStart || fireAt > windowEnd) continue;
 

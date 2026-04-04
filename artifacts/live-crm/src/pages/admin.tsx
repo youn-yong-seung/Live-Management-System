@@ -48,6 +48,7 @@ interface NotificationRule {
   templateId: string | null;
   templateName: string | null;
   messageBody: string | null;
+  customTime: string | null;
   enabled: boolean;
 }
 
@@ -776,7 +777,11 @@ export default function Admin() {
             {isLoadingRules ? (
               <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-blue-500" /></div>
             ) : notifRules.map((rule, idx) => {
-              const fireTime = rulesModal.live ? calcFireTime(rulesModal.live, rule.offsetMinutes) : null;
+              const defaultFireTime = rulesModal.live ? calcFireTime(rulesModal.live, rule.offsetMinutes) : null;
+              const defaultHHMM = defaultFireTime
+                ? `${String(defaultFireTime.getHours()).padStart(2, "0")}:${String(defaultFireTime.getMinutes()).padStart(2, "0")}`
+                : "";
+              const effectiveHHMM = rule.customTime ?? defaultHHMM;
               const label = OFFSET_LABELS[rule.offsetMinutes] ?? `${Math.abs(rule.offsetMinutes)}분 ${rule.offsetMinutes < 0 ? "전" : "후"}`;
               const isSms = rule.messageType === "sms";
 
@@ -786,12 +791,42 @@ export default function Admin() {
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${rule.enabled ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-500"}`}>{label}</span>
-                      {fireTime && <span className="text-xs text-gray-400">{fireTime.toLocaleString("ko-KR", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })}</span>}
+                      {defaultFireTime && (
+                        <span className="text-xs text-gray-400">
+                          {defaultFireTime.toLocaleDateString("ko-KR", { month: "2-digit", day: "2-digit" })}
+                        </span>
+                      )}
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-gray-400">{rule.enabled ? "활성" : "비활성"}</span>
                       <Switch checked={rule.enabled} onCheckedChange={(checked) => updateRule(idx, { enabled: checked })} />
                     </div>
+                  </div>
+
+                  {/* Custom time picker */}
+                  <div className="flex items-center gap-2 mb-3 p-2.5 bg-gray-50 rounded-lg">
+                    <Clock className="h-3.5 w-3.5 text-gray-400 flex-none" />
+                    <span className="text-xs text-gray-500 flex-none">발송 시각</span>
+                    <input
+                      type="time"
+                      value={effectiveHHMM}
+                      onChange={(e) => updateRule(idx, { customTime: e.target.value || null })}
+                      className="flex-1 text-sm font-mono font-semibold text-gray-800 bg-transparent border-none outline-none focus:ring-0 cursor-pointer"
+                    />
+                    {rule.customTime ? (
+                      <>
+                        <span className="text-xs font-semibold text-blue-600 flex-none">커스텀</span>
+                        <button
+                          onClick={() => updateRule(idx, { customTime: null })}
+                          className="text-xs text-gray-400 hover:text-red-500 flex-none"
+                          title="기본값으로 초기화"
+                        >
+                          초기화
+                        </button>
+                      </>
+                    ) : (
+                      <span className="text-xs text-gray-400 flex-none">자동</span>
+                    )}
                   </div>
 
                   {/* Message type toggle */}
