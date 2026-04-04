@@ -1,7 +1,8 @@
+import { useState } from "react";
 import { useGetLives, getGetLivesQueryKey } from "@workspace/api-client-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate } from "@/lib/date-utils";
-import { PlaySquare, Calendar, Users, ExternalLink, MessageSquare } from "lucide-react";
+import { PlaySquare, Calendar, Users, ExternalLink, MessageSquare, Tag } from "lucide-react";
 import { useLocation } from "wouter";
 
 export default function Replays() {
@@ -10,6 +11,17 @@ export default function Replays() {
     { status: "ended" },
     { query: { queryKey: getGetLivesQueryKey({ status: "ended" }) } }
   );
+
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  // Extract all unique categories from replays
+  const allCategories = Array.from(
+    new Set((replays ?? []).flatMap((r) => ((r as any).tags as string[] | null) ?? []))
+  ).sort();
+
+  const filteredReplays = selectedCategory
+    ? (replays ?? []).filter((r) => ((r as any).tags as string[] | null)?.includes(selectedCategory))
+    : replays;
 
   const extractYoutubeId = (url: string) => {
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
@@ -25,6 +37,35 @@ export default function Replays() {
         <p className="text-gray-500 text-sm">종료된 라이브를 언제든지 다시 시청하세요.</p>
       </div>
 
+      {/* Category Filter */}
+      {!isLoading && allCategories.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => setSelectedCategory(null)}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+              selectedCategory === null
+                ? "bg-blue-600 text-white"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            }`}
+          >
+            전체
+          </button>
+          {allCategories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setSelectedCategory(selectedCategory === cat ? null : cat)}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                selectedCategory === cat
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      )}
+
       {isLoading ? (
         <div className="grid gap-6 sm:grid-cols-2">
           {[1, 2, 3, 4].map(i => (
@@ -37,9 +78,9 @@ export default function Replays() {
             </div>
           ))}
         </div>
-      ) : replays && replays.length > 0 ? (
+      ) : filteredReplays && filteredReplays.length > 0 ? (
         <div className="grid gap-6 sm:grid-cols-2">
-          {replays.map((replay) => {
+          {filteredReplays.map((replay) => {
             const youtubeId = replay.youtubeUrl ? extractYoutubeId(replay.youtubeUrl) : null;
 
             return (
@@ -79,6 +120,19 @@ export default function Replays() {
                     </span>
                   </div>
                   <h3 className="font-bold text-gray-900 leading-snug line-clamp-1 mb-2">{replay.title}</h3>
+                  {((replay as any).tags as string[] | null)?.length ? (
+                    <div className="flex flex-wrap gap-1.5 mb-3">
+                      {((replay as any).tags as string[]).map((tag) => (
+                        <span
+                          key={tag}
+                          onClick={() => setSelectedCategory(selectedCategory === tag ? null : tag)}
+                          className="inline-block bg-gray-100 text-gray-600 text-xs font-medium px-2.5 py-1 rounded-full cursor-pointer hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
                   <p className="text-sm text-gray-500 line-clamp-2 flex-1 mb-4">{replay.description || "설명이 없습니다."}</p>
 
                   {replay.youtubeUrl && !youtubeId && (
