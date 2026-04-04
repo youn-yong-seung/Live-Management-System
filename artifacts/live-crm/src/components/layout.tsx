@@ -28,7 +28,7 @@ export function Layout({ children }: { children: ReactNode }) {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2" data-testid="nav-home">
             <span className="text-xl font-black text-blue-600 tracking-tight">윤자동</span>
-            <span className="hidden sm:inline-block text-xs font-semibold text-gray-400 border border-gray-200 rounded px-1.5 py-0.5">LIVE CRM</span>
+            <span className="hidden sm:inline-block text-xs font-semibold text-gray-400 border border-gray-200 rounded px-1.5 py-0.5">클래스</span>
           </Link>
 
           {/* Desktop Nav Links */}
