@@ -34,9 +34,7 @@ router.get("/youtube/auth-url", requireAdminAuth, async (_req: Request, res: Res
         "https://www.googleapis.com/auth/youtube",
         "https://www.googleapis.com/auth/drive.readonly",
       ],
-      // Let user pick which Google/Brand account to use
-      include_granted_scopes: true,
-    });
+    }) + "&authuser=0&prompt=select_account+consent";
 
     res.json({ url });
   } catch (err) {
