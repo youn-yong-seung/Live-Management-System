@@ -1457,7 +1457,8 @@ export default function Admin() {
                         const diffMs = sa.getTime() - Date.now();
                         const dH = Math.floor(Math.abs(diffMs) / 3600000);
                         const dM = Math.floor((Math.abs(diffMs) % 3600000) / 60000);
-                        autoMap["#{남은시간}"] = diffMs > 0 ? `${dH}시간 ${dM}분` : "곧";
+                        const dD = Math.floor(dH / 24); const dHr = dH % 24;
+                        autoMap["#{남은시간}"] = diffMs > 0 ? (dD > 0 ? `${dD}일 ${dHr}시간 ${dM}분` : `${dHr}시간 ${dM}분`) : "곧";
                       }
                       autoMap["#{라이브링크}"] = liveData.youtubeUrl ?? "";
                     }
@@ -1708,7 +1709,8 @@ export default function Admin() {
                             const diffMs = sa.getTime() - Date.now();
                             const dH = Math.floor(Math.abs(diffMs) / 3600000);
                             const dM = Math.floor((Math.abs(diffMs) % 3600000) / 60000);
-                            autoMap["#{남은시간}"] = diffMs > 0 ? `${dH}시간 ${dM}분` : "곧";
+                            const dD = Math.floor(dH / 24); const dHr = dH % 24;
+                        autoMap["#{남은시간}"] = diffMs > 0 ? (dD > 0 ? `${dD}일 ${dHr}시간 ${dM}분` : `${dHr}시간 ${dM}분`) : "곧";
                           }
                           autoMap["#{라이브링크}"] = liveData.youtubeUrl ?? "";
                         }

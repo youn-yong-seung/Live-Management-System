@@ -194,7 +194,8 @@ router.post("/lives/:id/send-now", requireAdminAuth, async (req: Request, res: R
         const diffMs = sa.getTime() - now.getTime();
         const diffH = Math.floor(Math.abs(diffMs) / (1000 * 60 * 60));
         const diffM = Math.floor((Math.abs(diffMs) % (1000 * 60 * 60)) / (1000 * 60));
-        autoVars["#{남은시간}"] = diffMs > 0 ? `${diffH}시간 ${diffM}분` : "곧";
+        const diffD = Math.floor(diffH / 24); const diffHr = diffH % 24;
+        autoVars["#{남은시간}"] = diffMs > 0 ? (diffD > 0 ? `${diffD}일 ${diffHr}시간 ${diffM}분` : `${diffHr}시간 ${diffM}분`) : "곧";
         autoVars["#{방송시작시간}"] = sa.toLocaleString("ko-KR", { timeZone: "Asia/Seoul", hour: "2-digit", minute: "2-digit" });
         autoVars["#{년월일}"] = sa.toLocaleDateString("ko-KR", { timeZone: "Asia/Seoul", year: "numeric", month: "long", day: "numeric" });
         autoVars["#{시간}"] = sa.toLocaleTimeString("ko-KR", { timeZone: "Asia/Seoul", hour: "2-digit", minute: "2-digit" });
