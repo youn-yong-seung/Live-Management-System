@@ -1352,7 +1352,7 @@ export default function Admin() {
 
       {/* ═══ Campaign Rules Modal ══════════════════════ */}
       <Dialog open={rulesModal.open} onOpenChange={(open) => setRulesModal({ ...rulesModal, open })}>
-        <DialogContent className="sm:max-w-[920px] bg-white rounded-2xl border border-gray-100 shadow-xl max-h-[92vh] overflow-hidden flex flex-col">
+        <DialogContent className="sm:max-w-[660px] bg-white rounded-2xl border border-gray-100 shadow-xl max-h-[92vh] overflow-hidden flex flex-col">
           <DialogHeader className="flex-none">
             <DialogTitle className="text-lg font-bold text-gray-900">캠페인 메시지 설정</DialogTitle>
             <DialogDescription className="text-sm text-gray-500">{rulesModal.live?.title} · 각 시점별 발송 메시지를 설정하세요. 템플릿 선택 시 오른쪽에서 미리보기를 확인할 수 있습니다.</DialogDescription>
@@ -1364,9 +1364,7 @@ export default function Admin() {
             </div>
           )}
 
-          <div className="flex-1 overflow-y-auto px-1 py-4 flex gap-5">
-          {/* Left: Rules */}
-          <div className="flex-1 space-y-4 min-w-0">
+          <div className="flex-1 overflow-y-auto px-1 py-4 space-y-4">
 
             {/* ═══ 신청 즉시 발송 (Trigger) ══════════════════════ */}
             <div className="rounded-2xl border-2 border-green-200 bg-green-50/30 p-4">
@@ -1456,19 +1454,43 @@ export default function Admin() {
                         <summary className="text-xs text-green-600 cursor-pointer hover:text-green-800 font-medium flex items-center gap-1">
                           <Settings className="h-3 w-3" /> 세부 설정 펼치기 ({vars.length}개 변수)
                         </summary>
-                        <div className="mt-2 space-y-1.5 p-3 bg-white rounded-lg border border-green-100">
-                          <p className="text-[10px] text-gray-400 mb-2">자동 매핑된 값을 확인하고, 필요한 경우 직접 수정하세요.</p>
-                          {vars.map((varName) => {
-                            const autoVal = autoMap[varName] ?? "";
-                            const isAuto = !!autoVal;
-                            return (
-                              <div key={varName} className="flex items-center gap-2">
-                                <span className="text-[10px] font-mono bg-green-50 text-green-700 px-1.5 py-0.5 rounded border border-green-200 flex-shrink-0 min-w-[90px]">{varName}</span>
-                                <span className="text-xs text-gray-600 flex-1 truncate">{autoVal || "(미설정)"}</span>
-                                {isAuto && <span className="text-[9px] text-green-500 flex-shrink-0">자동</span>}
+                        <div className="mt-2 flex gap-3">
+                          <div className="flex-1 space-y-1.5 p-3 bg-white rounded-lg border border-green-100">
+                            <p className="text-[10px] text-gray-400 mb-2">변수 매핑</p>
+                            {vars.map((varName) => {
+                              const autoVal = autoMap[varName] ?? "";
+                              const isAuto = !!autoVal;
+                              return (
+                                <div key={varName} className="flex items-center gap-2">
+                                  <span className="text-[10px] font-mono bg-green-50 text-green-700 px-1.5 py-0.5 rounded border border-green-200 flex-shrink-0 min-w-[80px]">{varName}</span>
+                                  <span className="text-xs text-gray-600 flex-1 truncate">{autoVal || "(미설정)"}</span>
+                                  {isAuto && <span className="text-[9px] text-green-500 flex-shrink-0">자동</span>}
+                                </div>
+                              );
+                            })}
+                          </div>
+                          <div className="w-[200px] flex-shrink-0">
+                            <p className="text-[10px] text-gray-400 mb-2">미리보기</p>
+                            <div className="bg-[#B2C7D9] rounded-xl p-2">
+                              <div className="bg-white rounded-lg p-2.5 shadow-sm">
+                                <div className="flex items-center gap-1.5 mb-2 pb-1.5 border-b border-gray-100">
+                                  <div className="w-5 h-5 bg-yellow-400 rounded flex items-center justify-center text-[7px]">💬</div>
+                                  <span className="text-[8px] font-bold text-gray-700">윤자동</span>
+                                </div>
+                                <p className="text-gray-700 whitespace-pre-wrap break-words text-[9px] leading-relaxed">
+                                  {(() => {
+                                    let p = tpl.content;
+                                    Object.entries(autoMap).forEach(([k, v]) => {
+                                      if (v && k !== "#{고객명}" && k !== "#{이름}") p = p.replace(new RegExp(k.replace(/[{}#]/g, "\\$&"), "g"), v);
+                                    });
+                                    p = p.replace(/#\{고객명\}/g, "홍길동").replace(/#\{이름\}/g, "홍길동");
+                                    p = p.replace(/#\{([^}]+)\}/g, "[#{$1}]");
+                                    return p;
+                                  })()}
+                                </p>
                               </div>
-                            );
-                          })}
+                            </div>
+                          </div>
                         </div>
                       </details>
                     );
@@ -1685,29 +1707,53 @@ export default function Admin() {
                             <summary className="text-xs text-blue-600 cursor-pointer hover:text-blue-800 font-medium flex items-center gap-1">
                               <Settings className="h-3 w-3" /> 세부 설정 펼치기 ({vars.length}개 변수)
                             </summary>
-                            <div className="mt-2 space-y-1.5 p-3 bg-gray-50 rounded-lg border border-gray-100">
-                              <p className="text-[10px] text-gray-400 mb-2">자동 매핑된 값을 확인하고, 필요한 경우 직접 ��정하세요.</p>
-                              {vars.map((varName) => {
-                                const autoVal = autoMap[varName] ?? "";
-                                const customVal = customVars?.[varName];
-                                const displayVal = customVal ?? autoVal;
-                                const isAuto = !customVal && !!autoVal;
-                                return (
-                                  <div key={varName} className="flex items-center gap-2">
-                                    <span className="text-[10px] font-mono bg-white text-gray-600 px-1.5 py-0.5 rounded border border-gray-200 flex-shrink-0 min-w-[90px]">{varName}</span>
-                                    <Input
-                                      value={displayVal}
-                                      onChange={(e) => {
-                                        const newCustom = { ...(customVars ?? {}), [varName]: e.target.value };
-                                        updateRule(idx, { customVariables: newCustom } as any);
-                                      }}
-                                      className="h-7 text-xs rounded border-gray-200 flex-1"
-                                      placeholder="값 입력"
-                                    />
-                                    {isAuto && <span className="text-[9px] text-green-500 flex-shrink-0">자동</span>}
+                            <div className="mt-2 flex gap-3">
+                              <div className="flex-1 space-y-1.5 p-3 bg-gray-50 rounded-lg border border-gray-100">
+                                <p className="text-[10px] text-gray-400 mb-2">변수 매핑 (수정 가능)</p>
+                                {vars.map((varName) => {
+                                  const autoVal = autoMap[varName] ?? "";
+                                  const customVal = customVars?.[varName];
+                                  const displayVal = customVal ?? autoVal;
+                                  const isAuto = !customVal && !!autoVal;
+                                  return (
+                                    <div key={varName} className="flex items-center gap-2">
+                                      <span className="text-[10px] font-mono bg-white text-gray-600 px-1.5 py-0.5 rounded border border-gray-200 flex-shrink-0 min-w-[80px]">{varName}</span>
+                                      <Input
+                                        value={displayVal}
+                                        onChange={(e) => {
+                                          const newCustom = { ...(customVars ?? {}), [varName]: e.target.value };
+                                          updateRule(idx, { customVariables: newCustom } as any);
+                                        }}
+                                        className="h-7 text-xs rounded border-gray-200 flex-1"
+                                        placeholder="값 입력"
+                                      />
+                                      {isAuto && <span className="text-[9px] text-green-500 flex-shrink-0">자동</span>}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                              <div className="w-[200px] flex-shrink-0">
+                                <p className="text-[10px] text-gray-400 mb-2">미리보기</p>
+                                <div className="bg-[#B2C7D9] rounded-xl p-2">
+                                  <div className="bg-white rounded-lg p-2.5 shadow-sm">
+                                    <div className="flex items-center gap-1.5 mb-2 pb-1.5 border-b border-gray-100">
+                                      <div className="w-5 h-5 bg-yellow-400 rounded flex items-center justify-center text-[7px]">💬</div>
+                                      <span className="text-[8px] font-bold text-gray-700">윤자동</span>
+                                    </div>
+                                    <p className="text-gray-700 whitespace-pre-wrap break-words text-[9px] leading-relaxed">
+                                      {(() => {
+                                        let p = tpl.content;
+                                        // Apply custom overrides first, then auto
+                                        if (customVars) Object.entries(customVars).forEach(([k, v]) => { if (v) p = p.replace(new RegExp(k.replace(/[{}#]/g, "\\$&"), "g"), v); });
+                                        Object.entries(autoMap).forEach(([k, v]) => { if (v && k !== "#{고객명}" && k !== "#{이름}") p = p.replace(new RegExp(k.replace(/[{}#]/g, "\\$&"), "g"), v); });
+                                        p = p.replace(/#\{고객명\}/g, "홍길동").replace(/#\{이름\}/g, "홍길동");
+                                        p = p.replace(/#\{([^}]+)\}/g, "[#{$1}]");
+                                        return p;
+                                      })()}
+                                    </p>
                                   </div>
-                                );
-                              })}
+                                </div>
+                              </div>
                             </div>
                           </details>
                         );
@@ -1792,73 +1838,6 @@ export default function Admin() {
                 )}
               </div>
             </div>
-          </div>
-
-          {/* Right: Preview panel */}
-          <div className="w-[240px] flex-shrink-0 sticky top-0">
-            <Label className="text-sm font-medium text-gray-700 mb-2 block">미리보기</Label>
-            <div className="bg-[#B2C7D9] rounded-2xl p-2.5 min-h-[350px]">
-              <div className="bg-white rounded-xl p-3 shadow-sm text-xs leading-relaxed">
-                {(() => {
-                  // Find any selected template to preview
-                  const selectedRule = notifRules.find((r) => r.enabled && r.templateId && r.messageType !== "sms");
-                  const triggerTpl = triggerConfig.enabled && triggerConfig.templateId && triggerConfig.messageType !== "sms"
-                    ? templates.find((t) => t.templateId === triggerConfig.templateId) : null;
-                  const ruleTpl = selectedRule ? templates.find((t) => t.templateId === selectedRule.templateId) : null;
-                  const tpl = triggerTpl || ruleTpl;
-
-                  if (tpl?.content) {
-                    let preview = tpl.content;
-                    // Auto-fill from live data
-                    const liveData = rulesModal.live;
-                    if (liveData) {
-                      preview = preview.replace(/#\{방송타이틀\}/g, liveData.title);
-                      if (liveData.scheduledAt) {
-                        const sa = new Date(liveData.scheduledAt);
-                        preview = preview.replace(/#\{년월일\}/g, sa.toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" }));
-                        preview = preview.replace(/#\{시간\}/g, sa.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" }));
-                        preview = preview.replace(/#\{방송시작시간\}/g, sa.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" }));
-                        const diffMs = sa.getTime() - Date.now();
-                        const dH = Math.floor(Math.abs(diffMs) / 3600000);
-                        const dM = Math.floor((Math.abs(diffMs) % 3600000) / 60000);
-                        preview = preview.replace(/#\{남은시간\}/g, diffMs > 0 ? `${dH}시간 ${dM}분` : "곧");
-                      }
-                      preview = preview.replace(/#\{라이브링크\}/g, liveData.youtubeUrl ?? "");
-                    }
-                    preview = preview.replace(/#\{고객명\}/g, "홍길동");
-                    preview = preview.replace(/#\{이름\}/g, "홍길동");
-                    preview = preview.replace(/#\{진행자명\}/g, "윤자동");
-                    preview = preview.replace(/#\{준비물\}/g, "없음");
-                    // Show remaining unfilled variables as placeholders
-                    preview = preview.replace(/#\{([^}]+)\}/g, "[#{$1}]");
-                    return (
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-100">
-                          <div className="w-7 h-7 bg-yellow-400 rounded-lg flex items-center justify-center text-[9px] font-bold">💬</div>
-                          <div>
-                            <p className="font-bold text-[10px] text-gray-800">윤자동</p>
-                            <p className="text-[8px] text-gray-400">{triggerTpl ? "신청 즉시" : `스케줄 (${tpl.name})`}</p>
-                          </div>
-                        </div>
-                        <p className="text-gray-700 whitespace-pre-wrap break-words text-[10px]">{preview}</p>
-                      </div>
-                    );
-                  }
-
-                  // SMS preview
-                  const smsRule = notifRules.find((r) => r.enabled && r.messageType === "sms" && r.messageBody);
-                  const smsTrigger = triggerConfig.enabled && triggerConfig.messageType === "sms" && triggerConfig.messageBody;
-                  const smsContent = smsTrigger ? triggerConfig.messageBody : smsRule?.messageBody;
-
-                  if (smsContent) {
-                    return <p className="text-gray-700 whitespace-pre-wrap text-[10px]">{smsContent}</p>;
-                  }
-
-                  return <p className="text-gray-400 text-center py-10 text-[10px]">활성화된 템플릿의<br/>미리보기가 표시됩니다</p>;
-                })()}
-              </div>
-            </div>
-            <p className="text-[10px] text-gray-400 mt-2 text-center">활성화된 첫 번째 규칙 기준</p>
           </div>
 
           </div>
