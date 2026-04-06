@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AdminEditors } from "@/components/admin-editors";
+import { AdminFormBuilder } from "@/components/admin-form-builder";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
@@ -1803,12 +1804,19 @@ export default function Admin() {
               </div>
             )}
 
+            {/* ── 신청폼 설정 (AI 추천) ─────────────────── */}
+            {rulesModal.live && (
+              <div className="border-t border-gray-100 pt-5 mt-2">
+                <AdminFormBuilder liveId={rulesModal.live.id} liveTitle={rulesModal.live.title} />
+              </div>
+            )}
+
             {/* ── 질문 설정 section ───────────────────── */}
             <div className="border-t border-gray-100 pt-5 mt-2">
               <div className="flex items-center justify-between mb-3">
                 <div>
-                  <h3 className="text-sm font-bold text-gray-800">질문 설정</h3>
-                  <p className="text-xs text-gray-400 mt-0.5">신청 폼에 노출할 맞춤 질문을 설정합니다. (최대 3개)</p>
+                  <h3 className="text-sm font-bold text-gray-800">커스텀 질문 (수동)</h3>
+                  <p className="text-xs text-gray-400 mt-0.5">위 AI 추천 외에 직접 질문을 추가합니다. (최대 3개)</p>
                 </div>
               </div>
               <div className="space-y-3">
