@@ -78,16 +78,20 @@ export async function sendAlimtalkBatch(
 
   for (const r of recipients) {
     // Build variables — merge auto + custom, ensure all values are non-empty strings
-    const allVars: Record<string, string> = {
+    // IMPORTANT: Solapi SDK v5 auto-wraps keys in #{}, so we must strip #{} from keys
+    const rawVars: Record<string, string> = {
       "#{이름}": r.name,
       "#{고객명}": r.name,
       ...(r.variables ?? {}),
     };
 
-    // Remove empty values — Solapi rejects empty string variables
+    // Strip #{} from keys and remove empty values
     const cleanVars: Record<string, string> = {};
-    for (const [k, v] of Object.entries(allVars)) {
-      if (v && v.trim()) cleanVars[k] = v;
+    for (const [k, v] of Object.entries(rawVars)) {
+      if (!v || !v.trim()) continue;
+      // Strip #{...} wrapper — SDK adds it automatically
+      const cleanKey = k.replace(/^#\{(.+)\}$/, "$1");
+      cleanVars[cleanKey] = v;
     }
 
     const msg = {
