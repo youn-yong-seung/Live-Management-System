@@ -103,9 +103,27 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
         continue;
       }
 
+      // Auto-compute variables
+      const autoVars: Record<string, string> = {};
+      autoVars["#{방송타이틀}"] = rule.liveTitle;
+      if (rule.liveScheduledAt) {
+        const sa = rule.liveScheduledAt;
+        const nowTs = new Date();
+        const diffMs = sa.getTime() - nowTs.getTime();
+        const diffH = Math.floor(Math.abs(diffMs) / (1000 * 60 * 60));
+        const diffM = Math.floor((Math.abs(diffMs) % (1000 * 60 * 60)) / (1000 * 60));
+        const diffD = Math.floor(diffH / 24); const diffHr = diffH % 24;
+        autoVars["#{남은시간}"] = diffMs > 0 ? (diffD > 0 ? `${diffD}일 ${diffHr}시간 ${diffM}분` : `${diffHr}시간 ${diffM}분`) : "곧";
+        autoVars["#{방송시작시간}"] = sa.toLocaleString("ko-KR", { timeZone: "Asia/Seoul", hour: "2-digit", minute: "2-digit" });
+        autoVars["#{년월일}"] = sa.toLocaleDateString("ko-KR", { timeZone: "Asia/Seoul", year: "numeric", month: "long", day: "numeric" });
+        autoVars["#{시간}"] = sa.toLocaleTimeString("ko-KR", { timeZone: "Asia/Seoul", hour: "2-digit", minute: "2-digit" });
+      }
+      autoVars["#{진행자명}"] = "윤자동";
+      autoVars["#{준비물}"] = "없음";
+
       const { successCount, failCount } = isSms
         ? await sendSmsBatch(config.apiKey, config.apiSecret, config.senderPhone, rule.messageBody!, regs.map((r) => ({ phone: r.phone, name: r.name })))
-        : await sendAlimtalkBatch(config.apiKey, config.apiSecret, config.senderKey!, config.senderPhone, rule.templateId!, regs.map((r) => ({ phone: r.phone, name: r.name })));
+        : await sendAlimtalkBatch(config.apiKey, config.apiSecret, config.senderKey!, config.senderPhone, rule.templateId!, regs.map((r) => ({ phone: r.phone, name: r.name, variables: { ...autoVars, "#{고객명}": r.name } })));
 
       await db.insert(notificationLogTable).values({
         liveId: rule.liveId,

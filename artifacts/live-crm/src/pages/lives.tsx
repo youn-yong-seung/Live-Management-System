@@ -54,6 +54,18 @@ interface CustomQuestion {
   displayOrder: number;
 }
 
+interface FormConfig {
+  showEmail: boolean;
+  showIndustry: boolean;
+  showChannelSource: boolean;
+  showSkillLevel: boolean;
+  showMessage: boolean;
+  showMarketingConsent: boolean;
+  channelSourceOptions: string[] | null;
+  industryOptions: string[] | null;
+  aiRecommendedQuestions: { question: string; questionType: string; options?: string[] }[] | null;
+}
+
 /* ── Form schema ─────────────────────────────────────── */
 
 const registrationSchema = z.object({
@@ -80,6 +92,7 @@ export default function Lives() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [customQuestions, setCustomQuestions] = useState<CustomQuestion[]>([]);
   const [isLoadingQuestions, setIsLoadingQuestions] = useState(false);
+  const [formConfig, setFormConfig] = useState<FormConfig | null>(null);
 
   const { data: lives, isLoading } = useGetLives(
     { status: "scheduled" },
@@ -98,18 +111,33 @@ export default function Lives() {
     defaultValues: { name: "", phone: "", email: "", message: "", industry: "", channelSource: [], skillLevel: "", customAnswers: {} },
   });
 
-  /* ── Load custom questions when dialog opens ─── */
+  /* ── Load custom questions + form config when dialog opens ─── */
   useEffect(() => {
-    if (!isDialogOpen || !selectedLiveId) { setCustomQuestions([]); return; }
+    if (!isDialogOpen || !selectedLiveId) { setCustomQuestions([]); setFormConfig(null); return; }
     setIsLoadingQuestions(true);
-    fetch(`/api/lives/${selectedLiveId}/custom-questions`)
-      .then((r) => { if (!r.ok) throw new Error(); return r.json() as Promise<CustomQuestion[]>; })
-      .then((qs) => Array.isArray(qs) ? setCustomQuestions(qs) : setCustomQuestions([]))
-      .catch(() => setCustomQuestions([]))
+    Promise.all([
+      fetch(`/api/lives/${selectedLiveId}/custom-questions`).then((r) => r.ok ? r.json() : []),
+      fetch(`/api/lives/${selectedLiveId}/form-config`).then((r) => r.ok ? r.json() : null),
+    ])
+      .then(([qs, fc]) => {
+        setCustomQuestions(Array.isArray(qs) ? qs : []);
+        setFormConfig(fc);
+      })
+      .catch(() => { setCustomQuestions([]); setFormConfig(null); })
       .finally(() => setIsLoadingQuestions(false));
   }, [isDialogOpen, selectedLiveId]);
 
-  const hasSkillLevel = customQuestions.some((q) => q.questionType === "skill_level");
+  const fc = formConfig;
+  const showEmail = fc?.showEmail ?? true;
+  const showIndustry = fc?.showIndustry ?? true;
+  const showChannelSource = fc?.showChannelSource ?? true;
+  const showSkillLevel = fc?.showSkillLevel ?? false;
+  const showMessage = fc?.showMessage ?? true;
+  const activeChannels = fc?.channelSourceOptions ?? CHANNELS;
+  const activeIndustries = fc?.industryOptions ?? INDUSTRIES;
+  const aiQuestions = fc?.aiRecommendedQuestions ?? [];
+
+  const hasSkillLevel = showSkillLevel || customQuestions.some((q) => q.questionType === "skill_level");
   const dynamicQuestions = customQuestions.filter((q) => q.questionType !== "skill_level");
 
   const onSubmit = (data: RegistrationFormValues) => {
@@ -414,6 +442,7 @@ export default function Lives() {
                 )} />
 
                 {/* ── 이메일 */}
+                {showEmail && (
                 <FormField control={form.control} name="email" render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium text-gray-700">이메일 <span className="text-gray-400 font-normal">(선택)</span></FormLabel>
@@ -421,8 +450,10 @@ export default function Lives() {
                     <FormMessage />
                   </FormItem>
                 )} />
+                )}
 
                 {/* ── 업종 */}
+                {showIndustry && (
                 <FormField control={form.control} name="industry" render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium text-gray-700">업종 <span className="text-gray-400 font-normal">(선택)</span></FormLabel>
@@ -433,7 +464,7 @@ export default function Lives() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {INDUSTRIES.map((ind) => (
+                        {activeIndustries.map((ind) => (
                           <SelectItem key={ind} value={ind}>{ind}</SelectItem>
                         ))}
                       </SelectContent>
@@ -441,13 +472,15 @@ export default function Lives() {
                     <FormMessage />
                   </FormItem>
                 )} />
+                )}
 
                 {/* ── 어디서 알게 됐나요 */}
+                {showChannelSource && (
                 <FormField control={form.control} name="channelSource" render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium text-gray-700">어디서 알게 됐나요? <span className="text-gray-400 font-normal">(복수 선택)</span></FormLabel>
                     <div className="grid grid-cols-2 gap-2 pt-1">
-                      {CHANNELS.map((ch) => {
+                      {activeChannels.map((ch) => {
                         const checked = (field.value as string[] | undefined)?.includes(ch) ?? false;
                         return (
                           <div key={ch} className="flex items-center gap-2">
@@ -467,6 +500,60 @@ export default function Lives() {
                     </div>
                   </FormItem>
                 )} />
+                )}
+
+                {/* ── AI 추천 질문 (form-config) */}
+                {aiQuestions.map((q, qi) => (
+                  <FormField
+                    key={`ai-${qi}`}
+                    control={form.control}
+                    name={`customAnswers.ai_${qi}`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium text-gray-700">{q.question}</FormLabel>
+                        {q.questionType === "radio" && q.options && (
+                          <RadioGroup onValueChange={field.onChange} value={typeof field.value === "string" ? field.value : ""} className="pt-1 space-y-2">
+                            {q.options.map((opt) => (
+                              <div key={opt} className="flex items-center gap-2">
+                                <RadioGroupItem value={opt} id={`ai${qi}-${opt}`} />
+                                <Label htmlFor={`ai${qi}-${opt}`} className="text-sm text-gray-700 cursor-pointer">{opt}</Label>
+                              </div>
+                            ))}
+                          </RadioGroup>
+                        )}
+                        {q.questionType === "checkbox" && q.options && (
+                          <div className="grid grid-cols-2 gap-2 pt-1">
+                            {q.options.map((opt) => {
+                              const vals = Array.isArray(field.value) ? field.value : [];
+                              return (
+                                <div key={opt} className="flex items-center gap-2">
+                                  <Checkbox
+                                    id={`ai${qi}-${opt}`}
+                                    checked={vals.includes(opt)}
+                                    onCheckedChange={(v) => field.onChange(v ? [...vals, opt] : vals.filter((x) => x !== opt))}
+                                    className="rounded border-gray-300"
+                                  />
+                                  <Label htmlFor={`ai${qi}-${opt}`} className="text-sm text-gray-700 cursor-pointer">{opt}</Label>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                        {(q.questionType === "text" || q.questionType === "textarea") && (
+                          <FormControl>
+                            <Textarea
+                              className="resize-none rounded-xl border-gray-200 text-sm"
+                              placeholder="답변을 입력해주세요"
+                              rows={q.questionType === "textarea" ? 3 : 2}
+                              value={typeof field.value === "string" ? field.value : ""}
+                              onChange={(e) => field.onChange(e.target.value)}
+                            />
+                          </FormControl>
+                        )}
+                      </FormItem>
+                    )}
+                  />
+                ))}
 
                 {/* ── 수준 (only if live has skill_level question) */}
                 {hasSkillLevel && (
@@ -539,6 +626,7 @@ export default function Lives() {
                 ))}
 
                 {/* ── 사전 질문 */}
+                {showMessage && (
                 <FormField control={form.control} name="message" render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium text-gray-700">사전 질문 <span className="text-gray-400 font-normal">(선택)</span></FormLabel>
@@ -548,6 +636,7 @@ export default function Lives() {
                     <FormMessage />
                   </FormItem>
                 )} />
+                )}
 
                 <div className="pt-2 flex justify-end gap-2">
                   <Button type="button" variant="outline" className="rounded-xl" onClick={() => handleOpenChange(false)}>취소</Button>
