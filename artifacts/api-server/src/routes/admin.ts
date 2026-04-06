@@ -240,4 +240,43 @@ router.get("/youtube-stats/all", requireAdminAuth, async (_req: Request, res: Re
   }
 });
 
+/* ── GET /youtube/channel-videos — 채널 영상 불러오기 ── */
+
+const YT_CHANNEL_ID = "UCYg51KBo-UcA4QILcYl5LEw"; // 윤자동
+
+router.get("/youtube/channel-videos", requireAdminAuth, async (_req: Request, res: Response) => {
+  try {
+    // Fetch RSS feed (latest 15)
+    const rssRes = await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${YT_CHANNEL_ID}`);
+    const xml = await rssRes.text();
+
+    // Parse video entries
+    const entries = xml.split("<entry>").slice(1);
+    const videos = entries.map((e) => {
+      const id = (e.match(/<yt:videoId>([^<]+)/) || [])[1];
+      const title = (e.match(/<title>([^<]+)/) || [])[1];
+      const published = (e.match(/<published>([^<]+)/) || [])[1];
+      return { id, title, published };
+    }).filter((v) => v.id && v.title);
+
+    // Get existing youtube URLs
+    const existingLives = await db.select({ youtubeUrl: livesTable.youtubeUrl }).from(livesTable);
+    const existingIds = new Set(
+      existingLives.map((l) => {
+        if (!l.youtubeUrl) return null;
+        const m = l.youtubeUrl.match(/(?:v=|\/live\/)([^#&?]{11})/);
+        return m ? m[1] : null;
+      }).filter(Boolean)
+    );
+
+    // Filter out already registered
+    const newVideos = videos.filter((v) => !existingIds.has(v.id));
+
+    return res.json({ total: videos.length, new: newVideos.length, videos: newVideos });
+  } catch (err) {
+    logger.error({ err }, "GET /youtube/channel-videos failed");
+    return res.status(500).json({ error: "채널 영상을 불러오는데 실패했습니다." });
+  }
+});
+
 export default router;
