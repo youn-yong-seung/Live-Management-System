@@ -7,8 +7,9 @@ import {
   editorSessionsTable,
   videoProjectsTable,
   projectMessagesTable,
+  projectTodosTable,
 } from "@workspace/db";
-import { eq, lt, desc, and } from "drizzle-orm";
+import { eq, lt, desc, and, asc, isNull } from "drizzle-orm";
 import { requireAdminAuth } from "../middleware/adminAuth";
 import { logger } from "../lib/logger";
 
@@ -435,6 +436,152 @@ router.post("/editor/projects/:id/messages", requireEditorAuth, async (req: Requ
     res.status(201).json(msg);
   } catch (err) {
     logger.error({ err }, "POST /editor/projects/:id/messages failed");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+/* ════════════════════════════════════════════════════════
+   ADMIN: 프로젝트 TODO 관리
+   ════════════════════════════════════════════════════════ */
+
+const SOP_TEMPLATE = [
+  { title: "영상 기획", assigneeType: "pd" },
+  { title: "영상 대본 제작", assigneeType: "pd" },
+  { title: "영상 촬영", assigneeType: "pd" },
+  { title: "편집 전 영상 소스 정리 및 업로드", assigneeType: "pd" },
+  { title: "영상 1차 초안 업로드", assigneeType: "editor" },
+  { title: "영상 초안 1차 피드백 진행", assigneeType: "pd" },
+  { title: "영상 최종 업로드", assigneeType: "editor" },
+  { title: "썸네일 제작", assigneeType: "editor" },
+  { title: "YouTube 업로드 & 예약", assigneeType: "pd" },
+];
+
+// GET /video-projects/:id/todos
+router.get("/video-projects/:id/todos", requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const projectId = parseInt(String(req.params.id), 10);
+    const todos = await db.select().from(projectTodosTable)
+      .where(eq(projectTodosTable.projectId, projectId))
+      .orderBy(asc(projectTodosTable.sortOrder), asc(projectTodosTable.createdAt));
+    res.json(todos);
+  } catch (err) {
+    logger.error({ err }, "GET /video-projects/:id/todos failed");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// POST /video-projects/:id/todos — 단일 TODO 추가
+router.post("/video-projects/:id/todos", requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const projectId = parseInt(String(req.params.id), 10);
+    const { title, scheduledDate, assigneeType, sortOrder } = req.body;
+    if (!title) return res.status(400).json({ error: "업무명은 필수입니다." });
+
+    const [todo] = await db.insert(projectTodosTable).values({
+      projectId, title,
+      scheduledDate: scheduledDate ? new Date(scheduledDate) : null,
+      assigneeType: assigneeType || null,
+      sortOrder: sortOrder ?? 0,
+    }).returning();
+    res.status(201).json(todo);
+  } catch (err) {
+    logger.error({ err }, "POST /video-projects/:id/todos failed");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// POST /video-projects/:id/todos/sop — SOP 템플릿으로 TODO 일괄 생성
+router.post("/video-projects/:id/todos/sop", requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const projectId = parseInt(String(req.params.id), 10);
+    const todos = await db.insert(projectTodosTable).values(
+      SOP_TEMPLATE.map((t, i) => ({
+        projectId, title: t.title, assigneeType: t.assigneeType, sortOrder: i,
+      }))
+    ).returning();
+    res.status(201).json(todos);
+  } catch (err) {
+    logger.error({ err }, "POST /video-projects/:id/todos/sop failed");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// PUT /todos/:id — TODO 수정 (상태, 날짜, 제목 등)
+router.put("/todos/:id", requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(String(req.params.id), 10);
+    const body = req.body;
+    const updateData: Record<string, unknown> = { updatedAt: new Date() };
+    if (body.title !== undefined) updateData.title = body.title;
+    if (body.status !== undefined) updateData.status = body.status;
+    if (body.scheduledDate !== undefined) updateData.scheduledDate = body.scheduledDate ? new Date(body.scheduledDate) : null;
+    if (body.assigneeType !== undefined) updateData.assigneeType = body.assigneeType;
+    if (body.sortOrder !== undefined) updateData.sortOrder = body.sortOrder;
+
+    const [updated] = await db.update(projectTodosTable).set(updateData).where(eq(projectTodosTable.id, id)).returning();
+    if (!updated) return res.status(404).json({ error: "TODO를 찾을 수 없습니다." });
+    res.json(updated);
+  } catch (err) {
+    logger.error({ err }, "PUT /todos/:id failed");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// DELETE /todos/:id
+router.delete("/todos/:id", requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(String(req.params.id), 10);
+    await db.delete(projectTodosTable).where(eq(projectTodosTable.id, id));
+    res.status(204).send();
+  } catch (err) {
+    logger.error({ err }, "DELETE /todos/:id failed");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// GET /todos/all — 전체 TODO (캘린더용)
+router.get("/todos/all", requireAdminAuth, async (_req: Request, res: Response) => {
+  try {
+    const todos = await db
+      .select({
+        id: projectTodosTable.id,
+        projectId: projectTodosTable.projectId,
+        projectTitle: videoProjectsTable.title,
+        title: projectTodosTable.title,
+        status: projectTodosTable.status,
+        scheduledDate: projectTodosTable.scheduledDate,
+        sortOrder: projectTodosTable.sortOrder,
+        assigneeType: projectTodosTable.assigneeType,
+      })
+      .from(projectTodosTable)
+      .innerJoin(videoProjectsTable, eq(projectTodosTable.projectId, videoProjectsTable.id))
+      .orderBy(asc(projectTodosTable.scheduledDate), asc(projectTodosTable.sortOrder));
+    res.json(todos);
+  } catch (err) {
+    logger.error({ err }, "GET /todos/all failed");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// GET /todos/unscheduled — 날짜 미정 TODO (드래그용)
+router.get("/todos/unscheduled", requireAdminAuth, async (_req: Request, res: Response) => {
+  try {
+    const todos = await db
+      .select({
+        id: projectTodosTable.id,
+        projectId: projectTodosTable.projectId,
+        projectTitle: videoProjectsTable.title,
+        title: projectTodosTable.title,
+        status: projectTodosTable.status,
+        assigneeType: projectTodosTable.assigneeType,
+      })
+      .from(projectTodosTable)
+      .innerJoin(videoProjectsTable, eq(projectTodosTable.projectId, videoProjectsTable.id))
+      .where(isNull(projectTodosTable.scheduledDate))
+      .orderBy(asc(projectTodosTable.sortOrder));
+    res.json(todos);
+  } catch (err) {
+    logger.error({ err }, "GET /todos/unscheduled failed");
     res.status(500).json({ error: "Internal server error" });
   }
 });

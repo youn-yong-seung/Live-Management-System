@@ -10,8 +10,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import {
   Plus, Edit, Trash2, Users, Loader2, Video, CheckCircle, Clock,
   AlertCircle, Send, Eye, MessageCircle, Calendar, ExternalLink,
-  DollarSign, UserPlus, FilmIcon,
+  DollarSign, UserPlus, FilmIcon, CalendarDays, Zap,
 } from "lucide-react";
+import { AdminTodoCalendar } from "@/components/admin-todo-calendar";
 
 /* ── Types ──────────────────────────────────────────── */
 
@@ -40,7 +41,7 @@ interface ProjectMessage {
 /* ── Helpers ─────────────────────────────────────────── */
 
 function apiFetch<T>(path: string, opts?: RequestInit): Promise<T> {
-  const token = sessionStorage.getItem("admin_token");
+  const token = sessionStorage.getItem("crm_admin_token");
   return fetch(`/api${path}`, {
     ...opts,
     headers: { "Content-Type": "application/json", "X-Admin-Token": token || "", ...opts?.headers },
@@ -88,7 +89,7 @@ export function AdminEditors() {
   const [editors, setEditors] = useState<Editor[]>([]);
   const [projects, setProjects] = useState<VideoProject[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<"editors" | "projects">("projects");
+  const [tab, setTab] = useState<"editors" | "projects" | "calendar">("projects");
 
   // Editor modal
   const [editorModal, setEditorModal] = useState(false);
@@ -242,6 +243,9 @@ export function AdminEditors() {
         <Button variant={tab === "editors" ? "default" : "outline"} size="sm" className="rounded-lg" onClick={() => setTab("editors")}>
           <Users className="h-4 w-4 mr-1" /> 편집자 관리
         </Button>
+        <Button variant={tab === "calendar" ? "default" : "outline"} size="sm" className="rounded-lg" onClick={() => setTab("calendar")}>
+          <CalendarDays className="h-4 w-4 mr-1" /> TODO 캘린더
+        </Button>
       </div>
 
       {/* ── Projects Tab ──────────────────────── */}
@@ -303,6 +307,13 @@ export function AdminEditors() {
                             apiFetch(`/video-projects/${p.id}`, { method: "PUT", body: JSON.stringify({ finalDeadline: p.proposedDeadline, status: "accepted" }) }).then(() => loadData());
                           }}>날짜 수락</Button>
                         )}
+                        <Button variant="ghost" size="sm" className="h-7 text-xs text-amber-500" title="SOP 템플릿으로 TODO 생성" onClick={() => {
+                          apiFetch(`/video-projects/${p.id}/todos/sop`, { method: "POST" }).then(() => {
+                            toast({ title: "SOP TODO 생성 완료!" }); loadData();
+                          }).catch((e) => toast({ variant: "destructive", title: (e as Error).message }));
+                        }}>
+                          <Zap className="h-3.5 w-3.5" />
+                        </Button>
                         <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => openProjectModal(p)}>
                           <Edit className="h-3.5 w-3.5" />
                         </Button>
@@ -369,6 +380,9 @@ export function AdminEditors() {
           </div>
         </div>
       )}
+
+      {/* ── TODO Calendar Tab ─────────────────── */}
+      {tab === "calendar" && <AdminTodoCalendar />}
 
       {/* ── Editor Modal ──────────────────────── */}
       <Dialog open={editorModal} onOpenChange={setEditorModal}>

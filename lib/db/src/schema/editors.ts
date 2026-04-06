@@ -104,8 +104,34 @@ export const projectMessagesTable = pgTable("project_messages", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+/* ── Todo Status ─────────────────────────────────────── */
+
+export const todoStatusEnum = pgEnum("todo_status", [
+  "pending",      // 대기
+  "in_progress",  // 진행 중
+  "done",         // 완료
+  "skipped",      // 건너뜀
+]);
+
+/* ── Project Todos ──────────────────────────────────── */
+
+export const projectTodosTable = pgTable("project_todos", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id")
+    .notNull()
+    .references(() => videoProjectsTable.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  status: todoStatusEnum("status").notNull().default("pending"),
+  scheduledDate: timestamp("scheduled_date"),
+  sortOrder: integer("sort_order").notNull().default(0),
+  assigneeType: text("assignee_type"),   // "pd" | "editor" | null
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 /* ── Types ──────────────────────────────────────────── */
 
 export type Editor = typeof editorsTable.$inferSelect;
 export type VideoProject = typeof videoProjectsTable.$inferSelect;
 export type ProjectMessage = typeof projectMessagesTable.$inferSelect;
+export type ProjectTodo = typeof projectTodosTable.$inferSelect;
