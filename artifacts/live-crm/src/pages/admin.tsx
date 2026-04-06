@@ -1840,8 +1840,6 @@ export default function Admin() {
             </div>
           </div>
 
-          </div>
-
           <DialogFooter className="flex-none border-t border-gray-100 pt-4">
             <Button variant="outline" className="rounded-xl border-gray-200" onClick={() => setRulesModal({ live: null, open: false })}>취소</Button>
             <Button className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold" onClick={saveRules} disabled={isSavingRules}>
