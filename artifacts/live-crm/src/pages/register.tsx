@@ -150,7 +150,15 @@ export default function RegisterPage() {
       <div className="max-w-md w-full glass-card-gold p-8 text-center">
         <CheckCircle className="h-12 w-12 text-[#CC9965] mx-auto mb-4" />
         <h2 className="text-xl font-bold text-white mb-2">{fc?.thankYouTitle || "신청이 완료되었습니다!"}</h2>
-        <p className="text-white/50 text-sm whitespace-pre-wrap">{fc?.thankYouBody || "라이브 시작 전 알림톡으로 접속 링크를 보내드립니다."}</p>
+        <p className="text-white/50 text-sm whitespace-pre-wrap mb-6">{fc?.thankYouBody || "라이브 시작 전 알림톡으로 접속 링크를 보내드립니다."}</p>
+        <a
+          href="https://open.kakao.com/o/gCM9Aehi"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 bg-[#FEE500] text-[#3C1E1E] font-bold text-sm px-6 py-3 rounded-xl hover:bg-[#FDD800] transition-colors"
+        >
+          💬 무료 특강 대기방 입장하기
+        </a>
       </div>
     </div>
   );

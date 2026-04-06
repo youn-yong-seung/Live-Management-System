@@ -19,7 +19,7 @@ import {
   Plus, Edit, Trash2, Users, Loader2, RefreshCw, Settings,
   Bell, Send, Eye, CheckCircle, Clock, AlertCircle, KeyRound,
   Zap, Lock, Youtube, TrendingUp, ThumbsUp, X,
-  MessageCircle, PlayCircle, BarChart2,
+  MessageCircle, PlayCircle, BarChart2, Link2,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AdminEditors } from "@/components/admin-editors";
@@ -792,6 +792,12 @@ export default function Admin() {
                             </Button>
                             <Button variant="outline" size="sm" className="h-8 rounded-lg border-gray-200 text-gray-500 hover:text-green-600 hover:border-green-200 text-xs gap-1" onClick={() => openSendModal(live)}>
                               <Zap className="h-3.5 w-3.5" />즉시 발송
+                            </Button>
+                            <Button variant="outline" size="icon" className="h-8 w-8 rounded-lg border-gray-200 text-gray-400 hover:text-[#CC9965] hover:border-[#CC9965]/30" title="공유 링크 복사" onClick={() => {
+                              navigator.clipboard.writeText(`https://yunjadong-live-class.vercel.app/api/og/lives/${live.id}`);
+                              toast({ title: "공유 링크 복사됨!" });
+                            }}>
+                              <Link2 className="h-3.5 w-3.5" />
                             </Button>
                             {live.status === "ended" && (
                               <Button variant="outline" size="sm" className="h-8 rounded-lg border-gray-200 text-gray-500 hover:text-purple-600 hover:border-purple-200 text-xs gap-1" onClick={() => navigate(`/lives/${live.id}/review`)}>
