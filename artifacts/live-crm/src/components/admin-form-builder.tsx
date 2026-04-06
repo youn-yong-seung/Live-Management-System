@@ -99,13 +99,28 @@ export function AdminFormBuilder({ liveId, liveTitle }: { liveId: number; liveTi
     setSaving(true);
     try {
       const selected = recommendations.filter((_, i) => selectedQuestions.has(i));
-      const saveData = { ...config, aiRecommendedQuestions: selected.length > 0 ? selected : null };
+      const saveData = {
+        showEmail: config.showEmail,
+        showIndustry: config.showIndustry,
+        showChannelSource: config.showChannelSource,
+        showSkillLevel: config.showSkillLevel,
+        showMessage: config.showMessage,
+        showMarketingConsent: config.showMarketingConsent,
+        industryOptions: config.industryOptions,
+        channelSourceOptions: config.channelSourceOptions,
+        aiRecommendedQuestions: selected.length > 0 ? selected : null,
+        thankYouTitle: config.thankYouTitle,
+        thankYouBody: config.thankYouBody,
+      };
+      console.log("[FormBuilder] Saving:", JSON.stringify(saveData));
       const saved = await apiFetch<FormConfig>(`/lives/${liveId}/form-config`, {
         method: "PUT",
         body: JSON.stringify(saveData),
       });
-      // Update local state with saved data from server
-      if (saved) setConfig(saved);
+      if (saved) {
+        setConfig(saved);
+        console.log("[FormBuilder] Saved response:", JSON.stringify(saved));
+      }
       toast({ title: "폼 설정 저장 완료!" });
     } catch (e) {
       toast({ variant: "destructive", title: (e as Error).message });
@@ -164,13 +179,14 @@ export function AdminFormBuilder({ liveId, liveTitle }: { liveId: number; liveTi
                       <input
                         type="checkbox" checked={included}
                         onChange={(e) => {
-                          const current = config.channelSourceOptions ?? channelSources.map((x) => x.name);
-                          setConfig((c) => ({
-                            ...c,
-                            channelSourceOptions: e.target.checked
-                              ? [...current, s.name]
-                              : current.filter((n) => n !== s.name),
-                          }));
+                          setConfig((c) => {
+                            const current = c.channelSourceOptions ?? channelSources.map((x) => x.name);
+                            const next = e.target.checked
+                              ? current.includes(s.name) ? current : [...current, s.name]
+                              : current.filter((n) => n !== s.name);
+                            console.log("[FormBuilder] Channel toggle:", s.name, e.target.checked, "→", next);
+                            return { ...c, channelSourceOptions: next };
+                          });
                         }}
                         className="rounded"
                       />
