@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { PlaySquare, MessageSquare, Star, Send } from "lucide-react";
+import { PlaySquare, MessageSquare, Star, Send, ExternalLink } from "lucide-react";
 
 interface Review {
   id: number;
@@ -135,6 +135,12 @@ export function ReplayModal({
                     ))}
                   </div>
                 ) : null}
+                {replay.youtubeUrl && (
+                  <a href={replay.youtubeUrl} target="_blank" rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 mt-3 text-xs font-semibold text-[#CC9965] hover:text-[#d4a570] transition-colors">
+                    <ExternalLink className="h-3.5 w-3.5" /> YouTube에서 보기
+                  </a>
+                )}
               </div>
             </div>
 
