@@ -229,21 +229,20 @@ export default function RegisterPage() {
               {showChannelSource && (
                 <FormField control={form.control} name="channelSource" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium text-white/70">어디서 보고 오셨나요?</FormLabel>
-                    <div className="grid grid-cols-2 gap-2 pt-1">
-                      {activeChannels.map((ch) => {
-                        const checked = (field.value as string[] | undefined)?.includes(ch) ?? false;
-                        return (
-                          <div key={ch} className="flex items-center gap-2">
-                            <Checkbox id={`r-ch-${ch}`} checked={checked}
-                              onCheckedChange={(v) => { const c = (field.value as string[]) ?? []; field.onChange(v ? [...c, ch] : c.filter((x) => x !== ch)); }}
-                              className="rounded border-white/20" />
-                            <Label htmlFor={`r-ch-${ch}`} className="text-sm text-white/70 cursor-pointer">{ch}</Label>
-                          </div>
-                        );
-                      })}
-                    </div>
-                    {(field.value as string[] | undefined)?.includes("직접 입력") && (
+                    <FormLabel className="text-sm font-medium text-white/70">어디서 보고 오셨나요? <span className="text-red-400">*</span></FormLabel>
+                    <RadioGroup
+                      onValueChange={(v) => field.onChange([v])}
+                      value={(field.value as string[] | undefined)?.[0] ?? ""}
+                      className="pt-1 space-y-2"
+                    >
+                      {activeChannels.map((ch) => (
+                        <div key={ch} className="flex items-center gap-2">
+                          <RadioGroupItem value={ch} id={`r-ch-${ch}`} />
+                          <Label htmlFor={`r-ch-${ch}`} className="text-sm text-white/70 cursor-pointer">{ch}</Label>
+                        </div>
+                      ))}
+                    </RadioGroup>
+                    {(field.value as string[] | undefined)?.[0] === "직접 입력" && (
                       <Input placeholder="직접 입력해주세요" className="mt-2 rounded-xl border-white/10 bg-white/5 !text-white placeholder:text-white/30" {...form.register("channelSourceCustom")} />
                     )}
                   </FormItem>

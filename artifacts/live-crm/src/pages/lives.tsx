@@ -485,32 +485,25 @@ export default function Lives() {
                 )} />
                 )}
 
-                {/* ── 어디서 알게 됐나요 */}
+                {/* ── 어디서 보고 오셨나요 */}
                 {showChannelSource && (
                 <FormField control={form.control} name="channelSource" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium text-gray-700">어디서 알게 됐나요? <span className="text-gray-400 font-normal">(복수 선택)</span></FormLabel>
-                    <div className="grid grid-cols-2 gap-2 pt-1">
-                      {activeChannels.map((ch) => {
-                        const checked = (field.value as string[] | undefined)?.includes(ch) ?? false;
-                        return (
-                          <div key={ch} className="flex items-center gap-2">
-                            <Checkbox
-                              id={`ch-${ch}`}
-                              checked={checked}
-                              onCheckedChange={(v) => {
-                                const current = (field.value as string[] | undefined) ?? [];
-                                field.onChange(v ? [...current, ch] : current.filter((c) => c !== ch));
-                              }}
-                              className="rounded border-gray-300"
-                            />
-                            <Label htmlFor={`ch-${ch}`} className="text-sm text-gray-700 cursor-pointer">{ch}</Label>
-                          </div>
-                        );
-                      })}
-                    </div>
-                    {(field.value as string[] | undefined)?.includes("직접 입력") && (
-                      <Input placeholder="어디서 알게 되셨는지 직접 입력해주세요" className="mt-2 rounded-xl border-gray-200 text-black" {...form.register("channelSourceCustom")} />
+                    <FormLabel className="text-sm font-medium text-gray-700">어디서 보고 오셨나요? <span className="text-red-500">*</span></FormLabel>
+                    <RadioGroup
+                      onValueChange={(v) => field.onChange([v])}
+                      value={(field.value as string[] | undefined)?.[0] ?? ""}
+                      className="pt-1 space-y-2"
+                    >
+                      {activeChannels.map((ch) => (
+                        <div key={ch} className="flex items-center gap-2">
+                          <RadioGroupItem value={ch} id={`ch-${ch}`} />
+                          <Label htmlFor={`ch-${ch}`} className="text-sm text-gray-700 cursor-pointer">{ch}</Label>
+                        </div>
+                      ))}
+                    </RadioGroup>
+                    {(field.value as string[] | undefined)?.[0] === "직접 입력" && (
+                      <Input placeholder="어디서 알게 되셨는지 직접 입력해주세요" className="mt-2 !rounded-xl !border-gray-200 !text-black" {...form.register("channelSourceCustom")} />
                     )}
                   </FormItem>
                 )} />
