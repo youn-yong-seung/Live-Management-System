@@ -96,6 +96,15 @@ export type SolapiConfig = typeof solapiConfigTable.$inferSelect;
 export type NotificationRule = typeof notificationRulesTable.$inferSelect;
 export type NotificationLog = typeof notificationLogTable.$inferSelect;
 export type RegistrationTrigger = typeof registrationTriggersTable.$inferSelect;
+export const googleTokensTable = pgTable("google_tokens", {
+  id: serial("id").primaryKey(),
+  accessToken: text("access_token").notNull(),
+  refreshToken: text("refresh_token").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  scope: text("scope"),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 export type AdminConfig = typeof adminConfigTable.$inferSelect;
 export type AdminSession = typeof adminSessionsTable.$inferSelect;
 export type LiveYoutubeStats = typeof liveYoutubeStatsTable.$inferSelect;

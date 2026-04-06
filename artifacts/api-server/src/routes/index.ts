@@ -4,6 +4,7 @@ import livesRouter from "./lives";
 import notificationsRouter from "./notifications";
 import adminRouter from "./admin";
 import editorsRouter from "./editors";
+import youtubeUploadRouter from "./youtube-upload";
 
 const router: IRouter = Router();
 
@@ -12,5 +13,6 @@ router.use(livesRouter);
 router.use(notificationsRouter);
 router.use(adminRouter);
 router.use(editorsRouter);
+router.use(youtubeUploadRouter);
 
 export default router;

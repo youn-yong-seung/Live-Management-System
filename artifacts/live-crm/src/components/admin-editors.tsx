@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import {
   Plus, Edit, Trash2, Users, Loader2, Video, CheckCircle, Clock,
   AlertCircle, Send, Eye, MessageCircle, Calendar, ExternalLink,
-  DollarSign, UserPlus, FilmIcon, CalendarDays, Zap,
+  DollarSign, UserPlus, FilmIcon, CalendarDays, Zap, Upload, Youtube,
 } from "lucide-react";
 import { AdminTodoCalendar } from "@/components/admin-todo-calendar";
 
@@ -106,16 +106,24 @@ export function AdminEditors() {
   const [messages, setMessages] = useState<ProjectMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
 
+  // YouTube upload
+  const [ytConnected, setYtConnected] = useState(false);
+  const [uploadModal, setUploadModal] = useState<VideoProject | null>(null);
+  const [uploadForm, setUploadForm] = useState({ title: "", description: "", publishAt: "", privacyStatus: "private" });
+  const [isUploading, setIsUploading] = useState(false);
+
   // Load data
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [eds, prjs] = await Promise.all([
+      const [eds, prjs, ytStatus] = await Promise.all([
         apiFetch<Editor[]>("/editors"),
         apiFetch<VideoProject[]>("/video-projects"),
+        apiFetch<{ connected: boolean }>("/youtube/auth-status").catch(() => ({ connected: false })),
       ]);
       setEditors(eds);
       setProjects(prjs);
+      setYtConnected(ytStatus.connected);
     } catch { /* ignore */ }
     setLoading(false);
   }, []);
@@ -252,7 +260,21 @@ export function AdminEditors() {
       {tab === "projects" && (
         <div>
           <div className="flex justify-between items-center mb-4">
-            <h3 className="font-bold text-gray-900">영상 파이프라인</h3>
+            <div className="flex items-center gap-3">
+              <h3 className="font-bold text-gray-900">영상 파이프라인</h3>
+              {ytConnected ? (
+                <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">YouTube 연결됨</span>
+              ) : (
+                <Button variant="outline" size="sm" className="h-6 text-[10px] rounded-full border-red-200 text-red-500" onClick={async () => {
+                  try {
+                    const { url } = await apiFetch<{ url: string }>("/youtube/auth-url");
+                    window.open(url, "_blank", "width=600,height=700");
+                  } catch (e) { toast({ variant: "destructive", title: (e as Error).message }); }
+                }}>
+                  <Youtube className="h-3 w-3 mr-1" />YouTube 연결
+                </Button>
+              )}
+            </div>
             <Button size="sm" className="rounded-lg" onClick={() => openProjectModal()}>
               <Plus className="h-4 w-4 mr-1" /> 새 프로젝트
             </Button>
@@ -301,6 +323,14 @@ export function AdminEditors() {
                             <Button variant="ghost" size="sm" className="h-7 text-xs text-green-600" onClick={() => updateProjectStatus(p.id, "approved")}>승인</Button>
                             <Button variant="ghost" size="sm" className="h-7 text-xs text-rose-500" onClick={() => updateProjectStatus(p.id, "revision")}>수정요청</Button>
                           </>
+                        )}
+                        {p.status === "approved" && p.driveLink && (
+                          <Button variant="ghost" size="sm" className="h-7 text-xs text-red-500" onClick={() => {
+                            setUploadModal(p);
+                            setUploadForm({ title: p.title, description: p.description || "", publishAt: "", privacyStatus: "private" });
+                          }}>
+                            <Youtube className="h-3.5 w-3.5 mr-1" />업로드
+                          </Button>
                         )}
                         {p.status === "date_requested" && (
                           <Button variant="ghost" size="sm" className="h-7 text-xs text-blue-500" onClick={() => {
@@ -487,6 +517,77 @@ export function AdminEditors() {
             <Input value={newMessage} onChange={(e) => setNewMessage(e.target.value)} placeholder="피드백을 입력하세요..." onKeyDown={(e) => e.key === "Enter" && sendFeedback()} />
             <Button onClick={sendFeedback} disabled={!newMessage.trim()}><Send className="h-4 w-4" /></Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── YouTube Upload Modal ──────────────── */}
+      <Dialog open={!!uploadModal} onOpenChange={() => setUploadModal(null)}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>YouTube 업로드</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            {!ytConnected && (
+              <div className="p-3 bg-amber-50 rounded-xl border border-amber-100 text-sm text-amber-700">
+                ⚠ YouTube 계정을 먼저 연결해주세요.
+              </div>
+            )}
+            <div><Label>제목</Label><Input value={uploadForm.title} onChange={(e) => setUploadForm(f => ({ ...f, title: e.target.value }))} /></div>
+            <div><Label>설명</Label><Textarea value={uploadForm.description} onChange={(e) => setUploadForm(f => ({ ...f, description: e.target.value }))} rows={3} /></div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>공개 설정</Label>
+                <Select value={uploadForm.privacyStatus} onValueChange={(v) => setUploadForm(f => ({ ...f, privacyStatus: v }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="private">비공개</SelectItem>
+                    <SelectItem value="unlisted">일부공개</SelectItem>
+                    <SelectItem value="public">공개</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>예약 업로드 (선택)</Label>
+                <Input type="datetime-local" value={uploadForm.publishAt} onChange={(e) => setUploadForm(f => ({ ...f, publishAt: e.target.value }))} />
+              </div>
+            </div>
+            <div className="p-3 bg-gray-50 rounded-xl text-xs text-gray-500">
+              <strong>드라이브 링크:</strong> {uploadModal?.driveLink}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setUploadModal(null)}>취소</Button>
+            <Button
+              className="bg-red-500 hover:bg-red-600 text-white"
+              disabled={isUploading || !ytConnected}
+              onClick={async () => {
+                if (!uploadModal) return;
+                setIsUploading(true);
+                try {
+                  const result = await apiFetch<{ success: boolean; youtubeUrl: string; videoId: string }>("/youtube/upload", {
+                    method: "POST",
+                    body: JSON.stringify({
+                      projectId: uploadModal.id,
+                      title: uploadForm.title,
+                      description: uploadForm.description,
+                      driveLink: uploadModal.driveLink,
+                      privacyStatus: uploadForm.privacyStatus,
+                      publishAt: uploadForm.publishAt || undefined,
+                    }),
+                  });
+                  toast({ title: "업로드 완료!", description: result.youtubeUrl });
+                  setUploadModal(null);
+                  loadData();
+                } catch (e) {
+                  toast({ variant: "destructive", title: "업로드 실패", description: (e as Error).message });
+                }
+                setIsUploading(false);
+              }}
+            >
+              {isUploading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Upload className="h-4 w-4 mr-2" />}
+              YouTube 업로드
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
