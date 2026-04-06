@@ -477,7 +477,7 @@ router.post("/lives/:liveId/reviews", async (req: Request, res: Response) => {
 
     const [live] = await db.select({ id: livesTable.id, status: livesTable.status }).from(livesTable).where(eq(livesTable.id, liveId));
     if (!live) return res.status(404).json({ error: "Live not found" });
-    if (live.status !== "ended") return res.status(400).json({ error: "종료된 라이브에만 후기를 남길 수 있습니다." });
+    if (live.status !== "ended" && live.status !== "live") return res.status(400).json({ error: "진행 중이거나 종료된 라이브에만 후기를 남길 수 있습니다." });
 
     const insertData = insertReviewSchema.parse({
       liveId,

@@ -5,7 +5,7 @@ import {
   livesTable,
   registrationsTable,
 } from "@workspace/db";
-import { eq, and, isNotNull } from "drizzle-orm";
+import { eq, and, isNotNull, lte } from "drizzle-orm";
 import { getSolapiConfig, sendAlimtalkBatch, sendSmsBatch } from "./lib/solapiHelper";
 import type { IncomingMessage, ServerResponse } from "http";
 
@@ -18,7 +18,16 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
   }
 
   try {
+    // Auto-promote: scheduled → live when time has passed
     const now = new Date();
+    await db.update(livesTable)
+      .set({ status: "live" })
+      .where(and(
+        eq(livesTable.status, "scheduled"),
+        isNotNull(livesTable.scheduledAt),
+        lte(livesTable.scheduledAt, now)
+      ));
+
     const windowStart = new Date(now.getTime() - 2 * 60 * 1000);
     const windowEnd = new Date(now.getTime() + 30 * 1000);
 

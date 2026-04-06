@@ -82,6 +82,11 @@ export default function Lives() {
     { query: { queryKey: getGetLivesQueryKey({ status: "scheduled" }) } }
   );
 
+  const { data: activeLives } = useGetLives(
+    { status: "live" },
+    { query: { queryKey: getGetLivesQueryKey({ status: "live" }) } }
+  );
+
   const createRegistration = useCreateRegistration();
 
   const form = useForm<RegistrationFormValues>({
@@ -269,6 +274,35 @@ export default function Lives() {
           </div>
         )}
       </div>
+
+      {/* ── Live Now ─────────────────────────────── */}
+      {activeLives && activeLives.length > 0 && (
+        <div className="space-y-4">
+          <h2 className="text-lg font-bold text-white flex items-center gap-2">
+            <span className="h-2.5 w-2.5 rounded-full bg-red-500 animate-pulse" />
+            지금 라이브 중
+          </h2>
+          {activeLives.map((live) => (
+            <a
+              key={live.id}
+              href={live.youtubeUrl ?? "#"}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="glass-card-gold hover:-translate-y-1 transition-all duration-300 p-6 flex items-center justify-between group block"
+            >
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+                  <span className="text-xs font-bold text-red-400 uppercase tracking-wide">LIVE NOW</span>
+                  <span className="text-xs text-white/30">{live.registrationCount}명 참석</span>
+                </div>
+                <h3 className="font-bold text-white group-hover:text-[#CC9965] transition-colors">{live.title}</h3>
+              </div>
+              <span className="text-sm text-[#CC9965] font-semibold flex-shrink-0 ml-4">입장하기 →</span>
+            </a>
+          ))}
+        </div>
+      )}
 
       {isLoading ? (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

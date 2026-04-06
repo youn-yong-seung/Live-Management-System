@@ -5,12 +5,29 @@ import {
   livesTable,
   registrationsTable,
 } from "@workspace/db";
-import { eq, and, isNotNull } from "drizzle-orm";
+import { eq, and, isNotNull, lte } from "drizzle-orm";
 import { logger } from "./logger";
 import { getSolapiConfig, sendAlimtalkBatch, sendSmsBatch } from "./solapiHelper";
 
+async function autoPromoteLives(): Promise<void> {
+  try {
+    const now = new Date();
+    // scheduled → live: when scheduledAt has passed
+    await db.update(livesTable)
+      .set({ status: "live" })
+      .where(and(
+        eq(livesTable.status, "scheduled"),
+        isNotNull(livesTable.scheduledAt),
+        lte(livesTable.scheduledAt, now)
+      ));
+  } catch (err) {
+    logger.error({ err }, "Auto-promote lives error");
+  }
+}
+
 async function runScheduler(): Promise<void> {
   try {
+    await autoPromoteLives();
     const now = new Date();
     const windowStart = new Date(now.getTime() - 2 * 60 * 1000);
     const windowEnd = new Date(now.getTime() + 30 * 1000);

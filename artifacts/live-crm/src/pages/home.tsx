@@ -81,6 +81,11 @@ export default function Home() {
     { query: { queryKey: getGetLivesQueryKey({ status: "scheduled" }) } }
   );
 
+  const { data: activeLives } = useGetLives(
+    { status: "live" },
+    { query: { queryKey: getGetLivesQueryKey({ status: "live" }) } }
+  );
+
   const replays = endedLives ?? [];
   const recommended = replays.slice(0, 4);
   const getByTag = (tag: string) =>
@@ -126,6 +131,35 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {/* ── Live Now ─────────────────────────────────── */}
+      {activeLives && activeLives.length > 0 && (
+        <div>
+          <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+            <span className="h-2.5 w-2.5 rounded-full bg-red-500 animate-pulse" />
+            지금 라이브 중
+          </h2>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {activeLives.map((live) => (
+              <a
+                key={live.id}
+                href={live.youtubeUrl ?? "#"}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="glass-card-gold hover:-translate-y-1 transition-all duration-300 p-6 block group"
+              >
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+                  <span className="text-xs font-bold text-red-400 uppercase tracking-wide">LIVE NOW</span>
+                </div>
+                <h3 className="font-bold text-white mb-1 line-clamp-1 group-hover:text-[#CC9965] transition-colors">{live.title}</h3>
+                <p className="text-sm text-white/50 line-clamp-1 mb-2">{live.description}</p>
+                <span className="text-xs text-[#CC9965] font-semibold">입장하기 →</span>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* ── Upcoming Live ─────────────────────────────── */}
       {scheduledLives && scheduledLives.length > 0 && (
