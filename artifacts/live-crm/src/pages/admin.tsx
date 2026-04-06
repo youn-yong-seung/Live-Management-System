@@ -22,6 +22,7 @@ import {
   MessageCircle, PlayCircle, BarChart2,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AdminEditors } from "@/components/admin-editors";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
@@ -706,6 +707,7 @@ export default function Admin() {
           <TabsTrigger value="settings" className="rounded-lg text-sm font-medium">API 설정</TabsTrigger>
           <TabsTrigger value="schedule" className="rounded-lg text-sm font-medium" onClick={loadSchedule}>발송 현황</TabsTrigger>
           <TabsTrigger value="youtube" className="rounded-lg text-sm font-medium" onClick={loadYtStatsAll}>YouTube 성과</TabsTrigger>
+          <TabsTrigger value="editors" className="rounded-lg text-sm font-medium">편집자 관리</TabsTrigger>
         </TabsList>
 
         {/* ── Tab 1: Live Management ─────────────────── */}
@@ -1143,6 +1145,11 @@ export default function Admin() {
               <p className="text-gray-300 text-xs mt-1">위에서 라이브를 선택하고 지표를 입력해 보세요.</p>
             </div>
           )}
+        </TabsContent>
+
+        {/* ── Tab 5: 편집자 관리 ──────────────────── */}
+        <TabsContent value="editors" className="mt-6">
+          <AdminEditors />
         </TabsContent>
 
       </Tabs>
