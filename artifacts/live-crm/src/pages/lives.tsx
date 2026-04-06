@@ -30,12 +30,12 @@ import { Label } from "@/components/ui/label";
 const INDUSTRIES = [
   "제조업", "도소매업", "음식점/카페", "서비스업", "교육",
   "IT/소프트웨어", "의료/헬스케어", "부동산", "금융",
-  "프리랜서/1인 기업", "기타",
+  "프리랜서/1인 기업", "직접 입력",
 ];
 
 const CHANNELS = [
   "유튜브", "인스타그램", "네이버 블로그", "지인 추천",
-  "카카오채널", "구글 검색", "기타",
+  "카카오채널", "구글 검색", "직접 입력",
 ];
 
 const SKILL_LEVELS = [
@@ -74,7 +74,9 @@ const registrationSchema = z.object({
   email: z.string().email("이메일 형식이 올바르지 않습니다").optional().or(z.literal("")),
   message: z.string().optional(),
   industry: z.string().optional(),
+  industryCustom: z.string().optional(),
   channelSource: z.array(z.string()).optional(),
+  channelSourceCustom: z.string().optional(),
   skillLevel: z.string().optional(),
   customAnswers: z.record(z.union([z.string(), z.array(z.string())])).optional(),
 });
@@ -108,7 +110,7 @@ export default function Lives() {
 
   const form = useForm<RegistrationFormValues>({
     resolver: zodResolver(registrationSchema),
-    defaultValues: { name: "", phone: "", email: "", message: "", industry: "", channelSource: [], skillLevel: "", customAnswers: {} },
+    defaultValues: { name: "", phone: "", email: "", message: "", industry: "", industryCustom: "", channelSource: [], channelSourceCustom: "", skillLevel: "", customAnswers: {} },
   });
 
   /* ── Load custom questions + form config when dialog opens ─── */
@@ -142,6 +144,12 @@ export default function Lives() {
 
   const onSubmit = (data: RegistrationFormValues) => {
     if (!selectedLiveId) return;
+    // Handle "직접 입력" custom values
+    const industry = data.industry === "직접 입력" && data.industryCustom
+      ? data.industryCustom : data.industry || null;
+    const channels = data.channelSource?.map((ch) =>
+      ch === "직접 입력" && data.channelSourceCustom ? data.channelSourceCustom : ch
+    );
     createRegistration.mutate(
       {
         liveId: selectedLiveId,
@@ -150,8 +158,8 @@ export default function Lives() {
           phone: data.phone,
           email: data.email || null,
           message: data.message || null,
-          industry: data.industry || null,
-          channelSource: data.channelSource?.length ? data.channelSource : null,
+          industry,
+          channelSource: channels?.length ? channels : null,
           skillLevel: data.skillLevel || null,
           customAnswers: data.customAnswers && Object.keys(data.customAnswers).length ? data.customAnswers : null,
         },
@@ -427,7 +435,7 @@ export default function Lives() {
                 <FormField control={form.control} name="name" render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium text-gray-700">이름 <span className="text-red-500">*</span></FormLabel>
-                    <FormControl><Input placeholder="홍길동" className="rounded-xl border-gray-200" {...field} data-testid="input-name" /></FormControl>
+                    <FormControl><Input placeholder="홍길동" className="rounded-xl border-gray-200 text-black" {...field} data-testid="input-name" /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />
@@ -436,7 +444,7 @@ export default function Lives() {
                 <FormField control={form.control} name="phone" render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium text-gray-700">연락처 <span className="text-red-500">*</span></FormLabel>
-                    <FormControl><Input placeholder="010-0000-0000" className="rounded-xl border-gray-200" {...field} data-testid="input-phone" /></FormControl>
+                    <FormControl><Input placeholder="010-0000-0000" className="rounded-xl border-gray-200 text-black" {...field} data-testid="input-phone" /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />
@@ -446,7 +454,7 @@ export default function Lives() {
                 <FormField control={form.control} name="email" render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium text-gray-700">이메일 <span className="text-gray-400 font-normal">(선택)</span></FormLabel>
-                    <FormControl><Input type="email" placeholder="example@email.com" className="rounded-xl border-gray-200" {...field} data-testid="input-email" /></FormControl>
+                    <FormControl><Input type="email" placeholder="example@email.com" className="rounded-xl border-gray-200 text-black" {...field} data-testid="input-email" /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />
@@ -459,7 +467,7 @@ export default function Lives() {
                     <FormLabel className="text-sm font-medium text-gray-700">업종 <span className="text-gray-400 font-normal">(선택)</span></FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger className="rounded-xl border-gray-200">
+                        <SelectTrigger className="rounded-xl border-gray-200 text-black">
                           <SelectValue placeholder="업종을 선택해주세요" />
                         </SelectTrigger>
                       </FormControl>
@@ -469,6 +477,9 @@ export default function Lives() {
                         ))}
                       </SelectContent>
                     </Select>
+                    {field.value === "직접 입력" && (
+                      <Input placeholder="업종을 직접 입력해주세요" className="mt-2 rounded-xl border-gray-200 text-black" {...form.register("industryCustom")} />
+                    )}
                     <FormMessage />
                   </FormItem>
                 )} />
@@ -498,6 +509,9 @@ export default function Lives() {
                         );
                       })}
                     </div>
+                    {(field.value as string[] | undefined)?.includes("직접 입력") && (
+                      <Input placeholder="어디서 알게 되셨는지 직접 입력해주세요" className="mt-2 rounded-xl border-gray-200 text-black" {...form.register("channelSourceCustom")} />
+                    )}
                   </FormItem>
                 )} />
                 )}
@@ -542,7 +556,7 @@ export default function Lives() {
                         {(q.questionType === "text" || q.questionType === "textarea") && (
                           <FormControl>
                             <Textarea
-                              className="resize-none rounded-xl border-gray-200 text-sm"
+                              className="resize-none rounded-xl border-gray-200 text-sm text-black"
                               placeholder="답변을 입력해주세요"
                               rows={q.questionType === "textarea" ? 3 : 2}
                               value={typeof field.value === "string" ? field.value : ""}
@@ -584,7 +598,7 @@ export default function Lives() {
                         {(q.questionType === "text" || q.questionType === "textarea") && (
                           <FormControl>
                             <Textarea
-                              className="resize-none rounded-xl border-gray-200 text-sm"
+                              className="resize-none rounded-xl border-gray-200 text-sm text-black"
                               placeholder="답변을 입력해주세요"
                               rows={q.questionType === "textarea" ? 4 : 2}
                               value={typeof field.value === "string" ? field.value : ""}
