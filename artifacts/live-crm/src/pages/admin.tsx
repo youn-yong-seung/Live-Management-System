@@ -1352,10 +1352,10 @@ export default function Admin() {
 
       {/* ═══ Campaign Rules Modal ══════════════════════ */}
       <Dialog open={rulesModal.open} onOpenChange={(open) => setRulesModal({ ...rulesModal, open })}>
-        <DialogContent className="sm:max-w-[660px] bg-white rounded-2xl border border-gray-100 shadow-xl max-h-[92vh] overflow-hidden flex flex-col">
+        <DialogContent className="sm:max-w-[920px] bg-white rounded-2xl border border-gray-100 shadow-xl max-h-[92vh] overflow-hidden flex flex-col">
           <DialogHeader className="flex-none">
             <DialogTitle className="text-lg font-bold text-gray-900">캠페인 메시지 설정</DialogTitle>
-            <DialogDescription className="text-sm text-gray-500">{rulesModal.live?.title} · 각 시점별 발송 메시지를 설정하세요.</DialogDescription>
+            <DialogDescription className="text-sm text-gray-500">{rulesModal.live?.title} · 각 시점별 발송 메시지를 설정하세요. 템플릿 선택 시 오른쪽에서 미리보기를 확인할 수 있습니다.</DialogDescription>
           </DialogHeader>
 
           {!solapiConfig?.configured && (
@@ -1364,7 +1364,9 @@ export default function Admin() {
             </div>
           )}
 
-          <div className="flex-1 overflow-y-auto px-1 py-4 space-y-4">
+          <div className="flex-1 overflow-y-auto px-1 py-4 flex gap-5">
+          {/* Left: Rules */}
+          <div className="flex-1 space-y-4 min-w-0">
 
             {/* ═══ 신청 즉시 발송 (Trigger) ══════════════════════ */}
             <div className="rounded-2xl border-2 border-green-200 bg-green-50/30 p-4">
@@ -1672,6 +1674,57 @@ export default function Admin() {
                 )}
               </div>
             </div>
+          </div>
+
+          {/* Right: Preview panel */}
+          <div className="w-[240px] flex-shrink-0 sticky top-0">
+            <Label className="text-sm font-medium text-gray-700 mb-2 block">미리보기</Label>
+            <div className="bg-[#B2C7D9] rounded-2xl p-2.5 min-h-[350px]">
+              <div className="bg-white rounded-xl p-3 shadow-sm text-xs leading-relaxed">
+                {(() => {
+                  // Find any selected template to preview
+                  const selectedRule = notifRules.find((r) => r.enabled && r.templateId && r.messageType !== "sms");
+                  const triggerTpl = triggerConfig.enabled && triggerConfig.templateId && triggerConfig.messageType !== "sms"
+                    ? templates.find((t) => t.templateId === triggerConfig.templateId) : null;
+                  const ruleTpl = selectedRule ? templates.find((t) => t.templateId === selectedRule.templateId) : null;
+                  const tpl = triggerTpl || ruleTpl;
+
+                  if (tpl?.content) {
+                    let preview = tpl.content;
+                    preview = preview.replace(/#\{고객명\}/g, "홍길동");
+                    preview = preview.replace(/#\{이름\}/g, "홍길동");
+                    // Show unfilled variables as placeholders
+                    preview = preview.replace(/#\{([^}]+)\}/g, "[#{$1}]");
+                    return (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-100">
+                          <div className="w-7 h-7 bg-yellow-400 rounded-lg flex items-center justify-center text-[9px] font-bold">💬</div>
+                          <div>
+                            <p className="font-bold text-[10px] text-gray-800">윤자동</p>
+                            <p className="text-[8px] text-gray-400">{triggerTpl ? "신청 즉시" : `스케줄 (${tpl.name})`}</p>
+                          </div>
+                        </div>
+                        <p className="text-gray-700 whitespace-pre-wrap break-words text-[10px]">{preview}</p>
+                      </div>
+                    );
+                  }
+
+                  // SMS preview
+                  const smsRule = notifRules.find((r) => r.enabled && r.messageType === "sms" && r.messageBody);
+                  const smsTrigger = triggerConfig.enabled && triggerConfig.messageType === "sms" && triggerConfig.messageBody;
+                  const smsContent = smsTrigger ? triggerConfig.messageBody : smsRule?.messageBody;
+
+                  if (smsContent) {
+                    return <p className="text-gray-700 whitespace-pre-wrap text-[10px]">{smsContent}</p>;
+                  }
+
+                  return <p className="text-gray-400 text-center py-10 text-[10px]">활성화된 템플릿의<br/>미리보기가 표시됩니다</p>;
+                })()}
+              </div>
+            </div>
+            <p className="text-[10px] text-gray-400 mt-2 text-center">활성화된 첫 번째 규칙 기준</p>
+          </div>
+
           </div>
 
           <DialogFooter className="flex-none border-t border-gray-100 pt-4">
