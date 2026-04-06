@@ -1402,25 +1402,78 @@ export default function Admin() {
 
               {/* Content */}
               {triggerConfig.messageType !== "sms" ? (
-                templates.length > 0 ? (
-                  <Select
-                    value={triggerConfig.templateId ?? ""}
-                    onValueChange={(val) => {
-                      const tpl = templates.find((t) => t.templateId === val);
-                      setTriggerConfig((s) => ({ ...s, templateId: val || null, templateName: tpl?.name ?? null }));
-                    }}
-                  >
-                    <SelectTrigger className="rounded-lg border-gray-200 h-9 text-sm"><SelectValue placeholder="알림톡 템플릿 선택" /></SelectTrigger>
-                    <SelectContent>{templates.map((t) => <SelectItem key={t.templateId} value={t.templateId}>{t.name}</SelectItem>)}</SelectContent>
-                  </Select>
-                ) : (
-                  <Input
-                    placeholder="Template ID 직접 입력"
-                    value={triggerConfig.templateId ?? ""}
-                    onChange={(e) => setTriggerConfig((s) => ({ ...s, templateId: e.target.value || null, templateName: null }))}
-                    className="rounded-lg border-gray-200 h-9 text-sm"
-                  />
-                )
+                <div className="space-y-2">
+                  {templates.length > 0 ? (
+                    <Select
+                      value={triggerConfig.templateId ?? ""}
+                      onValueChange={(val) => {
+                        const tpl = templates.find((t) => t.templateId === val);
+                        setTriggerConfig((s) => ({ ...s, templateId: val || null, templateName: tpl?.name ?? null }));
+                      }}
+                    >
+                      <SelectTrigger className="rounded-lg border-gray-200 h-9 text-sm"><SelectValue placeholder="알림톡 템플릿 선택" /></SelectTrigger>
+                      <SelectContent>{templates.map((t) => <SelectItem key={t.templateId} value={t.templateId}>{t.name}</SelectItem>)}</SelectContent>
+                    </Select>
+                  ) : (
+                    <Input
+                      placeholder="Template ID 직접 입력"
+                      value={triggerConfig.templateId ?? ""}
+                      onChange={(e) => setTriggerConfig((s) => ({ ...s, templateId: e.target.value || null, templateName: null }))}
+                      className="rounded-lg border-gray-200 h-9 text-sm"
+                    />
+                  )}
+
+                  {/* Trigger variable detail toggle */}
+                  {triggerConfig.templateId && (() => {
+                    const tpl = templates.find((t) => t.templateId === triggerConfig.templateId);
+                    if (!tpl?.content) return null;
+                    const vars = (tpl.content.match(/#\{[^}]+\}/g) ?? []).filter((v, i, a) => a.indexOf(v) === i);
+                    if (vars.length === 0) return null;
+
+                    const liveData = rulesModal.live;
+                    const autoMap: Record<string, string> = {};
+                    if (liveData) {
+                      autoMap["#{방송타이틀}"] = liveData.title;
+                      if (liveData.scheduledAt) {
+                        const sa = new Date(liveData.scheduledAt);
+                        autoMap["#{년월일}"] = sa.toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" });
+                        autoMap["#{시간}"] = sa.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
+                        autoMap["#{방송시작시간}"] = sa.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
+                        const diffMs = sa.getTime() - Date.now();
+                        const dH = Math.floor(Math.abs(diffMs) / 3600000);
+                        const dM = Math.floor((Math.abs(diffMs) % 3600000) / 60000);
+                        autoMap["#{남은시간}"] = diffMs > 0 ? `${dH}시간 ${dM}분` : "곧";
+                      }
+                      autoMap["#{라이브링크}"] = liveData.youtubeUrl ?? "";
+                    }
+                    autoMap["#{고객명}"] = "(신청자 이름)";
+                    autoMap["#{이름}"] = "(신청자 이름)";
+                    autoMap["#{진행자명}"] = "윤자동";
+                    autoMap["#{준비물}"] = "없음";
+
+                    return (
+                      <details className="group">
+                        <summary className="text-xs text-green-600 cursor-pointer hover:text-green-800 font-medium flex items-center gap-1">
+                          <Settings className="h-3 w-3" /> 세부 설정 펼치기 ({vars.length}개 변수)
+                        </summary>
+                        <div className="mt-2 space-y-1.5 p-3 bg-white rounded-lg border border-green-100">
+                          <p className="text-[10px] text-gray-400 mb-2">자동 매핑된 값을 확인하고, 필요한 경우 직접 수정하세요.</p>
+                          {vars.map((varName) => {
+                            const autoVal = autoMap[varName] ?? "";
+                            const isAuto = !!autoVal;
+                            return (
+                              <div key={varName} className="flex items-center gap-2">
+                                <span className="text-[10px] font-mono bg-green-50 text-green-700 px-1.5 py-0.5 rounded border border-green-200 flex-shrink-0 min-w-[90px]">{varName}</span>
+                                <span className="text-xs text-gray-600 flex-1 truncate">{autoVal || "(미설정)"}</span>
+                                {isAuto && <span className="text-[9px] text-green-500 flex-shrink-0">자동</span>}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </details>
+                    );
+                  })()}
+                </div>
               ) : (
                 <div className="space-y-1">
                   <Textarea
