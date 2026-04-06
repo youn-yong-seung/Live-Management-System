@@ -99,10 +99,13 @@ export function AdminFormBuilder({ liveId, liveTitle }: { liveId: number; liveTi
     setSaving(true);
     try {
       const selected = recommendations.filter((_, i) => selectedQuestions.has(i));
-      await apiFetch(`/lives/${liveId}/form-config`, {
+      const saveData = { ...config, aiRecommendedQuestions: selected.length > 0 ? selected : null };
+      const saved = await apiFetch<FormConfig>(`/lives/${liveId}/form-config`, {
         method: "PUT",
-        body: JSON.stringify({ ...config, aiRecommendedQuestions: selected.length > 0 ? selected : null }),
+        body: JSON.stringify(saveData),
       });
+      // Update local state with saved data from server
+      if (saved) setConfig(saved);
       toast({ title: "폼 설정 저장 완료!" });
     } catch (e) {
       toast({ variant: "destructive", title: (e as Error).message });

@@ -1807,7 +1807,7 @@ export default function Admin() {
             {/* ── 신청폼 설정 (AI 추천) ─────────────────── */}
             {rulesModal.live && (
               <div className="border-t border-gray-100 pt-5 mt-2">
-                <AdminFormBuilder liveId={rulesModal.live.id} liveTitle={rulesModal.live.title} />
+                <AdminFormBuilder key={`fb-${rulesModal.live.id}-${rulesModal.open}`} liveId={rulesModal.live.id} liveTitle={rulesModal.live.title} />
               </div>
             )}
 
