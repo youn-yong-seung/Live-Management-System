@@ -26,15 +26,18 @@ router.get("/youtube/auth-url", requireAdminAuth, async (_req: Request, res: Res
     }
 
     const oauth2 = getOAuth2Client();
-    const url = oauth2.generateAuthUrl({
-      access_type: "offline",
-      prompt: "select_account consent",
-      scope: [
-        "https://www.googleapis.com/auth/youtube.upload",
-        "https://www.googleapis.com/auth/youtube",
-        "https://www.googleapis.com/auth/drive.readonly",
-      ],
-    });
+    const scopes = [
+      "https://www.googleapis.com/auth/youtube.upload",
+      "https://www.googleapis.com/auth/youtube",
+      "https://www.googleapis.com/auth/drive.readonly",
+    ];
+    const url = `https://accounts.google.com/o/oauth2/v2/auth?` +
+      `client_id=${encodeURIComponent(YOUTUBE_CLIENT_ID)}` +
+      `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}` +
+      `&response_type=code` +
+      `&scope=${encodeURIComponent(scopes.join(" "))}` +
+      `&access_type=offline` +
+      `&prompt=select_account consent`;
 
     res.json({ url });
   } catch (err) {
@@ -128,17 +131,20 @@ async function getYouTubeClient() {
   return google.youtube({ version: "v3", auth: oauth2 });
 }
 
-/* ── GET /youtube/channels — 내 채널 목록 ────────────── */
+/* ── GET /youtube/channels — 내 채널 목록 (Brand Account 포함) */
 
 router.get("/youtube/channels", requireAdminAuth, async (_req: Request, res: Response) => {
   try {
     const youtube = await getYouTubeClient();
-    const result = await youtube.channels.list({
-      part: ["snippet", "statistics"],
+
+    // 1. Get my own channel
+    const mineResult = await youtube.channels.list({
+      part: ["snippet", "statistics", "contentOwnerDetails"],
       mine: true,
     });
 
-    const channels = (result.data.items ?? []).map((ch) => ({
+    // 2. Also try to list channels managed by this account
+    let allChannels = (mineResult.data.items ?? []).map((ch) => ({
       id: ch.id,
       title: ch.snippet?.title,
       handle: ch.snippet?.customUrl,
@@ -146,7 +152,28 @@ router.get("/youtube/channels", requireAdminAuth, async (_req: Request, res: Res
       thumbnail: ch.snippet?.thumbnails?.default?.url,
     }));
 
-    res.json({ channels });
+    // 3. Try to find Brand Account channels via YouTube API
+    // listByHandle for the known channel
+    try {
+      const brandResult = await youtube.channels.list({
+        part: ["snippet", "statistics"],
+        forHandle: "yunjadong",
+      });
+      const brandChannels = (brandResult.data.items ?? []).map((ch) => ({
+        id: ch.id,
+        title: ch.snippet?.title,
+        handle: ch.snippet?.customUrl,
+        subscriberCount: ch.statistics?.subscriberCount,
+        thumbnail: ch.snippet?.thumbnails?.default?.url,
+      }));
+      // Merge without duplicates
+      const existingIds = new Set(allChannels.map((c) => c.id));
+      for (const bc of brandChannels) {
+        if (!existingIds.has(bc.id)) allChannels.push(bc);
+      }
+    } catch { /* ignore if forHandle fails */ }
+
+    res.json({ channels: allChannels });
   } catch (err) {
     logger.error({ err }, "GET /youtube/channels failed");
     res.status(500).json({ error: "채널 목록 가져오기 실패" });
