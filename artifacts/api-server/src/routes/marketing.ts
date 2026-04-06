@@ -249,6 +249,22 @@ function generateRecommendedQuestions(title: string, description: string): Array
     });
   }
 
+  // 취업/커리어/채용 관련
+  if (t.includes("취업") || t.includes("채용") || t.includes("면접") || t.includes("커리어") || t.includes("ceo") || t.includes("이직") || t.includes("퇴사")) {
+    questions.push({
+      question: "지금 어떤 상황이세요?",
+      questionType: "radio",
+      options: ["학생", "취준생", "사회초년생(1~3년차)", "이직 고민 중", "퇴사 후 쉬는 중", "프리랜서·1인기업", "직접 입력"],
+      purpose: "참석자 현재 상황 파악 → 맞춤 사례/조언 준비",
+    });
+    questions.push({
+      question: "지금 가장 큰 고민은?",
+      questionType: "radio",
+      options: ["내가 뭘 하고 싶은지 모르겠다", "지금 하는 일이 맞는지 모르겠다", "이직·퇴사 타이밍을 모르겠다", "커리어 전환이 두렵다", "AI 시대에 뭘 준비해야 할지 모르겠다", "직접 입력"],
+      purpose: "핵심 고민 파악 → 라이브 중 집중 답변 주제 선정",
+    });
+  }
+
   // 사업/창업 관련
   if (t.includes("사업") || t.includes("창업") || t.includes("매출") || t.includes("수익")) {
     questions.push({
