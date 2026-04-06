@@ -161,7 +161,7 @@ export default function Home() {
                   )}
                   <button
                     className="flex-1 flex items-center justify-center gap-2 border border-white/10 text-white/60 hover:text-[#CC9965] hover:border-[#CC9965]/30 text-xs font-bold py-2.5 rounded-lg transition-colors"
-                    onClick={() => navigate(`/lives/${live.id}/review`)}>
+                    onClick={() => setModalReplay(live)}>
                     <Star className="h-3.5 w-3.5" /> 후기 작성하기
                   </button>
                 </div>
