@@ -5,6 +5,7 @@ import notificationsRouter from "./notifications";
 import adminRouter from "./admin";
 import editorsRouter from "./editors";
 import youtubeUploadRouter from "./youtube-upload";
+import marketingRouter from "./marketing";
 
 const router: IRouter = Router();
 
@@ -14,5 +15,6 @@ router.use(notificationsRouter);
 router.use(adminRouter);
 router.use(editorsRouter);
 router.use(youtubeUploadRouter);
+router.use(marketingRouter);
 
 export default router;
