@@ -108,6 +108,7 @@ export function AdminEditors() {
 
   // YouTube upload
   const [ytConnected, setYtConnected] = useState(false);
+  const [ytChannel, setYtChannel] = useState<{ id: string; title: string; handle: string; subscriberCount: string } | null>(null);
   const [uploadModal, setUploadModal] = useState<VideoProject | null>(null);
   const [uploadForm, setUploadForm] = useState({ title: "", description: "", publishAt: "", privacyStatus: "private" });
   const [isUploading, setIsUploading] = useState(false);
@@ -124,6 +125,11 @@ export function AdminEditors() {
       setEditors(eds);
       setProjects(prjs);
       setYtConnected(ytStatus.connected);
+      if (ytStatus.connected) {
+        apiFetch<{ channels: { id: string; title: string; handle: string; subscriberCount: string }[] }>("/youtube/channels")
+          .then((d) => { if (d.channels.length > 0) setYtChannel(d.channels[0]); })
+          .catch(() => {});
+      }
     } catch { /* ignore */ }
     setLoading(false);
   }, []);
@@ -263,7 +269,17 @@ export function AdminEditors() {
             <div className="flex items-center gap-3">
               <h3 className="font-bold text-gray-900">영상 파이프라인</h3>
               {ytConnected ? (
-                <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">YouTube 연결됨</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
+                    {ytChannel ? `${ytChannel.title} (${ytChannel.handle})` : "YouTube 연결됨"}
+                  </span>
+                  <Button variant="ghost" size="sm" className="h-5 text-[9px] text-gray-400 hover:text-red-500 px-1" onClick={async () => {
+                    try {
+                      const { url } = await apiFetch<{ url: string }>("/youtube/auth-url");
+                      window.open(url, "_blank", "width=600,height=700");
+                    } catch (e) { toast({ variant: "destructive", title: (e as Error).message }); }
+                  }}>채널 변경</Button>
+                </div>
               ) : (
                 <Button variant="outline" size="sm" className="h-6 text-[10px] rounded-full border-red-200 text-red-500" onClick={async () => {
                   try {
@@ -530,6 +546,15 @@ export function AdminEditors() {
             {!ytConnected && (
               <div className="p-3 bg-amber-50 rounded-xl border border-amber-100 text-sm text-amber-700">
                 ⚠ YouTube 계정을 먼저 연결해주세요.
+              </div>
+            )}
+            {ytChannel && (
+              <div className="p-3 bg-gray-50 rounded-xl text-xs text-gray-600 flex items-center justify-between">
+                <span>업로드 채널: <strong>{ytChannel.title}</strong> ({ytChannel.handle}) · 구독자 {ytChannel.subscriberCount}명</span>
+                <button className="text-blue-500 hover:text-blue-700 text-[10px] font-medium" onClick={async () => {
+                  const { url } = await apiFetch<{ url: string }>("/youtube/auth-url");
+                  window.open(url, "_blank", "width=600,height=700");
+                }}>채널 변경</button>
               </div>
             )}
             <div><Label>제목</Label><Input value={uploadForm.title} onChange={(e) => setUploadForm(f => ({ ...f, title: e.target.value }))} /></div>

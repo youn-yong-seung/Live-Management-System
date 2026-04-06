@@ -34,6 +34,8 @@ router.get("/youtube/auth-url", requireAdminAuth, async (_req: Request, res: Res
         "https://www.googleapis.com/auth/youtube",
         "https://www.googleapis.com/auth/drive.readonly",
       ],
+      // Let user pick which Google/Brand account to use
+      include_granted_scopes: true,
     });
 
     res.json({ url });
@@ -127,6 +129,31 @@ async function getYouTubeClient() {
 
   return google.youtube({ version: "v3", auth: oauth2 });
 }
+
+/* ── GET /youtube/channels — 내 채널 목록 ────────────── */
+
+router.get("/youtube/channels", requireAdminAuth, async (_req: Request, res: Response) => {
+  try {
+    const youtube = await getYouTubeClient();
+    const result = await youtube.channels.list({
+      part: ["snippet", "statistics"],
+      mine: true,
+    });
+
+    const channels = (result.data.items ?? []).map((ch) => ({
+      id: ch.id,
+      title: ch.snippet?.title,
+      handle: ch.snippet?.customUrl,
+      subscriberCount: ch.statistics?.subscriberCount,
+      thumbnail: ch.snippet?.thumbnails?.default?.url,
+    }));
+
+    res.json({ channels });
+  } catch (err) {
+    logger.error({ err }, "GET /youtube/channels failed");
+    res.status(500).json({ error: "채널 목록 가져오기 실패" });
+  }
+});
 
 /* ── POST /youtube/upload — 영상 업로드 ───────────────── */
 
