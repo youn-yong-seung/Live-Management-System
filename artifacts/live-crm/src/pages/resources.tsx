@@ -1,4 +1,4 @@
-import { ExternalLink, BookOpen, Download, GraduationCap, FileText, Crown } from "lucide-react";
+import { ExternalLink, BookOpen, Download, GraduationCap, FileText, Crown, Zap, MessageCircle } from "lucide-react";
 
 const gcHover = "glass-card hover:bg-white/[0.06] hover:-translate-y-1 transition-all duration-300";
 
@@ -19,6 +19,28 @@ interface ResourceSection {
 }
 
 const SECTIONS: ResourceSection[] = [
+  {
+    title: "자동화 프로그램",
+    description: "비즈니스에 바로 적용할 수 있는 자동화 프로그램",
+    icon: Zap,
+    iconColor: "text-emerald-400",
+    items: [
+      {
+        title: "N플레이스 자동 리뷰 답글 프로그램",
+        description: "자영업자 전용 — AI가 네이버 플레이스 리뷰에 자동으로 답글을 달아줍니다. 200분 이상 사용 중!",
+        url: "https://www.yunjadong.com/shop_view?idx=127",
+        badge: "무료",
+        badgeColor: "bg-emerald-500",
+      },
+      {
+        title: "카카오톡 자동 발송기 프로그램",
+        description: "단톡방 단체 발송, 예약 발송, 파일 첨부까지. 7일 무료 체험으로 모든 기능을 사용해보세요.",
+        url: "https://www.yunjadong.com/shop_view?idx=66",
+        badge: "7일 무료",
+        badgeColor: "bg-sky-500",
+      },
+    ],
+  },
   {
     title: "노션 템플릿",
     description: "바로 복제해서 쓸 수 있는 노션 템플릿 모음",

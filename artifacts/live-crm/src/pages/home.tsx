@@ -14,25 +14,28 @@ import {
 
 const FREE_RESOURCES = [
   {
+    title: "N플레이스 자동 리뷰 답글",
+    description: "자영업자 전용 AI 리뷰 자동 답글 프로그램",
+    icon: Zap,
+    color: "text-emerald-400",
+    url: "https://www.yunjadong.com/shop_view?idx=127",
+    badge: "무료",
+  },
+  {
+    title: "카톡 자동발송기",
+    description: "7일 무료 체험 — 단체발송, 예약발송",
+    icon: MessageCircle,
+    color: "text-sky-400",
+    url: "https://www.yunjadong.com/shop_view?idx=66",
+    badge: "무료체험",
+  },
+  {
     title: "노션 템플릿 & 전자책",
     description: "할 일 관리, 가계부 등 무료 템플릿",
     icon: BookOpen,
     color: "text-purple-400",
     url: "/resources",
-  },
-  {
-    title: "노션 왕초보 영상 강의",
-    description: "처음 시작하는 분들을 위한 강의",
-    icon: Download,
-    color: "text-sky-400",
-    url: "https://www.yunjadong.com/shop_view/?idx=159",
-  },
-  {
-    title: "노션 무료 전자책",
-    description: "기초부터 차근차근 알려주는 전자책",
-    icon: Zap,
-    color: "text-emerald-400",
-    url: "https://www.notion.so/yunjadong/2b8ec2501aa180eeac9ee3e98904f630?v=2b8ec2501aa180d4b80b000cef37f646",
+    badge: "무료",
   },
 ];
 
@@ -170,8 +173,15 @@ export default function Home() {
             const isExternal = res.url.startsWith("http");
             const inner = (
               <div className={`${gcHover} p-6 cursor-pointer group`}>
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4 bg-white/5 border border-white/10">
-                  <res.icon className={`h-5 w-5 ${res.color}`} />
+                <div className="flex items-start justify-between mb-4">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-white/5 border border-white/10">
+                    <res.icon className={`h-5 w-5 ${res.color}`} />
+                  </div>
+                  {(res as any).badge && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                      {(res as any).badge}
+                    </span>
+                  )}
                 </div>
                 <h3 className="font-bold text-white text-sm mb-1 group-hover:text-[#CC9965] transition-colors">{res.title}</h3>
                 <p className="text-xs text-white/40">{res.description}</p>
