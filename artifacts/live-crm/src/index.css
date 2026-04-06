@@ -268,6 +268,14 @@
   box-shadow: 0 0 25px rgba(204, 153, 101, 0.5);
 }
 
+/* Form inputs in dialogs — force black text for readability */
+[role="dialog"] input,
+[role="dialog"] textarea,
+[role="dialog"] select,
+[role="dialog"] [role="combobox"] {
+  color: #000000 !important;
+}
+
 /* Skill Info Panel slide-in */
 @keyframes slideInRight {
   from {

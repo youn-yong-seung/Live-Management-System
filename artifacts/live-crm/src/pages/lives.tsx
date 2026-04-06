@@ -435,7 +435,7 @@ export default function Lives() {
                 <FormField control={form.control} name="name" render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium text-gray-700">이름 <span className="text-red-500">*</span></FormLabel>
-                    <FormControl><Input placeholder="홍길동" className="rounded-xl border-gray-200 text-black" {...field} data-testid="input-name" /></FormControl>
+                    <FormControl><Input placeholder="홍길동" className="rounded-xl border-gray-200 !text-black" {...field} data-testid="input-name" /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />
@@ -444,7 +444,7 @@ export default function Lives() {
                 <FormField control={form.control} name="phone" render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium text-gray-700">연락처 <span className="text-red-500">*</span></FormLabel>
-                    <FormControl><Input placeholder="010-0000-0000" className="rounded-xl border-gray-200 text-black" {...field} data-testid="input-phone" /></FormControl>
+                    <FormControl><Input placeholder="010-0000-0000" className="rounded-xl border-gray-200 !text-black" {...field} data-testid="input-phone" /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />
@@ -454,7 +454,7 @@ export default function Lives() {
                 <FormField control={form.control} name="email" render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium text-gray-700">이메일 <span className="text-gray-400 font-normal">(선택)</span></FormLabel>
-                    <FormControl><Input type="email" placeholder="example@email.com" className="rounded-xl border-gray-200 text-black" {...field} data-testid="input-email" /></FormControl>
+                    <FormControl><Input type="email" placeholder="example@email.com" className="rounded-xl border-gray-200 !text-black" {...field} data-testid="input-email" /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />
@@ -467,7 +467,7 @@ export default function Lives() {
                     <FormLabel className="text-sm font-medium text-gray-700">업종 <span className="text-gray-400 font-normal">(선택)</span></FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger className="rounded-xl border-gray-200 text-black">
+                        <SelectTrigger className="rounded-xl border-gray-200 !text-black">
                           <SelectValue placeholder="업종을 선택해주세요" />
                         </SelectTrigger>
                       </FormControl>
@@ -556,7 +556,7 @@ export default function Lives() {
                         {(q.questionType === "text" || q.questionType === "textarea") && (
                           <FormControl>
                             <Textarea
-                              className="resize-none rounded-xl border-gray-200 text-sm text-black"
+                              className="resize-none rounded-xl border-gray-200 text-sm !text-black"
                               placeholder="답변을 입력해주세요"
                               rows={q.questionType === "textarea" ? 3 : 2}
                               value={typeof field.value === "string" ? field.value : ""}
@@ -598,7 +598,7 @@ export default function Lives() {
                         {(q.questionType === "text" || q.questionType === "textarea") && (
                           <FormControl>
                             <Textarea
-                              className="resize-none rounded-xl border-gray-200 text-sm text-black"
+                              className="resize-none rounded-xl border-gray-200 text-sm !text-black"
                               placeholder="답변을 입력해주세요"
                               rows={q.questionType === "textarea" ? 4 : 2}
                               value={typeof field.value === "string" ? field.value : ""}
