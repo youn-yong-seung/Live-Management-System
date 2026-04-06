@@ -230,6 +230,8 @@ export default function Admin() {
   const [sendTemplateId, setSendTemplateId] = useState("");
   const [sendMsgBody, setSendMsgBody] = useState("");
   const [isSending, setIsSending] = useState(false);
+  const [sendVariables, setSendVariables] = useState<Record<string, string>>({});
+  const [selectedTemplateContent, setSelectedTemplateContent] = useState("");
 
   /* ── Notification rules state ──────────────────── */
   const [rulesModal, setRulesModal] = useState<{ live: Live | null; open: boolean }>({ live: null, open: false });
@@ -472,8 +474,15 @@ export default function Admin() {
 
     setIsSending(true);
     try {
-      const body: Record<string, string> = { messageType: sendMsgType };
-      if (sendMsgType === "alimtalk") { body.templateId = sendTemplateId; if (tpl?.name) body.templateName = tpl.name; }
+      const body: Record<string, unknown> = { messageType: sendMsgType };
+      if (sendMsgType === "alimtalk") {
+        body.templateId = sendTemplateId;
+        if (tpl?.name) body.templateName = tpl.name;
+        // Pass variable mappings (exclude empty values and auto-filled ones)
+        const vars: Record<string, string> = {};
+        Object.entries(sendVariables).forEach(([k, v]) => { if (v.trim()) vars[k] = v; });
+        if (Object.keys(vars).length > 0) body.variables = vars;
+      }
       if (sendMsgType === "sms") body.messageBody = sendMsgBody;
 
       const result = await apiFetch<{ successCount: number; recipientCount: number }>(`/lives/${sendModal.live.id}/send-now`, {
@@ -1208,77 +1217,133 @@ export default function Admin() {
 
       {/* ═══ Immediate Send Modal ══════════════════════ */}
       <Dialog open={sendModal.open} onOpenChange={(open) => setSendModal({ ...sendModal, open })}>
-        <DialogContent className="sm:max-w-[500px] bg-white rounded-2xl border border-gray-100 shadow-xl">
+        <DialogContent className="sm:max-w-[800px] bg-white rounded-2xl border border-gray-100 shadow-xl">
           <DialogHeader>
             <DialogTitle className="text-lg font-bold text-gray-900">즉시 발송</DialogTitle>
             <DialogDescription className="text-sm text-gray-500">{sendModal.live?.title}</DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-2">
-            {!solapiConfig?.configured && (
-              <div className="p-3 bg-amber-50 rounded-xl border border-amber-100 text-sm text-amber-700">
-                ⚠ Solapi 자격증명을 먼저 API 설정 탭에서 저장해주세요.
-              </div>
-            )}
+          <div className="flex gap-6">
+            {/* Left: Settings */}
+            <div className="flex-1 space-y-4 py-2">
+              {!solapiConfig?.configured && (
+                <div className="p-3 bg-amber-50 rounded-xl border border-amber-100 text-sm text-amber-700">
+                  ⚠ Solapi 자격증명을 먼저 API 설정 탭에서 저장해주세요.
+                </div>
+              )}
 
-            {/* Message type toggle */}
-            <div className="grid gap-2">
-              <Label className="text-sm font-medium text-gray-700">발송 유형</Label>
-              <div className="flex gap-2">
-                {(["alimtalk", "sms"] as const).map((type) => (
-                  <button
-                    key={type}
-                    onClick={() => setSendMsgType(type)}
-                    className={`flex-1 py-2 px-3 rounded-xl border text-sm font-semibold transition-colors ${sendMsgType === type ? "bg-blue-600 border-blue-600 text-white" : "border-gray-200 text-gray-500 hover:border-blue-300"}`}
-                  >
-                    {type === "alimtalk" ? "🔔 카카오 알림톡" : "💬 문자(SMS/LMS)"}
-                  </button>
-                ))}
+              <div className="grid gap-2">
+                <Label className="text-sm font-medium text-gray-700">발송 유형</Label>
+                <div className="flex gap-2">
+                  {(["alimtalk", "sms"] as const).map((type) => (
+                    <button key={type} onClick={() => setSendMsgType(type)}
+                      className={`flex-1 py-2 px-3 rounded-xl border text-sm font-semibold transition-colors ${sendMsgType === type ? "bg-blue-600 border-blue-600 text-white" : "border-gray-200 text-gray-500 hover:border-blue-300"}`}>
+                      {type === "alimtalk" ? "🔔 알림톡" : "💬 문자"}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {sendMsgType === "alimtalk" ? (
+                <div className="space-y-3">
+                  <div className="grid gap-2">
+                    <Label className="text-sm font-medium text-gray-700">알림톡 템플릿</Label>
+                    {templates.length > 0 ? (
+                      <Select value={sendTemplateId} onValueChange={(v) => {
+                        setSendTemplateId(v);
+                        const tpl = templates.find((t) => t.templateId === v);
+                        setSelectedTemplateContent(tpl?.content ?? "");
+                        // Parse variables from content
+                        const vars: Record<string, string> = {};
+                        const matches = (tpl?.content ?? "").match(/#\{[^}]+\}/g) ?? [];
+                        matches.forEach((m) => { if (m !== "#{고객명}" && m !== "#{이름}") vars[m] = ""; });
+                        setSendVariables(vars);
+                      }}>
+                        <SelectTrigger className="rounded-xl border-gray-200"><SelectValue placeholder="템플릿을 선택하세요" /></SelectTrigger>
+                        <SelectContent>{templates.map((t) => <SelectItem key={t.templateId} value={t.templateId}>{t.name}</SelectItem>)}</SelectContent>
+                      </Select>
+                    ) : (
+                      <div className="flex gap-2">
+                        <Input placeholder="Template ID" value={sendTemplateId} onChange={(e) => setSendTemplateId(e.target.value)} className="rounded-xl border-gray-200" />
+                        <Button variant="outline" className="rounded-xl flex-none" onClick={() => fetchTemplates(false)} disabled={isFetchingTemplates || !solapiConfig?.configured}>
+                          {isFetchingTemplates ? <Loader2 className="h-4 w-4 animate-spin" /> : <Eye className="h-4 w-4" />}
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Variable mapping */}
+                  {Object.keys(sendVariables).length > 0 && (
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-gray-700">변수 매핑</Label>
+                      <p className="text-[11px] text-gray-400">#{'{'}고객명{'}'} 은 신청자 이름으로 자동 치환됩니다.</p>
+                      {Object.entries(sendVariables).map(([varName]) => (
+                        <div key={varName} className="flex items-center gap-2">
+                          <span className="text-xs font-mono bg-gray-100 text-gray-600 px-2 py-1 rounded flex-shrink-0 min-w-[100px]">{varName}</span>
+                          <Input
+                            placeholder={`${varName} 값 입력`}
+                            value={sendVariables[varName]}
+                            onChange={(e) => setSendVariables((prev) => ({ ...prev, [varName]: e.target.value }))}
+                            className="rounded-lg border-gray-200 h-8 text-sm"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="grid gap-2">
+                  <Label className="text-sm font-medium text-gray-700">
+                    문자 내용 <span className="text-gray-400 font-normal">{sendMsgBody.length}자 · {new TextEncoder().encode(sendMsgBody).length > 90 ? "LMS" : "SMS"}</span>
+                  </Label>
+                  <Textarea placeholder="발송할 문자 내용을 입력하세요..." value={sendMsgBody} onChange={(e) => setSendMsgBody(e.target.value)} className="rounded-xl border-gray-200 min-h-[100px] resize-none" />
+                </div>
+              )}
+
+              <div className="p-3 bg-blue-50 rounded-xl text-sm text-blue-700">
+                <strong>{sendModal.live?.registrationCount ?? 0}명</strong>의 신청자에게 발송됩니다.
               </div>
             </div>
 
-            {sendMsgType === "alimtalk" ? (
-              <div className="grid gap-2">
-                <Label className="text-sm font-medium text-gray-700">알림톡 템플릿</Label>
-                {templates.length > 0 ? (
-                  <Select value={sendTemplateId} onValueChange={setSendTemplateId}>
-                    <SelectTrigger className="rounded-xl border-gray-200"><SelectValue placeholder="템플릿을 선택하세요" /></SelectTrigger>
-                    <SelectContent>{templates.map((t) => <SelectItem key={t.templateId} value={t.templateId}>{t.name}</SelectItem>)}</SelectContent>
-                  </Select>
-                ) : (
-                  <div className="flex gap-2">
-                    <Input placeholder="Template ID를 직접 입력" value={sendTemplateId} onChange={(e) => setSendTemplateId(e.target.value)} className="rounded-xl border-gray-200" />
-                    <Button variant="outline" className="rounded-xl flex-none" onClick={() => fetchTemplates(false)} disabled={isFetchingTemplates || !solapiConfig?.configured}>
-                      {isFetchingTemplates ? <Loader2 className="h-4 w-4 animate-spin" /> : <Eye className="h-4 w-4" />}
-                    </Button>
-                  </div>
-                )}
+            {/* Right: Preview */}
+            <div className="w-[260px] flex-shrink-0">
+              <Label className="text-sm font-medium text-gray-700 mb-2 block">미리보기</Label>
+              <div className="bg-[#B2C7D9] rounded-2xl p-3 min-h-[300px]">
+                <div className="bg-white rounded-xl p-4 shadow-sm text-xs leading-relaxed">
+                  {sendMsgType === "alimtalk" && selectedTemplateContent ? (
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-100">
+                        <div className="w-8 h-8 bg-yellow-400 rounded-lg flex items-center justify-center text-[10px] font-bold">💬</div>
+                        <div>
+                          <p className="font-bold text-[11px] text-gray-800">윤자동</p>
+                          <p className="text-[9px] text-gray-400">알림톡</p>
+                        </div>
+                      </div>
+                      <p className="text-gray-700 whitespace-pre-wrap break-words text-[11px]">
+                        {(() => {
+                          let preview = selectedTemplateContent;
+                          preview = preview.replace(/#\{고객명\}/g, "홍길동");
+                          preview = preview.replace(/#\{이름\}/g, "홍길동");
+                          Object.entries(sendVariables).forEach(([k, v]) => {
+                            preview = preview.replace(new RegExp(k.replace(/[{}#]/g, "\\$&"), "g"), v || `[${k}]`);
+                          });
+                          return preview;
+                        })()}
+                      </p>
+                    </div>
+                  ) : sendMsgType === "sms" && sendMsgBody ? (
+                    <p className="text-gray-700 whitespace-pre-wrap">{sendMsgBody}</p>
+                  ) : (
+                    <p className="text-gray-400 text-center py-8">템플릿을 선택하면<br />미리보기가 표시됩니다</p>
+                  )}
+                </div>
               </div>
-            ) : (
-              <div className="grid gap-2">
-                <Label className="text-sm font-medium text-gray-700">
-                  문자 내용 <span className="text-gray-400 font-normal">{sendMsgBody.length}자 · {new TextEncoder().encode(sendMsgBody).length > 90 ? "LMS" : "SMS"}</span>
-                </Label>
-                <Textarea
-                  placeholder="발송할 문자 내용을 입력하세요..."
-                  value={sendMsgBody}
-                  onChange={(e) => setSendMsgBody(e.target.value)}
-                  className="rounded-xl border-gray-200 min-h-[100px] resize-none"
-                />
-                <p className="text-xs text-gray-400">90 bytes 초과 시 자동으로 LMS로 발송됩니다.</p>
-              </div>
-            )}
-
-            <div className="p-3 bg-blue-50 rounded-xl text-sm text-blue-700">
-              <strong>{sendModal.live?.registrationCount ?? 0}명</strong>의 신청자에게 발송됩니다.
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" className="rounded-xl border-gray-200" onClick={() => setSendModal({ live: null, open: false })}>취소</Button>
-            <Button
-              className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold"
+            <Button className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold"
               onClick={handleSendNow}
-              disabled={isSending || !solapiConfig?.configured || (sendMsgType === "alimtalk" && !sendTemplateId) || (sendMsgType === "sms" && !sendMsgBody.trim())}
-            >
+              disabled={isSending || !solapiConfig?.configured || (sendMsgType === "alimtalk" && !sendTemplateId) || (sendMsgType === "sms" && !sendMsgBody.trim())}>
               {isSending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}발송하기
             </Button>
           </DialogFooter>

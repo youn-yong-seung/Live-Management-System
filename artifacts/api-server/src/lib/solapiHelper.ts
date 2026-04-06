@@ -19,6 +19,8 @@ export interface SolapiTemplate {
   name: string;
   content: string;
   status: string;
+  emphasizeTitle?: string;
+  emphasizeSubTitle?: string;
 }
 
 export async function fetchSolapiTemplates(apiKey: string, apiSecret: string): Promise<SolapiTemplate[]> {
@@ -76,6 +78,7 @@ export async function sendAlimtalkBatch(
       templateId,
       variables: {
         "#{이름}": r.name,
+        "#{고객명}": r.name,
         ...(r.variables ?? {}),
       },
     },

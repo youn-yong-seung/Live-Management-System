@@ -159,8 +159,9 @@ router.post("/lives/:id/send-now", requireAdminAuth, async (req: Request, res: R
     const liveId = parseInt(String(req.params.id), 10);
     if (isNaN(liveId)) return res.status(400).json({ error: "Invalid id" });
 
-    const { messageType = "alimtalk", templateId, templateName, messageBody } = req.body as {
+    const { messageType = "alimtalk", templateId, templateName, messageBody, variables } = req.body as {
       messageType?: string; templateId?: string; templateName?: string; messageBody?: string;
+      variables?: Record<string, string>;
     };
     const isSms = messageType === "sms";
 
@@ -182,7 +183,14 @@ router.post("/lives/:id/send-now", requireAdminAuth, async (req: Request, res: R
 
     const { successCount, failCount } = isSms
       ? await sendSmsBatch(config.apiKey, config.apiSecret, config.senderPhone, messageBody!, regs.map((r) => ({ phone: r.phone, name: r.name })))
-      : await sendAlimtalkBatch(config.apiKey, config.apiSecret, config.senderKey!, config.senderPhone, templateId!, regs.map((r) => ({ phone: r.phone, name: r.name })));
+      : await sendAlimtalkBatch(config.apiKey, config.apiSecret, config.senderKey!, config.senderPhone, templateId!, regs.map((r) => ({
+          phone: r.phone,
+          name: r.name,
+          variables: {
+            ...variables,
+            "#{고객명}": r.name,
+          },
+        })));
 
     await db.insert(notificationLogTable).values({
       liveId,
