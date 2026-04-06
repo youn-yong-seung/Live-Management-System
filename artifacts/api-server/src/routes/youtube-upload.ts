@@ -32,6 +32,7 @@ router.get("/youtube/auth-url", requireAdminAuth, async (_req: Request, res: Res
       scope: [
         "https://www.googleapis.com/auth/youtube.upload",
         "https://www.googleapis.com/auth/youtube",
+        "https://www.googleapis.com/auth/drive.readonly",
       ],
     });
 
