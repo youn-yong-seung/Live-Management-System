@@ -101,6 +101,40 @@ router.post("/lives", requireAdminAuth, async (req: Request, res: Response) => {
   }
 });
 
+/* ── OG meta page for social sharing ─────────────── */
+router.get("/og/lives/:id", async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(String(req.params.id), 10);
+    const [live] = await db.select().from(livesTable).where(eq(livesTable.id, id));
+    if (!live) return res.status(404).send("Not found");
+
+    const ytMatch = live.youtubeUrl?.match(/(?:youtu\.be\/|v=|\/embed\/|\/live\/)([^#&?]{11})/);
+    const thumb = ytMatch ? `https://img.youtube.com/vi/${ytMatch[1]}/hqdefault.jpg` : "";
+    const siteUrl = `https://yunjadong-live-class.vercel.app/lives/${id}/register`;
+    const title = `[윤자동 클래스] ${live.title}`;
+    const desc = live.description || "무료 라이브 특강에 참가 신청하세요!";
+
+    res.setHeader("Content-Type", "text/html; charset=utf-8");
+    res.send(`<!DOCTYPE html><html><head>
+      <meta charset="utf-8">
+      <meta property="og:title" content="${title.replace(/"/g, "&quot;")}" />
+      <meta property="og:description" content="${desc.replace(/"/g, "&quot;")}" />
+      <meta property="og:image" content="${thumb}" />
+      <meta property="og:url" content="${siteUrl}" />
+      <meta property="og:type" content="website" />
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content="${title.replace(/"/g, "&quot;")}" />
+      <meta name="twitter:description" content="${desc.replace(/"/g, "&quot;")}" />
+      <meta name="twitter:image" content="${thumb}" />
+      <meta http-equiv="refresh" content="0;url=${siteUrl}" />
+      <title>${title.replace(/</g, "&lt;")}</title>
+    </head><body><p>Redirecting to <a href="${siteUrl}">${siteUrl}</a>...</p></body></html>`);
+  } catch (err) {
+    req.log.error({ err }, "GET /og/lives/:id failed");
+    res.status(500).send("Error");
+  }
+});
+
 router.get("/lives/:id", async (req: Request, res: Response) => {
   try {
     const { id } = GetLiveParams.parse({ id: parseInt(String(req.params.id), 10) });

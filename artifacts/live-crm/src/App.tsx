@@ -13,6 +13,7 @@ import TechTree from "@/pages/techtree";
 import Admin from "@/pages/admin";
 import ReviewPage from "@/pages/review";
 import EditorPortal from "@/pages/editor-portal";
+import RegisterPage from "@/pages/register";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient();
@@ -41,8 +42,9 @@ function App() {
       <TooltipProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
           <Switch>
-            {/* Editor portal — independent layout */}
+            {/* Independent layout pages */}
             <Route path="/editor" component={EditorPortal} />
+            <Route path="/lives/:id/register" component={RegisterPage} />
             {/* Main site */}
             <Route>{() => <MainRouter />}</Route>
           </Switch>
