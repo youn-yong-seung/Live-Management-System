@@ -12,11 +12,12 @@ import Resources from "@/pages/resources";
 import TechTree from "@/pages/techtree";
 import Admin from "@/pages/admin";
 import ReviewPage from "@/pages/review";
+import EditorPortal from "@/pages/editor-portal";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient();
 
-function Router() {
+function MainRouter() {
   return (
     <Layout>
       <Switch>
@@ -39,7 +40,12 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <Router />
+          <Switch>
+            {/* Editor portal — independent layout */}
+            <Route path="/editor" component={EditorPortal} />
+            {/* Main site */}
+            <Route>{() => <MainRouter />}</Route>
+          </Switch>
         </WouterRouter>
         <Toaster />
       </TooltipProvider>
