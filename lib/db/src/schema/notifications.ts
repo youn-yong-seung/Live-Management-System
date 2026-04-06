@@ -6,6 +6,7 @@ import {
   integer,
   boolean,
   real,
+  jsonb,
 } from "drizzle-orm/pg-core";
 import { livesTable } from "./lives";
 
@@ -29,8 +30,10 @@ export const notificationRulesTable = pgTable("notification_rules", {
   templateName: text("template_name"),
   messageBody: text("message_body"),
   customTime: text("custom_time"),
+  customVariables: jsonb("custom_variables").$type<Record<string, string>>(),
   enabled: boolean("enabled").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 export const notificationLogTable = pgTable("notification_log", {

@@ -176,10 +176,34 @@ router.post("/lives/:id/send-now", requireAdminAuth, async (req: Request, res: R
       return res.status(400).json({ error: "Solapi senderKey (pfId) not configured for alimtalk" });
     }
 
+    // Get live info for auto-filling variables
+    const [live] = await db.select().from(livesTable).where(eq(livesTable.id, liveId));
+
     const regs = await db.select().from(registrationsTable).where(eq(registrationsTable.liveId, liveId));
     if (regs.length === 0) {
       return res.json({ success: true, recipientCount: 0, successCount: 0, message: "No registrants" });
     }
+
+    // Auto-compute variables from live data
+    const autoVars: Record<string, string> = {};
+    if (live) {
+      autoVars["#{방송타이틀}"] = live.title;
+      if (live.scheduledAt) {
+        const sa = new Date(live.scheduledAt);
+        const now = new Date();
+        const diffMs = sa.getTime() - now.getTime();
+        const diffH = Math.floor(Math.abs(diffMs) / (1000 * 60 * 60));
+        const diffM = Math.floor((Math.abs(diffMs) % (1000 * 60 * 60)) / (1000 * 60));
+        autoVars["#{남은시간}"] = diffMs > 0 ? `${diffH}시간 ${diffM}분` : "곧";
+        autoVars["#{방송시작시간}"] = sa.toLocaleString("ko-KR", { timeZone: "Asia/Seoul", hour: "2-digit", minute: "2-digit" });
+        autoVars["#{년월일}"] = sa.toLocaleDateString("ko-KR", { timeZone: "Asia/Seoul", year: "numeric", month: "long", day: "numeric" });
+        autoVars["#{시간}"] = sa.toLocaleTimeString("ko-KR", { timeZone: "Asia/Seoul", hour: "2-digit", minute: "2-digit" });
+      }
+      autoVars["#{라이브링크}"] = live.youtubeUrl ?? "";
+    }
+    // Defaults
+    if (!variables?.["#{진행자명}"] && !autoVars["#{진행자명}"]) autoVars["#{진행자명}"] = "윤자동";
+    if (!variables?.["#{준비물}"] && !autoVars["#{준비물}"]) autoVars["#{준비물}"] = "없음";
 
     const { successCount, failCount } = isSms
       ? await sendSmsBatch(config.apiKey, config.apiSecret, config.senderPhone, messageBody!, regs.map((r) => ({ phone: r.phone, name: r.name })))
@@ -187,6 +211,7 @@ router.post("/lives/:id/send-now", requireAdminAuth, async (req: Request, res: R
           phone: r.phone,
           name: r.name,
           variables: {
+            ...autoVars,
             ...variables,
             "#{고객명}": r.name,
           },

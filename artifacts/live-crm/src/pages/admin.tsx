@@ -1576,25 +1576,90 @@ export default function Admin() {
 
                   {/* Content input */}
                   {!isSms ? (
-                    templates.length > 0 ? (
-                      <Select
-                        value={rule.templateId ?? ""}
-                        onValueChange={(val) => {
-                          const tpl = templates.find((t) => t.templateId === val);
-                          updateRule(idx, { templateId: val || null, templateName: tpl?.name ?? null });
-                        }}
-                      >
-                        <SelectTrigger className="rounded-lg border-gray-200 h-9 text-sm"><SelectValue placeholder="알림톡 템플릿 선택" /></SelectTrigger>
-                        <SelectContent>{templates.map((t) => <SelectItem key={t.templateId} value={t.templateId}>{t.name}</SelectItem>)}</SelectContent>
-                      </Select>
-                    ) : (
-                      <Input
-                        placeholder="Template ID 직접 입력"
-                        value={rule.templateId ?? ""}
-                        onChange={(e) => updateRule(idx, { templateId: e.target.value || null, templateName: null })}
-                        className="rounded-lg border-gray-200 h-9 text-sm"
-                      />
-                    )
+                    <div className="space-y-2">
+                      {templates.length > 0 ? (
+                        <Select
+                          value={rule.templateId ?? ""}
+                          onValueChange={(val) => {
+                            const tpl = templates.find((t) => t.templateId === val);
+                            updateRule(idx, { templateId: val || null, templateName: tpl?.name ?? null });
+                          }}
+                        >
+                          <SelectTrigger className="rounded-lg border-gray-200 h-9 text-sm"><SelectValue placeholder="알림톡 템플릿 선택" /></SelectTrigger>
+                          <SelectContent>{templates.map((t) => <SelectItem key={t.templateId} value={t.templateId}>{t.name}</SelectItem>)}</SelectContent>
+                        </Select>
+                      ) : (
+                        <Input
+                          placeholder="Template ID 직접 입력"
+                          value={rule.templateId ?? ""}
+                          onChange={(e) => updateRule(idx, { templateId: e.target.value || null, templateName: null })}
+                          className="rounded-lg border-gray-200 h-9 text-sm"
+                        />
+                      )}
+
+                      {/* Variable detail toggle */}
+                      {rule.templateId && (() => {
+                        const tpl = templates.find((t) => t.templateId === rule.templateId);
+                        if (!tpl?.content) return null;
+                        const vars = (tpl.content.match(/#\{[^}]+\}/g) ?? []).filter((v, i, a) => a.indexOf(v) === i);
+                        if (vars.length === 0) return null;
+
+                        const liveData = rulesModal.live;
+                        const autoMap: Record<string, string> = {};
+                        if (liveData) {
+                          autoMap["#{방송타이틀}"] = liveData.title;
+                          if (liveData.scheduledAt) {
+                            const sa = new Date(liveData.scheduledAt);
+                            autoMap["#{년월일}"] = sa.toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" });
+                            autoMap["#{시간}"] = sa.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
+                            autoMap["#{방송시작시간}"] = sa.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
+                            const diffMs = sa.getTime() - Date.now();
+                            const dH = Math.floor(Math.abs(diffMs) / 3600000);
+                            const dM = Math.floor((Math.abs(diffMs) % 3600000) / 60000);
+                            autoMap["#{남은시간}"] = diffMs > 0 ? `${dH}시간 ${dM}분` : "곧";
+                          }
+                          autoMap["#{라이브링크}"] = liveData.youtubeUrl ?? "";
+                        }
+                        autoMap["#{고객명}"] = "(신청자 이름)";
+                        autoMap["#{이름}"] = "(신청자 이름)";
+                        autoMap["#{진행자명}"] = "윤자동";
+                        autoMap["#{준비물}"] = "없음";
+
+                        const customVars = (rule as any).customVariables as Record<string, string> | undefined;
+
+                        return (
+                          <details className="group">
+                            <summary className="text-xs text-blue-600 cursor-pointer hover:text-blue-800 font-medium flex items-center gap-1">
+                              <Settings className="h-3 w-3" /> 세부 설정 펼치기 ({vars.length}개 변수)
+                            </summary>
+                            <div className="mt-2 space-y-1.5 p-3 bg-gray-50 rounded-lg border border-gray-100">
+                              <p className="text-[10px] text-gray-400 mb-2">자동 매핑된 값을 확인하고, 필요한 경우 직접 ��정하세요.</p>
+                              {vars.map((varName) => {
+                                const autoVal = autoMap[varName] ?? "";
+                                const customVal = customVars?.[varName];
+                                const displayVal = customVal ?? autoVal;
+                                const isAuto = !customVal && !!autoVal;
+                                return (
+                                  <div key={varName} className="flex items-center gap-2">
+                                    <span className="text-[10px] font-mono bg-white text-gray-600 px-1.5 py-0.5 rounded border border-gray-200 flex-shrink-0 min-w-[90px]">{varName}</span>
+                                    <Input
+                                      value={displayVal}
+                                      onChange={(e) => {
+                                        const newCustom = { ...(customVars ?? {}), [varName]: e.target.value };
+                                        updateRule(idx, { customVariables: newCustom } as any);
+                                      }}
+                                      className="h-7 text-xs rounded border-gray-200 flex-1"
+                                      placeholder="값 입력"
+                                    />
+                                    {isAuto && <span className="text-[9px] text-green-500 flex-shrink-0">자동</span>}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </details>
+                        );
+                      })()}
+                    </div>
                   ) : (
                     <div className="space-y-1">
                       <Textarea
@@ -1691,9 +1756,27 @@ export default function Admin() {
 
                   if (tpl?.content) {
                     let preview = tpl.content;
+                    // Auto-fill from live data
+                    const liveData = rulesModal.live;
+                    if (liveData) {
+                      preview = preview.replace(/#\{방송타이틀\}/g, liveData.title);
+                      if (liveData.scheduledAt) {
+                        const sa = new Date(liveData.scheduledAt);
+                        preview = preview.replace(/#\{년월일\}/g, sa.toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" }));
+                        preview = preview.replace(/#\{시간\}/g, sa.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" }));
+                        preview = preview.replace(/#\{방송시작시간\}/g, sa.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" }));
+                        const diffMs = sa.getTime() - Date.now();
+                        const dH = Math.floor(Math.abs(diffMs) / 3600000);
+                        const dM = Math.floor((Math.abs(diffMs) % 3600000) / 60000);
+                        preview = preview.replace(/#\{남은시간\}/g, diffMs > 0 ? `${dH}시간 ${dM}분` : "곧");
+                      }
+                      preview = preview.replace(/#\{라이브링크\}/g, liveData.youtubeUrl ?? "");
+                    }
                     preview = preview.replace(/#\{고객명\}/g, "홍길동");
                     preview = preview.replace(/#\{이름\}/g, "홍길동");
-                    // Show unfilled variables as placeholders
+                    preview = preview.replace(/#\{진행자명\}/g, "윤자동");
+                    preview = preview.replace(/#\{준비물\}/g, "없음");
+                    // Show remaining unfilled variables as placeholders
                     preview = preview.replace(/#\{([^}]+)\}/g, "[#{$1}]");
                     return (
                       <div className="space-y-2">
