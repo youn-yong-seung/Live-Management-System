@@ -28,13 +28,13 @@ router.get("/youtube/auth-url", requireAdminAuth, async (_req: Request, res: Res
     const oauth2 = getOAuth2Client();
     const url = oauth2.generateAuthUrl({
       access_type: "offline",
-      prompt: "consent",
+      prompt: "select_account consent",
       scope: [
         "https://www.googleapis.com/auth/youtube.upload",
         "https://www.googleapis.com/auth/youtube",
         "https://www.googleapis.com/auth/drive.readonly",
       ],
-    }) + "&authuser=0&prompt=select_account+consent";
+    });
 
     res.json({ url });
   } catch (err) {
