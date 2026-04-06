@@ -410,38 +410,120 @@ export default function TechTree() {
     return levels;
   };
 
+  /* Arc offset for each node position */
+  const arcOffsets = [24, 8, 0, 8, 24];
+
   return (
-    <div className="space-y-12">
+    <div className="space-y-16">
       {/* Header */}
-      <div className="pt-2 text-center">
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-white mb-2">테크트리</h1>
-        <p className="text-white/50 text-sm max-w-md mx-auto">시작 지점을 선택하고 나만의 성장 루트를 따라가세요. 각 노드에 마우스를 올려 강의 정보를 확인하세요.</p>
+      <div className="pt-4 text-center">
+        <p className="text-[#00E5E5]/60 text-xs font-semibold uppercase tracking-[0.2em] mb-3">SKILL TREE</p>
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-3" style={{ textShadow: "0 0 40px rgba(0,229,229,0.15)" }}>테크트리</h1>
+        <p className="text-white/40 text-sm max-w-md mx-auto">시작 지점을 선택하고 나만의 성장 루트를 따라가세요</p>
       </div>
 
-      {/* Path Selector */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {PATHS.map((path) => (
-          <button
-            key={path.id}
-            onClick={() => handleSelectPath(path.id)}
-            className={`glass-card p-5 text-left transition-all duration-300 cursor-pointer group ${
-              selectedPath === path.id ? "!border-opacity-100" : "hover:-translate-y-1"
-            }`}
-            style={{
-              borderColor: selectedPath === path.id ? path.color : undefined,
-              boxShadow: selectedPath === path.id ? `0 0 20px ${path.glowColor}` : undefined,
-            }}
-          >
-            <div className="flex items-center gap-3 mb-2">
-              <span className="text-2xl">{path.emoji}</span>
-              <div>
-                <h3 className="font-bold text-white text-sm group-hover:text-[#CC9965] transition-colors">{path.name}</h3>
-                <p className="text-[11px] text-white/30">{path.nodes.length}개 강의</p>
+      {/* ── Arc Path Selector ────────────────────────── */}
+      <div className="relative py-8">
+        {/* Background constellation pattern */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <svg className="w-full h-full opacity-[0.04]" viewBox="0 0 800 200">
+            <circle cx="80" cy="40" r="1.5" fill="#00E5E5" />
+            <circle cx="200" cy="120" r="1" fill="#00E5E5" />
+            <circle cx="350" cy="30" r="1.5" fill="#00E5E5" />
+            <circle cx="500" cy="150" r="1" fill="#00E5E5" />
+            <circle cx="650" cy="60" r="1.5" fill="#00E5E5" />
+            <circle cx="720" cy="160" r="1" fill="#00E5E5" />
+            <line x1="80" y1="40" x2="200" y2="120" stroke="#00E5E5" strokeWidth="0.5" />
+            <line x1="200" y1="120" x2="350" y2="30" stroke="#00E5E5" strokeWidth="0.5" />
+            <line x1="350" y1="30" x2="500" y2="150" stroke="#00E5E5" strokeWidth="0.5" />
+            <line x1="500" y1="150" x2="650" y2="60" stroke="#00E5E5" strokeWidth="0.5" />
+            <line x1="650" y1="60" x2="720" y2="160" stroke="#00E5E5" strokeWidth="0.5" />
+            <circle cx="140" cy="160" r="0.8" fill="#00E5E5" />
+            <circle cx="420" cy="100" r="0.8" fill="#00E5E5" />
+            <circle cx="580" cy="40" r="0.8" fill="#00E5E5" />
+            <line x1="140" y1="160" x2="200" y2="120" stroke="#00E5E5" strokeWidth="0.3" />
+            <line x1="420" y1="100" x2="500" y2="150" stroke="#00E5E5" strokeWidth="0.3" />
+          </svg>
+        </div>
+
+        {/* Connecting arc line */}
+        <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-[80%] max-w-[700px] pointer-events-none">
+          <svg viewBox="0 0 700 60" className="w-full opacity-20">
+            <path d="M 30 50 Q 175 0 350 30 Q 525 60 670 10" fill="none" stroke="url(#arcGrad)" strokeWidth="1" />
+            <defs>
+              <linearGradient id="arcGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#00E5E5" stopOpacity="0" />
+                <stop offset="30%" stopColor="#00E5E5" stopOpacity="1" />
+                <stop offset="70%" stopColor="#0066FF" stopOpacity="1" />
+                <stop offset="100%" stopColor="#0066FF" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+
+        {/* Nodes */}
+        <div className="flex justify-center items-end gap-6 sm:gap-10 lg:gap-14 relative z-10">
+          {PATHS.map((path, i) => {
+            const isSelected = selectedPath === path.id;
+            return (
+              <div
+                key={path.id}
+                className="flex flex-col items-center group cursor-pointer relative"
+                style={{ transform: `translateY(${arcOffsets[i]}px)` }}
+                onClick={() => handleSelectPath(path.id)}
+              >
+                {/* Glow ring */}
+                <div
+                  className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center transition-all duration-500"
+                  style={{
+                    background: isSelected
+                      ? "rgba(0, 229, 229, 0.12)"
+                      : "rgba(255, 255, 255, 0.03)",
+                    backdropFilter: "blur(12px)",
+                    border: isSelected
+                      ? "1.5px solid rgba(0, 229, 229, 0.5)"
+                      : "1px solid rgba(255, 255, 255, 0.08)",
+                    boxShadow: isSelected
+                      ? "0 0 30px rgba(0, 229, 229, 0.25), 0 0 60px rgba(0, 229, 229, 0.1), inset 0 0 20px rgba(0, 229, 229, 0.05)"
+                      : "0 4px 24px rgba(0,0,0,0.3)",
+                  }}
+                >
+                  {/* Icon — thin line style */}
+                  <span className="text-2xl sm:text-3xl transition-transform duration-300 group-hover:scale-110">{path.emoji}</span>
+
+                  {/* Outer pulse for selected */}
+                  {isSelected && (
+                    <div className="absolute inset-0 rounded-full animate-ping opacity-20"
+                      style={{ border: "1px solid rgba(0, 229, 229, 0.4)" }} />
+                  )}
+                </div>
+
+                {/* Label */}
+                <span className={`mt-3 text-xs font-semibold transition-colors duration-300 ${
+                  isSelected ? "text-[#00E5E5]" : "text-white/40 group-hover:text-white/70"
+                }`}>
+                  {path.name}
+                </span>
+
+                {/* Hover detail popup */}
+                <div className={`absolute top-full mt-4 left-1/2 -translate-x-1/2 w-[180px] pointer-events-none transition-all duration-300 ${
+                  isSelected ? "opacity-0 translate-y-0" : "opacity-0 group-hover:opacity-100 group-hover:translate-y-0 translate-y-2"
+                }`}>
+                  <div className="rounded-xl p-3 text-center"
+                    style={{
+                      background: "rgba(0, 40, 50, 0.9)",
+                      backdropFilter: "blur(16px)",
+                      border: "1px solid rgba(0, 229, 229, 0.15)",
+                      boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
+                    }}>
+                    <p className="text-[10px] text-[#00E5E5]/70 font-medium">{path.nodes.length}개 강의</p>
+                    <p className="text-[11px] text-white/50 mt-0.5">{path.description}</p>
+                  </div>
+                </div>
               </div>
-            </div>
-            <p className="text-xs text-white/40">{path.description}</p>
-          </button>
-        ))}
+            );
+          })}
+        </div>
       </div>
 
       {/* Tree */}
@@ -449,9 +531,10 @@ export default function TechTree() {
         <div ref={treeRef} className="p-6 sm:p-10 rounded-2xl" style={{ background: "rgba(0, 80, 81, 0.2)", backdropFilter: "blur(16px) saturate(180%)", border: "1px solid rgba(0, 80, 81, 0.3)", boxShadow: "0 8px 32px 0 rgba(0, 0, 0, 0.5)" }}>
           {/* Path header */}
           <div className="text-center mb-10">
-            <span className="text-3xl mb-2 block">{currentPath.emoji}</span>
-            <h2 className="text-xl font-bold text-white mb-1">{currentPath.name} 테크트리</h2>
+            <span className="text-3xl mb-3 block">{currentPath.emoji}</span>
+            <h2 className="text-xl font-bold text-white mb-1" style={{ textShadow: `0 0 30px ${currentPath.glowColor}` }}>{currentPath.name} 테크트리</h2>
             <p className="text-xs text-white/40">{currentPath.description}</p>
+            <div className="mt-4 mx-auto w-24 h-px" style={{ background: `linear-gradient(to right, transparent, ${currentPath.color}60, transparent)` }} />
           </div>
 
           {/* Levels */}
