@@ -237,6 +237,7 @@ export default function Admin() {
 
   /* ── Notification rules state ──────────────────── */
   const [rulesModal, setRulesModal] = useState<{ live: Live | null; open: boolean }>({ live: null, open: false });
+  const [formModal, setFormModal] = useState<{ live: Live | null; open: boolean }>({ live: null, open: false });
   const [notifRules, setNotifRules] = useState<NotificationRule[]>([]);
   const [isLoadingRules, setIsLoadingRules] = useState(false);
   const [isSavingRules, setIsSavingRules] = useState(false);
@@ -785,6 +786,9 @@ export default function Admin() {
                             </Button>
                             <Button variant="outline" size="sm" className="h-8 rounded-lg border-gray-200 text-gray-500 hover:text-blue-600 hover:border-blue-200 text-xs gap-1" onClick={() => openRulesModal(live)}>
                               <Bell className="h-3.5 w-3.5" />캠페인 설정
+                            </Button>
+                            <Button variant="outline" size="sm" className="h-8 rounded-lg border-gray-200 text-gray-500 hover:text-purple-600 hover:border-purple-200 text-xs gap-1" onClick={() => setFormModal({ live, open: true })}>
+                              <Edit className="h-3.5 w-3.5" />신청서 수정
                             </Button>
                             <Button variant="outline" size="sm" className="h-8 rounded-lg border-gray-200 text-gray-500 hover:text-green-600 hover:border-green-200 text-xs gap-1" onClick={() => openSendModal(live)}>
                               <Zap className="h-3.5 w-3.5" />즉시 발송
@@ -1804,13 +1808,6 @@ export default function Admin() {
               </div>
             )}
 
-            {/* ── 신청폼 설정 (AI 추천) ─────────────────── */}
-            {rulesModal.live && (
-              <div className="border-t border-gray-100 pt-5 mt-2">
-                <AdminFormBuilder key={`fb-${rulesModal.live.id}-${Date.now()}`} liveId={rulesModal.live.id} liveTitle={rulesModal.live.title} />
-              </div>
-            )}
-
             {/* ── 질문 설정 section ───────────────────── */}
             <div className="border-t border-gray-100 pt-5 mt-2">
               <div className="flex items-center justify-between mb-3">
@@ -1873,6 +1870,15 @@ export default function Admin() {
               {isSavingRules && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}저장
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ═══ Form Builder Modal ═════════════════════════ */}
+      <Dialog open={formModal.open} onOpenChange={(open) => setFormModal({ ...formModal, open })}>
+        <DialogContent className="sm:max-w-[720px] bg-white rounded-2xl border border-gray-100 shadow-xl max-h-[92vh] overflow-y-auto">
+          {formModal.live && (
+            <AdminFormBuilder key={`fb-${formModal.live.id}-${formModal.open}`} liveId={formModal.live.id} liveTitle={formModal.live.title} />
+          )}
         </DialogContent>
       </Dialog>
 
