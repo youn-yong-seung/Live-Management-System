@@ -196,46 +196,6 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ── Charity Live Feature ─────────────────────── */}
-      <div className="glass-card-gold overflow-hidden">
-        <div className="flex flex-col sm:flex-row">
-          <div className="sm:w-[45%] aspect-video sm:aspect-auto bg-black/30 overflow-hidden relative group cursor-pointer"
-            onClick={() => window.open("https://www.youtube.com/watch?v=e3eJjWSqhuk", "_blank")}
-          >
-            <img
-              src="https://img.youtube.com/vi/e3eJjWSqhuk/hqdefault.jpg"
-              alt="기부 강의"
-              className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-300"
-            />
-            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-              <div className="w-14 h-14 bg-[#CC9965]/90 rounded-full flex items-center justify-center shadow-lg">
-                <PlayCircle className="h-8 w-8 text-black" />
-              </div>
-            </div>
-          </div>
-          <div className="sm:w-[55%] p-6 sm:p-8 flex flex-col justify-center">
-            <div className="inline-flex items-center gap-2 bg-rose-500/15 rounded-full px-3 py-1 text-xs font-bold text-rose-400 border border-rose-500/20 mb-4 w-fit">
-              <Heart className="h-3.5 w-3.5 fill-rose-400" />
-              기부 특별 강의
-            </div>
-            <h3 className="text-lg sm:text-xl font-bold text-white mb-2">
-              보육원에 1,400만원 기부 강의
-            </h3>
-            <p className="text-sm text-white/50 mb-4 leading-relaxed">
-              <span className="text-[#CC9965] font-semibold">나민수, 노션다움, 조쉬, 윤자동</span> — 4명의 강사가 모여 진행한 특별 기부 라이브. 수익금 전액이 보육원에 기부되었습니다.
-            </p>
-            <a
-              href="https://www.youtube.com/watch?v=e3eJjWSqhuk"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-sm font-semibold text-[#CC9965] hover:text-[#d4a570] transition-colors w-fit"
-            >
-              영상 보러가기 <ExternalLink className="h-3.5 w-3.5" />
-            </a>
-          </div>
-        </div>
-      </div>
-
       {/* ── Recommended Replays ───────────────────────── */}
       {!isLoading && recommended.length > 0 && (
         <div>
@@ -289,6 +249,46 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      {/* ── Charity Live Feature ─────────────────────── */}
+      <div className="glass-card-gold overflow-hidden">
+        <div className="flex flex-col sm:flex-row">
+          <div className="sm:w-[45%] aspect-video sm:aspect-auto bg-black/30 overflow-hidden relative group cursor-pointer"
+            onClick={() => window.open("https://www.youtube.com/watch?v=e3eJjWSqhuk", "_blank")}
+          >
+            <img
+              src="https://img.youtube.com/vi/e3eJjWSqhuk/hqdefault.jpg"
+              alt="기부 강의"
+              className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-300"
+            />
+            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="w-14 h-14 bg-[#CC9965]/90 rounded-full flex items-center justify-center shadow-lg">
+                <PlayCircle className="h-8 w-8 text-black" />
+              </div>
+            </div>
+          </div>
+          <div className="sm:w-[55%] p-6 sm:p-8 flex flex-col justify-center">
+            <div className="inline-flex items-center gap-2 bg-rose-500/15 rounded-full px-3 py-1 text-xs font-bold text-rose-400 border border-rose-500/20 mb-4 w-fit">
+              <Heart className="h-3.5 w-3.5 fill-rose-400" />
+              기부 특별 강의
+            </div>
+            <h3 className="text-lg sm:text-xl font-bold text-white mb-2">
+              보육원에 1,400만원 기부 강의
+            </h3>
+            <p className="text-sm text-white/50 mb-4 leading-relaxed">
+              <span className="text-[#CC9965] font-semibold">나민수, 노션다움, 조쉬, 윤자동</span> — 4명의 강사가 모여 진행한 특별 기부 라이브. 수익금 전액이 보육원에 기부되었습니다.
+            </p>
+            <a
+              href="https://www.youtube.com/watch?v=e3eJjWSqhuk"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-[#CC9965] hover:text-[#d4a570] transition-colors w-fit"
+            >
+              영상 보러가기 <ExternalLink className="h-3.5 w-3.5" />
+            </a>
+          </div>
+        </div>
+      </div>
 
       {/* ── Category Sections ─────────────────────────── */}
       {!isLoading && CATEGORY_SECTIONS.map((section) => {
