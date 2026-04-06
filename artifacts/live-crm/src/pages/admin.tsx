@@ -728,19 +728,19 @@ export default function Admin() {
             </Button>
             <Button variant="outline" className="rounded-xl border-gray-200 text-red-600 hover:bg-red-50" onClick={async () => {
               try {
-                const data = await apiFetch<{ videos: { id: string; title: string; published: string }[]; new: number }>("/youtube/channel-videos");
-                if (data.new === 0) { toast({ title: "새 영상 없음", description: "모든 영상이 이미 등록되어 있습니다." }); return; }
-                if (!confirm(`${data.new}개의 새 영상을 발견했습니다. 모두 등록할까요?\n\n${data.videos.map(v => v.title).join("\n")}`)) return;
+                const data = await apiFetch<{ videos: { id: string; title: string }[]; new: number }>("/youtube/channel-videos");
+                if (data.new === 0) { toast({ title: "새 예정 라이브 없음", description: "등록할 예정 라이브가 없습니다." }); return; }
+                if (!confirm(`${data.new}개의 예정 라이브를 발견했습니다. 등록할까요?\n\n${data.videos.map(v => v.title).join("\n")}`)) return;
                 let added = 0;
                 for (const v of data.videos) {
-                  await apiFetch("/lives", { method: "POST", body: JSON.stringify({ title: v.title, youtubeUrl: `https://www.youtube.com/watch?v=${v.id}`, status: "ended" }) });
+                  await apiFetch("/lives", { method: "POST", body: JSON.stringify({ title: v.title, youtubeUrl: `https://www.youtube.com/watch?v=${v.id}`, status: "scheduled" }) });
                   added++;
                 }
-                toast({ title: `${added}개 라이브 등록 완료!` });
+                toast({ title: `${added}개 예정 라이브 등록 완료!` });
                 refetchLives();
               } catch (e) { toast({ variant: "destructive", title: "불러오기 실패", description: String(e) }); }
             }}>
-              <Youtube className="mr-2 h-4 w-4" />유튜브 영상 불러오기
+              <Youtube className="mr-2 h-4 w-4" />예정 라이브 불러오기
             </Button>
             <Button className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold" onClick={() => handleOpenLiveModal()}>
               <Plus className="mr-2 h-4 w-4" />라이브 생성

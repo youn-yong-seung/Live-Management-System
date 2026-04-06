@@ -246,18 +246,30 @@ const YT_CHANNEL_ID = "UCYg51KBo-UcA4QILcYl5LEw"; // 윤자동
 
 router.get("/youtube/channel-videos", requireAdminAuth, async (_req: Request, res: Response) => {
   try {
-    // Fetch RSS feed (latest 15)
-    const rssRes = await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${YT_CHANNEL_ID}`);
-    const xml = await rssRes.text();
+    // Fetch /streams page to find UPCOMING lives
+    const pageRes = await fetch(`https://www.youtube.com/@yunjadong/streams`, {
+      headers: { "Accept-Language": "ko-KR,ko" },
+    });
+    const html = await pageRes.text();
 
-    // Parse video entries
-    const entries = xml.split("<entry>").slice(1);
-    const videos = entries.map((e) => {
-      const id = (e.match(/<yt:videoId>([^<]+)/) || [])[1];
-      const title = (e.match(/<title>([^<]+)/) || [])[1];
-      const published = (e.match(/<published>([^<]+)/) || [])[1];
-      return { id, title, published };
-    }).filter((v) => v.id && v.title);
+    // Parse video entries with their overlay style
+    const videoBlocks = html.split('"videoRenderer"').slice(1);
+    const videos: { id: string; title: string; isUpcoming: boolean }[] = [];
+    const seen = new Set<string>();
+
+    for (const block of videoBlocks) {
+      const idMatch = block.match(/"videoId":"([^"]{11})"/);
+      const titleMatch = block.match(/"title":\{"runs":\[\{"text":"([^"]+)"\}/);
+      const isUpcoming = block.includes('"style":"UPCOMING"');
+
+      if (idMatch && titleMatch && !seen.has(idMatch[1])) {
+        seen.add(idMatch[1]);
+        videos.push({ id: idMatch[1], title: titleMatch[1], isUpcoming });
+      }
+    }
+
+    // Only return UPCOMING streams
+    const upcoming = videos.filter((v) => v.isUpcoming);
 
     // Get existing youtube URLs
     const existingLives = await db.select({ youtubeUrl: livesTable.youtubeUrl }).from(livesTable);
@@ -269,10 +281,9 @@ router.get("/youtube/channel-videos", requireAdminAuth, async (_req: Request, re
       }).filter(Boolean)
     );
 
-    // Filter out already registered
-    const newVideos = videos.filter((v) => !existingIds.has(v.id));
+    const newVideos = upcoming.filter((v) => !existingIds.has(v.id));
 
-    return res.json({ total: videos.length, new: newVideos.length, videos: newVideos });
+    return res.json({ total: upcoming.length, new: newVideos.length, videos: newVideos });
   } catch (err) {
     logger.error({ err }, "GET /youtube/channel-videos failed");
     return res.status(500).json({ error: "채널 영상을 불러오는데 실패했습니다." });
