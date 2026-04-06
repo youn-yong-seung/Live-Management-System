@@ -383,9 +383,36 @@ export async function fireRegistrationTrigger(
     if (!isSms && (!trigger.templateId || !config.senderKey)) return;
     if (isSms && !trigger.messageBody) return;
 
+    // Auto-compute variables from live data
+    const autoVars: Record<string, string> = {};
+    if (!isSms) {
+      const [live] = await db.select().from(livesTable).where(eq(livesTable.id, liveId));
+      if (live) {
+        autoVars["#{방송타이틀}"] = live.title;
+        if (live.scheduledAt) {
+          const sa = new Date(live.scheduledAt);
+          const now = new Date();
+          const diffMs = sa.getTime() - now.getTime();
+          const diffH = Math.floor(Math.abs(diffMs) / (1000 * 60 * 60));
+          const diffM = Math.floor((Math.abs(diffMs) % (1000 * 60 * 60)) / (1000 * 60));
+          const diffD = Math.floor(diffH / 24); const diffHr = diffH % 24;
+          autoVars["#{남은시간}"] = diffMs > 0 ? (diffD > 0 ? `${diffD}일 ${diffHr}시간 ${diffM}분` : `${diffHr}시간 ${diffM}분`) : "곧";
+          autoVars["#{방송시작시간}"] = sa.toLocaleString("ko-KR", { timeZone: "Asia/Seoul", hour: "2-digit", minute: "2-digit" });
+          autoVars["#{년월일}"] = sa.toLocaleDateString("ko-KR", { timeZone: "Asia/Seoul", year: "numeric", month: "long", day: "numeric" });
+          autoVars["#{시간}"] = sa.toLocaleTimeString("ko-KR", { timeZone: "Asia/Seoul", hour: "2-digit", minute: "2-digit" });
+        }
+        if (live.youtubeUrl) autoVars["#{라이브링크}"] = live.youtubeUrl;
+      }
+      autoVars["#{진행자명}"] = "윤자동";
+      autoVars["#{준비물}"] = "없음";
+    }
+
     const { successCount, failCount } = isSms
       ? await sendSmsBatch(config.apiKey, config.apiSecret, config.senderPhone, trigger.messageBody!, [registrant])
-      : await sendAlimtalkBatch(config.apiKey, config.apiSecret, config.senderKey!, config.senderPhone, trigger.templateId!, [registrant]);
+      : await sendAlimtalkBatch(config.apiKey, config.apiSecret, config.senderKey!, config.senderPhone, trigger.templateId!, [{
+          ...registrant,
+          variables: { ...autoVars, "#{고객명}": registrant.name },
+        }]);
 
     await db.insert(notificationLogTable).values({
       liveId,
