@@ -178,7 +178,11 @@ router.post("/youtube/upload", requireAdminAuth, async (req: Request, res: Respo
     };
     if (publishAt) {
       status.privacyStatus = "private";
-      status.publishAt = new Date(publishAt).toISOString();
+      // publishAt from frontend is KST (no timezone), append +09:00
+      const kstDate = publishAt.includes("+") || publishAt.includes("Z")
+        ? new Date(publishAt)
+        : new Date(publishAt + "+09:00");
+      status.publishAt = kstDate.toISOString();
     }
 
     const uploadRes = await youtube.videos.insert({
