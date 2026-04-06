@@ -7,7 +7,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate } from "@/lib/date-utils";
-import { Video, Calendar, Users, ChevronLeft, ChevronRight } from "lucide-react";
+import { Video, Calendar, Users, ChevronLeft, ChevronRight, PlayCircle, Star, MessageSquare } from "lucide-react";
+import { useLocation } from "wouter";
+import { ReplayModal } from "@/components/replay-modal";
 import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import {
@@ -71,6 +73,8 @@ type RegistrationFormValues = z.infer<typeof registrationSchema>;
 
 export default function Lives() {
   const { toast } = useToast();
+  const [, navigate] = useLocation();
+  const [modalReplay, setModalReplay] = useState<any>(null);
   const queryClient = useQueryClient();
   const [selectedLiveId, setSelectedLiveId] = useState<number | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -283,23 +287,30 @@ export default function Lives() {
             지금 라이브 중
           </h2>
           {activeLives.map((live) => (
-            <a
-              key={live.id}
-              href={live.youtubeUrl ?? "#"}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="glass-card-gold hover:-translate-y-1 transition-all duration-300 p-6 flex items-center justify-between group block"
-            >
-              <div>
+            <div key={live.id} className="glass-card-gold hover:-translate-y-1 transition-all duration-300 p-6">
+              <div className="cursor-pointer" onClick={() => setModalReplay(live)}>
                 <div className="flex items-center gap-2 mb-2">
                   <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
                   <span className="text-xs font-bold text-red-400 uppercase tracking-wide">LIVE NOW</span>
                   <span className="text-xs text-white/30">{live.registrationCount}명 참석</span>
                 </div>
-                <h3 className="font-bold text-white group-hover:text-[#CC9965] transition-colors">{live.title}</h3>
+                <h3 className="font-bold text-white hover:text-[#CC9965] transition-colors mb-1">{live.title}</h3>
+                <p className="text-sm text-white/50 line-clamp-2 mb-3">{live.description}</p>
               </div>
-              <span className="text-sm text-[#CC9965] font-semibold flex-shrink-0 ml-4">입장하기 →</span>
-            </a>
+              <div className="flex gap-2 pt-3 border-t border-white/[0.06]">
+                {live.youtubeUrl && (
+                  <a href={live.youtubeUrl} target="_blank" rel="noopener noreferrer"
+                    className="flex-1 flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white text-xs font-bold py-2.5 rounded-lg transition-colors">
+                    <PlayCircle className="h-3.5 w-3.5" /> 라이브 입장하기
+                  </a>
+                )}
+                <button
+                  className="flex-1 flex items-center justify-center gap-2 border border-white/10 text-white/60 hover:text-[#CC9965] hover:border-[#CC9965]/30 text-xs font-bold py-2.5 rounded-lg transition-colors"
+                  onClick={() => navigate(`/lives/${live.id}/review`)}>
+                  <Star className="h-3.5 w-3.5" /> 후기 작성하기
+                </button>
+              </div>
+            </div>
           ))}
         </div>
       )}
@@ -554,6 +565,8 @@ export default function Lives() {
           )}
         </DialogContent>
       </Dialog>
+
+      <ReplayModal replay={modalReplay} onClose={() => setModalReplay(null)} />
     </div>
   );
 }

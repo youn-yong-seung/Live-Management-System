@@ -141,21 +141,31 @@ export default function Home() {
           </h2>
           <div className="grid gap-4 sm:grid-cols-2">
             {activeLives.map((live) => (
-              <a
-                key={live.id}
-                href={live.youtubeUrl ?? "#"}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="glass-card-gold hover:-translate-y-1 transition-all duration-300 p-6 block group"
-              >
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
-                  <span className="text-xs font-bold text-red-400 uppercase tracking-wide">LIVE NOW</span>
+              <div key={live.id} className="glass-card-gold hover:-translate-y-1 transition-all duration-300 p-6">
+                <div className="cursor-pointer" onClick={() => setModalReplay(live)}>
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+                    <span className="text-xs font-bold text-red-400 uppercase tracking-wide">LIVE NOW</span>
+                    <span className="text-xs text-white/30">{live.registrationCount}명 참석</span>
+                  </div>
+                  <h3 className="font-bold text-white mb-1 line-clamp-1 hover:text-[#CC9965] transition-colors">{live.title}</h3>
+                  <p className="text-sm text-white/50 line-clamp-2 mb-3">{live.description}</p>
                 </div>
-                <h3 className="font-bold text-white mb-1 line-clamp-1 group-hover:text-[#CC9965] transition-colors">{live.title}</h3>
-                <p className="text-sm text-white/50 line-clamp-1 mb-2">{live.description}</p>
-                <span className="text-xs text-[#CC9965] font-semibold">입장하기 →</span>
-              </a>
+                <div className="flex gap-2 pt-3 border-t border-white/[0.06]">
+                  {live.youtubeUrl && (
+                    <a href={live.youtubeUrl} target="_blank" rel="noopener noreferrer"
+                      className="flex-1 flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white text-xs font-bold py-2.5 rounded-lg transition-colors"
+                      onClick={(e) => e.stopPropagation()}>
+                      <PlayCircle className="h-3.5 w-3.5" /> 라이브 입장하기
+                    </a>
+                  )}
+                  <button
+                    className="flex-1 flex items-center justify-center gap-2 border border-white/10 text-white/60 hover:text-[#CC9965] hover:border-[#CC9965]/30 text-xs font-bold py-2.5 rounded-lg transition-colors"
+                    onClick={() => navigate(`/lives/${live.id}/review`)}>
+                    <Star className="h-3.5 w-3.5" /> 후기 작성하기
+                  </button>
+                </div>
+              </div>
             ))}
           </div>
         </div>
