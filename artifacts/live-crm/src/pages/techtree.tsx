@@ -304,35 +304,114 @@ function NodeTooltip({ node, color }: { node: TreeNode; color: string }) {
   );
 }
 
+/* ── Skill Info Panel ────────────────────────────────── */
+
+function SkillInfoPanel({
+  node, color, onWatch, onClose
+}: {
+  node: TreeNode; color: string; onWatch: () => void; onClose: () => void;
+}) {
+  const ytId = extractYoutubeId(node.youtubeUrl);
+  return (
+    <div
+      className="absolute z-[60] left-full ml-5 top-1/2 -translate-y-1/2 w-[280px] animate-[slideInRight_0.25s_ease-out]"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="rounded-2xl overflow-hidden"
+        style={{
+          background: "rgba(0, 50, 51, 0.92)",
+          backdropFilter: "blur(20px)",
+          border: "1px solid rgba(204, 153, 101, 0.35)",
+          boxShadow: "0 12px 40px rgba(0,0,0,0.6), 0 0 20px rgba(204,153,101,0.08)",
+        }}>
+        {/* Thumbnail */}
+        {ytId && (
+          <div className="aspect-video bg-black/40 relative">
+            <img src={`https://img.youtube.com/vi/${ytId}/mqdefault.jpg`} alt="" className="w-full h-full object-cover opacity-85" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[rgba(0,50,51,0.8)] to-transparent" />
+          </div>
+        )}
+
+        <div className="p-4">
+          {/* Level */}
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full inline-block mb-2"
+            style={{ background: `${color}20`, color, border: `1px solid ${color}40` }}>
+            {node.level}
+          </span>
+
+          {/* Title & desc */}
+          <h4 className="text-sm font-bold text-white leading-snug mb-1">{node.title}</h4>
+          <p className="text-[11px] text-white/40 mb-3 leading-relaxed">{node.description}</p>
+
+          {/* Gains */}
+          <div className="mb-4">
+            <p className="text-[9px] font-bold text-[#CC9965] uppercase tracking-[0.15em] mb-2">습득 스킬</p>
+            <div className="space-y-1.5">
+              {node.gains.map((g) => (
+                <div key={g} className="flex items-start gap-2">
+                  <span className="w-1 h-1 rounded-full mt-1.5 flex-shrink-0" style={{ background: color }} />
+                  <span className="text-[11px] text-white/60 leading-snug">{g}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Watch button */}
+          <button
+            onClick={onWatch}
+            className="w-full py-2.5 rounded-xl text-sm font-bold text-black bg-[#CC9965] hover:bg-[#d4a570] transition-all gold-glow flex items-center justify-center gap-2"
+          >
+            <Play className="h-4 w-4" />
+            100% 무료로 시청하기
+          </button>
+        </div>
+      </div>
+
+      {/* Left arrow */}
+      <div className="absolute left-0 top-1/2 -translate-x-[7px] -translate-y-1/2 w-3.5 h-3.5 rotate-45"
+        style={{ background: "rgba(0, 50, 51, 0.92)", borderLeft: "1px solid rgba(204,153,101,0.35)", borderBottom: "1px solid rgba(204,153,101,0.35)" }} />
+    </div>
+  );
+}
+
 /* ── Tree Node Component ────────────────────────────── */
 
 function TreeNodeCircle({
-  node, color, glowColor, isActive, onClick, onHover, onLeave, showTooltip
+  node, color, glowColor, isActive, isInfoOpen,
+  onClick, onHover, onLeave, showTooltip, onWatch, onCloseInfo
 }: {
   node: TreeNode; color: string; glowColor: string;
-  isActive: boolean; onClick: () => void;
-  onHover: () => void; onLeave: () => void; showTooltip: boolean;
+  isActive: boolean; isInfoOpen: boolean;
+  onClick: () => void; onHover: () => void; onLeave: () => void;
+  showTooltip: boolean; onWatch: () => void; onCloseInfo: () => void;
 }) {
   return (
     <div className="relative flex flex-col items-center" onMouseEnter={onHover} onMouseLeave={onLeave}>
-      {showTooltip && <NodeTooltip node={node} color={color} />}
+      {/* Hover tooltip (only when info panel is NOT open) */}
+      {showTooltip && !isInfoOpen && <NodeTooltip node={node} color={color} />}
+
+      {/* Skill Info Panel (click) */}
+      {isInfoOpen && <SkillInfoPanel node={node} color={color} onWatch={onWatch} onClose={onCloseInfo} />}
+
       <button
         onClick={onClick}
-        className="relative w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 group cursor-pointer"
+        className={`relative w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 group cursor-pointer ${isInfoOpen ? "ring-2 ring-offset-2 ring-offset-transparent" : ""}`}
         style={{
-          background: isActive ? `${color}30` : "rgba(255,255,255,0.05)",
-          border: `2px solid ${isActive ? color : "rgba(255,255,255,0.1)"}`,
-          boxShadow: isActive ? `0 0 20px ${glowColor}` : "none",
+          background: isActive || isInfoOpen ? `${color}30` : "rgba(255,255,255,0.05)",
+          border: `2px solid ${isActive || isInfoOpen ? color : "rgba(255,255,255,0.1)"}`,
+          boxShadow: isInfoOpen
+            ? `0 0 25px ${glowColor}, 0 0 50px ${glowColor.replace("0.3", "0.1")}`
+            : isActive ? `0 0 20px ${glowColor}` : "none",
+          ringColor: isInfoOpen ? color : undefined,
         }}
       >
-        <Play className="h-5 w-5 transition-colors" style={{ color: isActive ? color : "rgba(255,255,255,0.3)" }} />
-        {/* Level pip */}
+        <Play className="h-5 w-5 transition-colors" style={{ color: isActive || isInfoOpen ? color : "rgba(255,255,255,0.3)" }} />
         <span className="absolute -top-1 -right-1 text-[9px] font-bold px-1.5 py-0.5 rounded-full"
-          style={{ background: isActive ? color : "rgba(255,255,255,0.1)", color: isActive ? "#050A0A" : "rgba(255,255,255,0.4)" }}>
+          style={{ background: isActive || isInfoOpen ? color : "rgba(255,255,255,0.1)", color: isActive || isInfoOpen ? "#050A0A" : "rgba(255,255,255,0.4)" }}>
           {node.level.split(" ")[0]}
         </span>
       </button>
-      <span className={`mt-2 text-xs font-medium text-center max-w-[100px] leading-tight ${isActive ? "text-white" : "text-white/40"}`}>
+      <span className={`mt-2 text-xs font-medium text-center max-w-[100px] leading-tight ${isActive || isInfoOpen ? "text-white" : "text-white/40"}`}>
         {node.shortTitle}
       </span>
     </div>
@@ -345,17 +424,24 @@ export default function TechTree() {
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
   const [activeNodes, setActiveNodes] = useState<Set<string>>(new Set());
   const [hoveredNode, setHoveredNode] = useState<string | null>(null);
+  const [infoNode, setInfoNode] = useState<string | null>(null);
   const [modalReplay, setModalReplay] = useState<{ id: number; title: string; description: string | null; youtubeUrl: string | null; tags?: string[] | null } | null>(null);
   const treeRef = useRef<HTMLDivElement>(null);
 
   const currentPath = PATHS.find((p) => p.id === selectedPath);
 
   const handleNodeClick = (node: TreeNode) => {
+    // Toggle info panel
+    setInfoNode((prev) => prev === node.id ? null : node.id);
+  };
+
+  const handleWatch = (node: TreeNode) => {
     setActiveNodes((prev) => {
       const next = new Set(prev);
       next.add(node.id);
       return next;
     });
+    setInfoNode(null);
     setModalReplay({
       id: node.liveId,
       title: node.title,
@@ -369,6 +455,7 @@ export default function TechTree() {
     setSelectedPath(pathId);
     setActiveNodes(new Set());
     setHoveredNode(null);
+    setInfoNode(null);
     setTimeout(() => {
       treeRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 100);
@@ -572,10 +659,13 @@ export default function TechTree() {
                       color={currentPath.color}
                       glowColor={currentPath.glowColor}
                       isActive={activeNodes.has(node.id)}
+                      isInfoOpen={infoNode === node.id}
                       onClick={() => handleNodeClick(node)}
                       onHover={() => setHoveredNode(node.id)}
                       onLeave={() => setHoveredNode(null)}
                       showTooltip={hoveredNode === node.id}
+                      onWatch={() => handleWatch(node)}
+                      onCloseInfo={() => setInfoNode(null)}
                     />
                   ))}
                 </div>

@@ -267,3 +267,15 @@
 .gold-glow:hover {
   box-shadow: 0 0 25px rgba(204, 153, 101, 0.5);
 }
+
+/* Skill Info Panel slide-in */
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(-12px) translateY(-50%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) translateY(-50%);
+  }
+}
