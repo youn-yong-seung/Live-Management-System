@@ -70,31 +70,41 @@ export async function sendAlimtalkBatch(
   templateId: string,
   recipients: { phone: string; name: string; variables?: Record<string, string> }[]
 ): Promise<{ successCount: number; failCount: number }> {
-  const messages = recipients.map((r) => ({
-    to: r.phone,
-    from: senderPhone,
-    kakaoOptions: {
-      pfId: senderKey,
-      templateId,
-      variables: {
-        "#{이름}": r.name,
-        "#{고객명}": r.name,
-        ...(r.variables ?? {}),
-      },
-    },
-  }));
-
   const { SolapiMessageService } = await import("solapi");
   const service = new SolapiMessageService(apiKey, apiSecret);
 
   let successCount = 0;
   let failCount = 0;
 
-  for (const msg of messages) {
+  for (const r of recipients) {
+    // Build variables — merge auto + custom, ensure all values are non-empty strings
+    const allVars: Record<string, string> = {
+      "#{이름}": r.name,
+      "#{고객명}": r.name,
+      ...(r.variables ?? {}),
+    };
+
+    // Remove empty values — Solapi rejects empty string variables
+    const cleanVars: Record<string, string> = {};
+    for (const [k, v] of Object.entries(allVars)) {
+      if (v && v.trim()) cleanVars[k] = v;
+    }
+
+    const msg = {
+      to: r.phone,
+      from: senderPhone,
+      kakaoOptions: {
+        pfId: senderKey,
+        templateId,
+        variables: cleanVars,
+      },
+    };
+
     try {
       await service.send(msg);
       successCount++;
-    } catch {
+    } catch (err) {
+      console.error(`[Alimtalk] Failed to send to ${r.phone}:`, err, JSON.stringify(msg.kakaoOptions));
       failCount++;
     }
   }

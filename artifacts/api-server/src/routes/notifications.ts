@@ -200,11 +200,11 @@ router.post("/lives/:id/send-now", requireAdminAuth, async (req: Request, res: R
         autoVars["#{년월일}"] = sa.toLocaleDateString("ko-KR", { timeZone: "Asia/Seoul", year: "numeric", month: "long", day: "numeric" });
         autoVars["#{시간}"] = sa.toLocaleTimeString("ko-KR", { timeZone: "Asia/Seoul", hour: "2-digit", minute: "2-digit" });
       }
-      autoVars["#{라이브링크}"] = live.youtubeUrl ?? "";
+      if (live.youtubeUrl) autoVars["#{라이브링크}"] = live.youtubeUrl;
     }
     // Defaults
-    if (!variables?.["#{진행자명}"] && !autoVars["#{진행자명}"]) autoVars["#{진행자명}"] = "윤자동";
-    if (!variables?.["#{준비물}"] && !autoVars["#{준비물}"]) autoVars["#{준비물}"] = "없음";
+    autoVars["#{진행자명}"] = variables?.["#{진행자명}"] || "윤자동";
+    autoVars["#{준비물}"] = variables?.["#{준비물}"] || "없음";
 
     const { successCount, failCount } = isSms
       ? await sendSmsBatch(config.apiKey, config.apiSecret, config.senderPhone, messageBody!, regs.map((r) => ({ phone: r.phone, name: r.name })))

@@ -110,7 +110,6 @@ async function runScheduler(): Promise<void> {
       }
       autoVars["#{진행자명}"] = "윤자동";
       autoVars["#{준비물}"] = "없음";
-      autoVars["#{라이브링크}"] = "";
 
       const { successCount, failCount } = isSms
         ? await sendSmsBatch(config.apiKey, config.apiSecret, config.senderPhone, rule.messageBody!, regs.map((r) => ({ phone: r.phone, name: r.name })))
