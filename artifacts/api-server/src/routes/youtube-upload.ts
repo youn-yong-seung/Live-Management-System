@@ -225,16 +225,19 @@ router.post("/youtube/upload", requireAdminAuth, async (req: Request, res: Respo
     };
     if (tags?.length) snippet.tags = tags;
 
-    const status: Record<string, unknown> = {
-      privacyStatus: publishAt ? "private" : privacyStatus,
-    };
+    const status: Record<string, unknown> = {};
     if (publishAt) {
+      // Scheduled upload: must be private + publishAt in future
       status.privacyStatus = "private";
-      // publishAt from frontend is KST (no timezone), append +09:00
       const kstDate = publishAt.includes("+") || publishAt.includes("Z")
         ? new Date(publishAt)
         : new Date(publishAt + "+09:00");
       status.publishAt = kstDate.toISOString();
+      status.selfDeclaredMadeForKids = false;
+      logger.info({ publishAt, kstDate: kstDate.toISOString(), privacyStatus: "private" }, "Scheduled upload");
+    } else {
+      status.privacyStatus = privacyStatus || "private";
+      status.selfDeclaredMadeForKids = false;
     }
 
     const uploadRes = await youtube.videos.insert({

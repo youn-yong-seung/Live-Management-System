@@ -573,7 +573,8 @@ export function AdminEditors() {
               </div>
               <div>
                 <Label>예약 업로드 (선택)</Label>
-                <Input type="datetime-local" value={uploadForm.publishAt} onChange={(e) => setUploadForm(f => ({ ...f, publishAt: e.target.value }))} />
+                <Input type="datetime-local" value={uploadForm.publishAt} onChange={(e) => setUploadForm(f => ({ ...f, publishAt: e.target.value, ...(e.target.value ? { privacyStatus: "private" } : {}) }))} />
+                {uploadForm.publishAt && <p className="text-[10px] text-amber-500 mt-1">예약 시 자동으로 비공개로 업로드됩니다</p>}
               </div>
             </div>
             <div className="p-3 bg-gray-50 rounded-xl text-xs text-gray-500">
@@ -589,6 +590,7 @@ export function AdminEditors() {
                 if (!uploadModal) return;
                 setIsUploading(true);
                 try {
+                  const hasSchedule = !!uploadForm.publishAt;
                   const result = await apiFetch<{ success: boolean; youtubeUrl: string; videoId: string }>("/youtube/upload", {
                     method: "POST",
                     body: JSON.stringify({
@@ -596,7 +598,7 @@ export function AdminEditors() {
                       title: uploadForm.title,
                       description: uploadForm.description,
                       driveLink: uploadModal.driveLink,
-                      privacyStatus: uploadForm.privacyStatus,
+                      privacyStatus: hasSchedule ? "private" : uploadForm.privacyStatus,
                       publishAt: uploadForm.publishAt || undefined,
                     }),
                   });
