@@ -140,6 +140,7 @@ async function apiFetch<T = unknown>(path: string, options?: RequestInit): Promi
     const text = await res.text();
     throw new Error(text || `HTTP ${res.status}`);
   }
+  if (res.status === 204) return null as T;
   return res.json() as Promise<T>;
 }
 
