@@ -521,34 +521,50 @@ export default function Lives() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-sm font-medium text-gray-700">{q.question}</FormLabel>
-                        {q.questionType === "radio" && q.options && (
-                          <RadioGroup onValueChange={field.onChange} value={typeof field.value === "string" ? field.value : ""} className="pt-1 space-y-2">
-                            {q.options.map((opt) => (
-                              <div key={opt} className="flex items-center gap-2">
-                                <RadioGroupItem value={opt} id={`ai${qi}-${opt}`} />
-                                <Label htmlFor={`ai${qi}-${opt}`} className="text-sm text-gray-700 cursor-pointer">{opt}</Label>
+                        {q.questionType === "radio" && q.options && (() => {
+                          const val = typeof field.value === "string" ? field.value : "";
+                          const isCustom = val === "기타" || val === "직접 입력" || val.startsWith("기타(") || val.startsWith("직접 입력(");
+                          return (
+                            <>
+                              <RadioGroup onValueChange={field.onChange} value={val} className="pt-1 space-y-2">
+                                {q.options.map((opt) => (
+                                  <div key={opt} className="flex items-center gap-2">
+                                    <RadioGroupItem value={opt} id={`ai${qi}-${opt}`} />
+                                    <Label htmlFor={`ai${qi}-${opt}`} className="text-sm text-gray-700 cursor-pointer">{opt}</Label>
+                                  </div>
+                                ))}
+                              </RadioGroup>
+                              {isCustom && (
+                                <Input placeholder="직접 입력해주세요" className="mt-2 !rounded-xl !border-gray-200 !text-black"
+                                  onChange={(e) => field.onChange(e.target.value ? `직접 입력: ${e.target.value}` : val)} />
+                              )}
+                            </>
+                          );
+                        })()}
+                        {q.questionType === "checkbox" && q.options && (() => {
+                          const vals = Array.isArray(field.value) ? field.value : [];
+                          const hasCustom = vals.some((v) => v === "기타" || v === "직접 입력" || v.startsWith("기타(") || v.startsWith("직접 입력("));
+                          return (
+                            <>
+                              <div className="grid grid-cols-2 gap-2 pt-1">
+                                {q.options.map((opt) => (
+                                  <div key={opt} className="flex items-center gap-2">
+                                    <Checkbox
+                                      id={`ai${qi}-${opt}`}
+                                      checked={vals.includes(opt)}
+                                      onCheckedChange={(v) => field.onChange(v ? [...vals, opt] : vals.filter((x) => x !== opt))}
+                                      className="rounded border-gray-300"
+                                    />
+                                    <Label htmlFor={`ai${qi}-${opt}`} className="text-sm text-gray-700 cursor-pointer">{opt}</Label>
+                                  </div>
+                                ))}
                               </div>
-                            ))}
-                          </RadioGroup>
-                        )}
-                        {q.questionType === "checkbox" && q.options && (
-                          <div className="grid grid-cols-2 gap-2 pt-1">
-                            {q.options.map((opt) => {
-                              const vals = Array.isArray(field.value) ? field.value : [];
-                              return (
-                                <div key={opt} className="flex items-center gap-2">
-                                  <Checkbox
-                                    id={`ai${qi}-${opt}`}
-                                    checked={vals.includes(opt)}
-                                    onCheckedChange={(v) => field.onChange(v ? [...vals, opt] : vals.filter((x) => x !== opt))}
-                                    className="rounded border-gray-300"
-                                  />
-                                  <Label htmlFor={`ai${qi}-${opt}`} className="text-sm text-gray-700 cursor-pointer">{opt}</Label>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        )}
+                              {hasCustom && (
+                                <Input placeholder="직접 입력해주세요" className="mt-2 !rounded-xl !border-gray-200 !text-black" />
+                              )}
+                            </>
+                          );
+                        })()}
                         {(q.questionType === "text" || q.questionType === "textarea") && (
                           <FormControl>
                             <Textarea
