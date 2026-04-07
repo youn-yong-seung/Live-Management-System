@@ -170,31 +170,82 @@ export function AdminFormBuilder({ liveId, liveTitle }: { liveId: number; liveTi
           {config.showChannelSource && (
             <div className="space-y-2">
               <Label className="text-xs font-bold text-gray-600 uppercase tracking-wider">유입경로 옵션</Label>
-              <p className="text-[10px] text-gray-400">체크 해제하면 해당 옵션이 폼에서 숨겨집니다. 기본: 전체 표시</p>
+              <p className="text-[10px] text-gray-400">체크 해제하면 해당 옵션이 폼에서 숨겨집니다.</p>
               <div className="max-h-[200px] overflow-y-auto space-y-1 p-2 bg-gray-50 rounded-lg border">
                 {channelSources.map((s) => {
                   const included = !config.channelSourceOptions || config.channelSourceOptions.includes(s.name);
                   return (
-                    <label key={s.id} className="flex items-center gap-2 py-0.5 cursor-pointer text-xs text-gray-700">
-                      <input
-                        type="checkbox" checked={included}
-                        onChange={(e) => {
-                          setConfig((c) => {
-                            const current = c.channelSourceOptions ?? channelSources.map((x) => x.name);
-                            const next = e.target.checked
-                              ? current.includes(s.name) ? current : [...current, s.name]
-                              : current.filter((n) => n !== s.name);
-                            console.log("[FormBuilder] Channel toggle:", s.name, e.target.checked, "→", next);
-                            return { ...c, channelSourceOptions: next };
-                          });
-                        }}
-                        className="rounded"
-                      />
-                      {s.name}
-                      {s.category && <span className="text-[9px] text-gray-400">({s.category})</span>}
-                    </label>
+                    <div key={s.id} className="flex items-center justify-between py-0.5">
+                      <label className="flex items-center gap-2 cursor-pointer text-xs text-gray-700 flex-1">
+                        <input
+                          type="checkbox" checked={included}
+                          onChange={(e) => {
+                            setConfig((c) => {
+                              const current = c.channelSourceOptions ?? channelSources.map((x) => x.name);
+                              const next = e.target.checked
+                                ? current.includes(s.name) ? current : [...current, s.name]
+                                : current.filter((n) => n !== s.name);
+                              return { ...c, channelSourceOptions: next };
+                            });
+                          }}
+                          className="rounded"
+                        />
+                        {s.name}
+                        {s.category && <span className="text-[9px] text-gray-400">({s.category})</span>}
+                      </label>
+                      <button className="text-gray-300 hover:text-red-400 p-0.5" title="삭제" onClick={() => {
+                        apiFetch(`/channel-sources/${s.id}`, { method: "DELETE" }).then(() => {
+                          setChannelSources((prev) => prev.filter((x) => x.id !== s.id));
+                          setConfig((c) => ({
+                            ...c,
+                            channelSourceOptions: (c.channelSourceOptions ?? channelSources.map((x) => x.name)).filter((n) => n !== s.name),
+                          }));
+                        });
+                      }}>
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
                   );
                 })}
+              </div>
+              {/* 새 유입경로 추가 */}
+              <div className="flex gap-2">
+                <Input
+                  id="new-channel-input"
+                  placeholder="새 유입경로 추가"
+                  className="h-7 text-xs flex-1"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      const input = e.currentTarget;
+                      const name = input.value.trim();
+                      if (!name) return;
+                      apiFetch<ChannelSource>("/channel-sources", { method: "POST", body: JSON.stringify({ name, category: "기타" }) }).then((s) => {
+                        setChannelSources((prev) => [...prev, s]);
+                        setConfig((c) => ({
+                          ...c,
+                          channelSourceOptions: [...(c.channelSourceOptions ?? channelSources.map((x) => x.name)), name],
+                        }));
+                        input.value = "";
+                      }).catch((err) => toast({ variant: "destructive", title: (err as Error).message }));
+                    }
+                  }}
+                />
+                <Button variant="outline" size="sm" className="h-7 text-xs px-2" onClick={() => {
+                  const input = document.getElementById("new-channel-input") as HTMLInputElement;
+                  const name = input?.value.trim();
+                  if (!name) return;
+                  apiFetch<ChannelSource>("/channel-sources", { method: "POST", body: JSON.stringify({ name, category: "기타" }) }).then((s) => {
+                    setChannelSources((prev) => [...prev, s]);
+                    setConfig((c) => ({
+                      ...c,
+                      channelSourceOptions: [...(c.channelSourceOptions ?? channelSources.map((x) => x.name)), name],
+                    }));
+                    input.value = "";
+                  }).catch((err) => toast({ variant: "destructive", title: (err as Error).message }));
+                }}>
+                  <Plus className="h-3 w-3" />
+                </Button>
               </div>
             </div>
           )}
