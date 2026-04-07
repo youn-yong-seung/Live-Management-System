@@ -148,10 +148,10 @@ export default function Lives() {
   const onSubmit = (data: RegistrationFormValues) => {
     if (!selectedLiveId) return;
     // Handle "직접 입력" custom values
-    const industry = data.industry === "직접 입력" && data.industryCustom
+    const industry = (data.industry === "직접 입력" || data.industry === "기타") && data.industryCustom
       ? data.industryCustom : data.industry || null;
     const channels = data.channelSource?.map((ch) =>
-      ch === "직접 입력" && data.channelSourceCustom ? data.channelSourceCustom : ch
+      (ch === "직접 입력" || ch === "기타") && data.channelSourceCustom ? data.channelSourceCustom : ch
     );
     createRegistration.mutate(
       {
@@ -480,8 +480,8 @@ export default function Lives() {
                         ))}
                       </SelectContent>
                     </Select>
-                    {field.value === "직접 입력" && (
-                      <Input placeholder="업종을 직접 입력해주세요" className="mt-2 rounded-xl border-gray-200 text-black" {...form.register("industryCustom")} />
+                    {(field.value === "직접 입력" || field.value === "기타") && (
+                      <Input placeholder="업종을 직접 입력해주세요" className="mt-2 !rounded-xl !border-gray-200 !text-black" {...form.register("industryCustom")} />
                     )}
                     <FormMessage />
                   </FormItem>
@@ -505,7 +505,7 @@ export default function Lives() {
                         </div>
                       ))}
                     </RadioGroup>
-                    {(field.value as string[] | undefined)?.[0] === "직접 입력" && (
+                    {((field.value as string[] | undefined)?.[0] === "직접 입력" || (field.value as string[] | undefined)?.[0] === "기타") && (
                       <Input placeholder="어디서 알게 되셨는지 직접 입력해주세요" className="mt-2 !rounded-xl !border-gray-200 !text-black" {...form.register("channelSourceCustom")} />
                     )}
                   </FormItem>

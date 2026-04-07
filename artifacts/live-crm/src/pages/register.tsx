@@ -109,8 +109,8 @@ export default function RegisterPage() {
   const onSubmit = async (data: FormValues) => {
     setSubmitting(true);
     try {
-      const industry = data.industry === "직접 입력" && data.industryCustom ? data.industryCustom : data.industry || null;
-      const channels = data.channelSource?.map((ch) => ch === "직접 입력" && data.channelSourceCustom ? data.channelSourceCustom : ch);
+      const industry = (data.industry === "직접 입력" || data.industry === "기타") && data.industryCustom ? data.industryCustom : data.industry || null;
+      const channels = data.channelSource?.map((ch) => (ch === "직접 입력" || ch === "기타") && data.channelSourceCustom ? data.channelSourceCustom : ch);
 
       const res = await fetch(`/api/lives/${liveId}/registrations`, {
         method: "POST",
@@ -246,7 +246,7 @@ export default function RegisterPage() {
                         </div>
                       ))}
                     </RadioGroup>
-                    {(field.value as string[] | undefined)?.[0] === "직접 입력" && (
+                    {((field.value as string[] | undefined)?.[0] === "직접 입력" || (field.value as string[] | undefined)?.[0] === "기타") && (
                       <Input placeholder="직접 입력해주세요" className="mt-2 rounded-xl border-white/10 bg-white/5 !text-white placeholder:text-white/30" {...form.register("channelSourceCustom")} />
                     )}
                   </FormItem>
@@ -266,7 +266,7 @@ export default function RegisterPage() {
                       </FormControl>
                       <SelectContent>{activeIndustries.map((i) => <SelectItem key={i} value={i}>{i}</SelectItem>)}</SelectContent>
                     </Select>
-                    {field.value === "직접 입력" && (
+                    {(field.value === "직접 입력" || field.value === "기타") && (
                       <Input placeholder="업종을 직접 입력해주세요" className="mt-2 rounded-xl border-white/10 bg-white/5 !text-white placeholder:text-white/30" {...form.register("industryCustom")} />
                     )}
                   </FormItem>
