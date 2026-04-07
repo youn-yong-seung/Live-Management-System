@@ -62,6 +62,7 @@ export function AdminFormBuilder({ liveId, liveTitle }: { liveId: number; liveTi
   const [recommendations, setRecommendations] = useState<RecommendedQuestion[]>([]);
   const [selectedQuestions, setSelectedQuestions] = useState<Set<number>>(new Set());
   const [showPreview, setShowPreview] = useState(false);
+  const [dragIdx, setDragIdx] = useState<number | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -167,38 +168,71 @@ export function AdminFormBuilder({ liveId, liveTitle }: { liveId: number; liveTi
           </div>
 
           {/* 유입경로 커스텀 */}
-          {config.showChannelSource && (
+          {config.showChannelSource && (() => {
+            // Build ordered list: channelSourceOptions order first, then remaining
+            const currentOrder = config.channelSourceOptions ?? channelSources.map((x) => x.name);
+            const orderedSources = [
+              ...currentOrder.map((name) => channelSources.find((s) => s.name === name)).filter(Boolean) as ChannelSource[],
+              ...channelSources.filter((s) => !currentOrder.includes(s.name)),
+            ];
+            // Remove duplicates
+            const seen = new Set<number>();
+            const uniqueSources = orderedSources.filter((s) => { if (seen.has(s.id)) return false; seen.add(s.id); return true; });
+
+            return (
             <div className="space-y-2">
               <Label className="text-xs font-bold text-gray-600 uppercase tracking-wider">유입경로 옵션</Label>
-              <p className="text-[10px] text-gray-400">체크 해제하면 해당 옵션이 폼에서 숨겨집니다.</p>
-              <div className="max-h-[200px] overflow-y-auto space-y-1 p-2 bg-gray-50 rounded-lg border">
-                {channelSources.map((s) => {
+              <p className="text-[10px] text-gray-400">드래그로 순서 변경, 체크로 표시/숨김</p>
+              <div className="max-h-[250px] overflow-y-auto space-y-0.5 p-2 bg-gray-50 rounded-lg border">
+                {uniqueSources.map((s, idx) => {
                   const included = !config.channelSourceOptions || config.channelSourceOptions.includes(s.name);
                   return (
-                    <div key={s.id} className="flex items-center justify-between py-0.5">
-                      <label className="flex items-center gap-2 cursor-pointer text-xs text-gray-700 flex-1">
-                        <input
-                          type="checkbox" checked={included}
-                          onChange={(e) => {
-                            setConfig((c) => {
-                              const current = c.channelSourceOptions ?? channelSources.map((x) => x.name);
-                              const next = e.target.checked
-                                ? current.includes(s.name) ? current : [...current, s.name]
-                                : current.filter((n) => n !== s.name);
-                              return { ...c, channelSourceOptions: next };
-                            });
-                          }}
-                          className="rounded"
-                        />
-                        {s.name}
-                        {s.category && <span className="text-[9px] text-gray-400">({s.category})</span>}
-                      </label>
-                      <button className="text-gray-300 hover:text-red-400 p-0.5" title="삭제" onClick={() => {
+                    <div
+                      key={s.id}
+                      draggable
+                      onDragStart={() => setDragIdx(idx)}
+                      onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add("bg-blue-50"); }}
+                      onDragLeave={(e) => e.currentTarget.classList.remove("bg-blue-50")}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        e.currentTarget.classList.remove("bg-blue-50");
+                        if (dragIdx === null || dragIdx === idx) return;
+                        setConfig((c) => {
+                          const list = [...(c.channelSourceOptions ?? uniqueSources.map((x) => x.name))];
+                          const [moved] = list.splice(dragIdx, 1);
+                          list.splice(idx, 0, moved);
+                          return { ...c, channelSourceOptions: list };
+                        });
+                        setDragIdx(null);
+                      }}
+                      className={`flex items-center justify-between py-1 px-1 rounded transition-colors ${dragIdx === idx ? "opacity-50" : ""} ${included ? "" : "opacity-40"}`}
+                    >
+                      <div className="flex items-center gap-1.5 flex-1 cursor-grab active:cursor-grabbing">
+                        <GripVertical className="h-3 w-3 text-gray-300 flex-shrink-0" />
+                        <label className="flex items-center gap-2 cursor-pointer text-xs text-gray-700 flex-1">
+                          <input
+                            type="checkbox" checked={included}
+                            onChange={(e) => {
+                              setConfig((c) => {
+                                const current = c.channelSourceOptions ?? uniqueSources.map((x) => x.name);
+                                const next = e.target.checked
+                                  ? current.includes(s.name) ? current : [...current, s.name]
+                                  : current.filter((n) => n !== s.name);
+                                return { ...c, channelSourceOptions: next };
+                              });
+                            }}
+                            className="rounded"
+                          />
+                          {s.name}
+                          {s.category && <span className="text-[9px] text-gray-400">({s.category})</span>}
+                        </label>
+                      </div>
+                      <button className="text-gray-300 hover:text-red-400 p-0.5 flex-shrink-0" title="삭제" onClick={() => {
                         apiFetch(`/channel-sources/${s.id}`, { method: "DELETE" }).then(() => {
                           setChannelSources((prev) => prev.filter((x) => x.id !== s.id));
                           setConfig((c) => ({
                             ...c,
-                            channelSourceOptions: (c.channelSourceOptions ?? channelSources.map((x) => x.name)).filter((n) => n !== s.name),
+                            channelSourceOptions: (c.channelSourceOptions ?? uniqueSources.map((x) => x.name)).filter((n) => n !== s.name),
                           }));
                         });
                       }}>
@@ -248,7 +282,8 @@ export function AdminFormBuilder({ liveId, liveTitle }: { liveId: number; liveTi
                 </Button>
               </div>
             </div>
-          )}
+            );
+          })()}
 
           {/* AI 추천 질문 */}
           <div className="space-y-3">
