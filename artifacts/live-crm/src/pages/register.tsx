@@ -74,6 +74,7 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(true);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [masterChannels, setMasterChannels] = useState<string[]>([]);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -86,10 +87,12 @@ export default function RegisterPage() {
       fetch(`/api/lives/${liveId}`).then((r) => r.ok ? r.json() : null),
       fetch(`/api/lives/${liveId}/form-config`).then((r) => r.ok ? r.json() : null),
       fetch(`/api/lives/${liveId}/custom-questions`).then((r) => r.ok ? r.json() : []),
-    ]).then(([l, fc, qs]) => {
+      fetch(`/api/channel-sources`).then((r) => r.ok ? r.json() : []),
+    ]).then(([l, fc, qs, channels]) => {
       setLive(l);
       setFormConfig(fc);
       setCustomQuestions(Array.isArray(qs) ? qs : []);
+      setMasterChannels(Array.isArray(channels) ? channels.map((c: any) => c.name) : []);
     }).finally(() => setLoading(false));
   }, [liveId]);
 
@@ -98,7 +101,8 @@ export default function RegisterPage() {
   const showIndustry = fc?.showIndustry ?? true;
   const showChannelSource = fc?.showChannelSource ?? true;
   const showMessage = fc?.showMessage ?? true;
-  const activeChannels = fc?.channelSourceOptions ?? DEFAULT_CHANNELS;
+  const showMarketingConsent = fc?.showMarketingConsent ?? true;
+  const activeChannels = fc?.channelSourceOptions ?? (masterChannels.length > 0 ? masterChannels : DEFAULT_CHANNELS);
   const activeIndustries = fc?.industryOptions ?? DEFAULT_INDUSTRIES;
   const aiQuestions = fc?.aiRecommendedQuestions ?? [];
 
@@ -318,6 +322,30 @@ export default function RegisterPage() {
                     <FormControl>
                       <Textarea placeholder="궁금한 점을 남겨주세요" className="resize-none rounded-xl border-white/10 bg-white/5 !text-white placeholder:text-white/30" {...field} />
                     </FormControl>
+                  </FormItem>
+                )} />
+              )}
+
+              {/* 마케팅 수신 동의 */}
+              {showMarketingConsent && (
+                <FormField control={form.control} name="customAnswers.marketing_consent" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium text-white/70">마케팅 수신 동의 <span className="text-red-400">*</span></FormLabel>
+                    <p className="text-[11px] text-white/40 mb-1">윤자동의 웨비나, 특강, 유용한 콘텐츠 안내를 받으시겠습니까?</p>
+                    <RadioGroup
+                      onValueChange={field.onChange}
+                      value={typeof field.value === "string" ? field.value : ""}
+                      className="pt-1 space-y-2"
+                    >
+                      <div className="flex items-center gap-2">
+                        <RadioGroupItem value="동의합니다" id="r-mkt-yes" />
+                        <Label htmlFor="r-mkt-yes" className="text-sm text-white/70 cursor-pointer">동의합니다 — 웨비나·특강 안내를 받겠습니다</Label>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <RadioGroupItem value="동의하지 않습니다" id="r-mkt-no" />
+                        <Label htmlFor="r-mkt-no" className="text-sm text-white/70 cursor-pointer">동의하지 않습니다</Label>
+                      </div>
+                    </RadioGroup>
                   </FormItem>
                 )} />
               )}

@@ -95,6 +95,7 @@ export default function Lives() {
   const [customQuestions, setCustomQuestions] = useState<CustomQuestion[]>([]);
   const [isLoadingQuestions, setIsLoadingQuestions] = useState(false);
   const [formConfig, setFormConfig] = useState<FormConfig | null>(null);
+  const [masterChannels, setMasterChannels] = useState<string[]>([]);
 
   const { data: lives, isLoading } = useGetLives(
     { status: "scheduled" },
@@ -120,10 +121,12 @@ export default function Lives() {
     Promise.all([
       fetch(`/api/lives/${selectedLiveId}/custom-questions`).then((r) => r.ok ? r.json() : []),
       fetch(`/api/lives/${selectedLiveId}/form-config`).then((r) => r.ok ? r.json() : null),
+      fetch(`/api/channel-sources`).then((r) => r.ok ? r.json() : []),
     ])
-      .then(([qs, fc]) => {
+      .then(([qs, fc, channels]) => {
         setCustomQuestions(Array.isArray(qs) ? qs : []);
         setFormConfig(fc);
+        if (Array.isArray(channels)) setMasterChannels(channels.map((c: any) => c.name));
       })
       .catch(() => { setCustomQuestions([]); setFormConfig(null); })
       .finally(() => setIsLoadingQuestions(false));
@@ -135,7 +138,7 @@ export default function Lives() {
   const showChannelSource = fc?.showChannelSource ?? true;
   const showSkillLevel = fc?.showSkillLevel ?? false;
   const showMessage = fc?.showMessage ?? true;
-  const activeChannels = fc?.channelSourceOptions ?? CHANNELS;
+  const activeChannels = fc?.channelSourceOptions ?? (masterChannels.length > 0 ? masterChannels : CHANNELS);
   const activeIndustries = fc?.industryOptions ?? INDUSTRIES;
   const aiQuestions = fc?.aiRecommendedQuestions ?? [];
 
