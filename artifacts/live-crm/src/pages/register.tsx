@@ -192,7 +192,6 @@ export default function RegisterPage() {
             {live.scheduledAt && (
               <span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5 text-[#CC9965]" />{formatDate(live.scheduledAt)}</span>
             )}
-            <span className="flex items-center gap-1"><Users className="h-3.5 w-3.5 text-[#CC9965]" />{live.registrationCount}명 신청</span>
           </div>
         </div>
 
