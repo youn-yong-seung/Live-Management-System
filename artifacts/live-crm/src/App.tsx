@@ -11,6 +11,7 @@ import Courses from "@/pages/courses";
 import Resources from "@/pages/resources";
 import TechTree from "@/pages/techtree";
 import Admin from "@/pages/admin";
+import VideoFactory from "@/pages/video-factory";
 import ReviewPage from "@/pages/review";
 import EditorPortal from "@/pages/editor-portal";
 import RegisterPage from "@/pages/register";
@@ -29,6 +30,7 @@ function MainRouter() {
         <Route path="/courses" component={Courses} />
         <Route path="/resources" component={Resources} />
         <Route path="/techtree" component={TechTree} />
+        <Route path="/video-factory" component={VideoFactory} />
         <Route path="/admin" component={Admin} />
         <Route component={NotFound} />
       </Switch>

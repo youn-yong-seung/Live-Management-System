@@ -1,6 +1,6 @@
 import { ReactNode, useState } from "react";
 import { Link, useLocation } from "wouter";
-import { Home, Video, PlaySquare, GraduationCap, Download, GitBranch, Settings, Menu, X } from "lucide-react";
+import { Home, Video, PlaySquare, GraduationCap, Download, GitBranch, Settings, Menu, X, Clapperboard } from "lucide-react";
 
 const navItems = [
   { href: "/", label: "홈" },
@@ -18,6 +18,7 @@ const navIcons: Record<string, typeof Home> = {
   "/replays": PlaySquare,
   "/resources": Download,
   "/courses": GraduationCap,
+  "/video-factory": Clapperboard,
   "/admin": Settings,
 };
 
