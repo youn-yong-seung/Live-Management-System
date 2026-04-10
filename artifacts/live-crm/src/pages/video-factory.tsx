@@ -239,18 +239,41 @@ function PlanCard({ plan, isOpen, onToggle }: { plan: PlanCluster; isOpen: boole
 // ─── Main Page ───
 
 export default function VideoFactory() {
-  /* ── Admin auth gate ── */
+  /* ── All hooks must be declared BEFORE any conditional returns ── */
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     try { return sessionStorage.getItem("crm_admin_auth") === "1"; } catch { return false; }
   });
   const [loginPwd, setLoginPwd] = useState("");
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [openPlanId, setOpenPlanId] = useState<string | null>("remotion");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState<"ratio" | "views" | "recent">("ratio");
 
+  const clusters = useMemo(() => {
+    let filtered = SAMPLE_CLUSTERS;
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        c => c.topic.toLowerCase().includes(q) ||
+          c.videoTitle.toLowerCase().includes(q) ||
+          c.refs.some(r => r.title.toLowerCase().includes(q) || r.channel.toLowerCase().includes(q))
+      );
+    }
+    return filtered;
+  }, [searchQuery]);
+
+  // Stats
+  const totalRefs = SAMPLE_CLUSTERS.reduce((s, c) => s + c.refs.length, 0);
+  const totalViews = SAMPLE_CLUSTERS.flatMap(c => c.refs).reduce((s, r) => s + r.views, 0);
+  const avgRatio = SAMPLE_CLUSTERS.flatMap(c => c.refs).reduce((s, r) => s + r.ratio, 0) / totalRefs;
+
+  /* ── Login handler ── */
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoggingIn(true);
     try {
-      const res = await fetch(`${import.meta.env.BASE_URL.replace(/\/$/, "")}/api/admin/login`, {
+      const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+      const res = await fetch(`${base}/api/admin/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password: loginPwd }),
@@ -258,7 +281,7 @@ export default function VideoFactory() {
       if (!res.ok) throw new Error("비밀번호가 틀렸습니다");
       const data = await res.json();
       sessionStorage.setItem("crm_admin_auth", "1");
-      sessionStorage.setItem("crm_admin_token", data.token);
+      if (data.token) sessionStorage.setItem("crm_admin_token", data.token);
       setIsAuthenticated(true);
       setLoginPwd("");
     } catch {
@@ -268,6 +291,7 @@ export default function VideoFactory() {
     }
   };
 
+  /* ── Auth gate (rendered AFTER all hooks) ── */
   if (!isAuthenticated) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -294,29 +318,6 @@ export default function VideoFactory() {
       </div>
     );
   }
-
-  /* ── Main state ── */
-  const [openPlanId, setOpenPlanId] = useState<string | null>("remotion");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState<"ratio" | "views" | "recent">("ratio");
-
-  const clusters = useMemo(() => {
-    let filtered = SAMPLE_CLUSTERS;
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        c => c.topic.toLowerCase().includes(q) ||
-          c.videoTitle.toLowerCase().includes(q) ||
-          c.refs.some(r => r.title.toLowerCase().includes(q) || r.channel.toLowerCase().includes(q))
-      );
-    }
-    return filtered;
-  }, [searchQuery]);
-
-  // Stats
-  const totalRefs = SAMPLE_CLUSTERS.reduce((s, c) => s + c.refs.length, 0);
-  const totalViews = SAMPLE_CLUSTERS.flatMap(c => c.refs).reduce((s, r) => s + r.views, 0);
-  const avgRatio = SAMPLE_CLUSTERS.flatMap(c => c.refs).reduce((s, r) => s + r.ratio, 0) / totalRefs;
 
   return (
     <div className="space-y-8">
