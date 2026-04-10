@@ -27,40 +27,46 @@ interface BenchmarkRationale {
   structural: string;     // "챕터별 실습 위주 영상"
 }
 
+type HookType = "위기형" | "시나리오형" | "숨겨진기능형" | "수치약속형" | "감정형" | "경고형";
+type BodyFormat = "실습나열형" | "단계별프롬프트형" | "3단계구축형" | "비교형" | "풀코스형";
+
 interface VideoPlan {
   id: string;
+  hookType: HookType;
+  bodyFormat: BodyFormat;
   // 앵커 벤치마킹
   anchor: VideoRef;
   rationale: BenchmarkRationale;
   // 주제
-  topic: string;               // 리라이팅한 영상 주제
-  valueMessage: string;        // 전달하고 싶은 가치 & 메세지 1줄
+  topic: string;
+  valueMessage: string;
   // 썸네일
   thumbTitle: string;
   thumbSub: string;
-  videoTitle: string;          // SEO 영상 제목
+  videoTitle: string;
   // 인트로 3요소
   intro: {
-    crisis: string;            // 위기 환기
-    empathy: string;           // 공감
-    promise: string;           // 구체적 약속 (시간 + 수치)
+    crisis: string;
+    empathy: string;
+    promise: string;
   };
-  // 본문
+  // 본문 (format별로 다른 구조)
   body: {
-    setup: string[];           // 기본 세팅 항목
-    practices: Array<{         // 실습 사례
+    setup: string[];
+    practices: Array<{
       title: string;
-      highlight?: string;      // 하이라이트 포인트
+      highlight?: string;
+      prompt?: string;          // 단계별 프롬프트형에서 사용
     }>;
-    midCta: string;            // 중간 CTA
+    midCta: string;
   };
   // 엔딩 CTA 3중
   endingCta: {
-    leadMagnet: string;        // 카톡방 / 자료
-    subscribe: string;         // 구독 이유
-    comment: string;           // 댓글 유도
+    leadMagnet: string;
+    subscribe: string;
+    comment: string;
   };
-  // 보조 레퍼런스
+  outro?: string;               // 특수 아웃트로 (경고/농담형 등)
   additionalRefs: VideoRef[];
 }
 
@@ -98,6 +104,8 @@ function extractVideoId(url: string) {
 const SAMPLE_PLANS: VideoPlan[] = [
   {
     id: "claude-cowork",
+    hookType: "위기형",
+    bodyFormat: "실습나열형",
     anchor: {
       id: "cowork-ref",
       title: "클로드 코워크로 업무 10배 빨라지는 방법 l 회사 업무에 바로 적용해보세요",
@@ -148,6 +156,8 @@ const SAMPLE_PLANS: VideoPlan[] = [
   },
   {
     id: "remotion",
+    hookType: "시나리오형",
+    bodyFormat: "실습나열형",
     anchor: {
       id: "idVMGLzrrnU",
       title: "Claude Code Just Changed YouTube Videos Forever (Tutorial)",
@@ -197,6 +207,8 @@ const SAMPLE_PLANS: VideoPlan[] = [
   },
   {
     id: "gemini-gems",
+    hookType: "숨겨진기능형",
+    bodyFormat: "실습나열형",
     anchor: {
       id: "gem-anchor",
       title: "제미나이 숨겨진 기능 'GEM'으로 야근탈출! 나만의 AI 업무 자동화 도구 만들기",
@@ -242,6 +254,106 @@ const SAMPLE_PLANS: VideoPlan[] = [
     additionalRefs: [
       { id: "gem-setup", title: "(무료 자료 제공) 99%가 모르는 Gemini 3 설정법 7가지!", channel: "소형채널(1.83만)", views: 27000, subs: 18300, ratio: 1.5, uploadDate: "2026-01-10", url: "" },
       { id: "nblm-merge", title: "NotebookLM and Gemini Just Merged (Massive Update)", channel: "해외채널", views: 77000, subs: 350000, ratio: 0.2, uploadDate: "2026-04-09", url: "" },
+    ],
+  },
+  {
+    id: "elon-gems",
+    hookType: "시나리오형",
+    bodyFormat: "3단계구축형",
+    anchor: {
+      id: "gem-anchor-elon",
+      title: "제미나이 숨겨진 기능 'GEM'으로 야근탈출! 나만의 AI 업무 자동화 도구 만들기",
+      channel: "소형채널",
+      views: 240000,
+      subs: 30000,
+      ratio: 8.0,
+      uploadDate: "2026-03-10",
+      url: "",
+    },
+    rationale: {
+      quantitative: "3만 채널 / 1개월만에 24만뷰 (8.0x)",
+      seo: "Gemini Gems 키워드 급상승 + 일론머스크/빌게이츠 검색량 항상 높음",
+      structural: "'유명인 채용'이라는 비현실적 시나리오 후크 + 3단계 명확한 구축 과정",
+    },
+    topic: "일론머스크, 빌게이츠를 직원으로 채용했다고? | GEMS 신기능 완벽 활용법",
+    valueMessage: "Gemini Gems로 세계적 인사이트를 가진 AI 어드바이저를 무료로 만드는 3단계 방법",
+    thumbTitle: "??? 채용",
+    thumbSub: "일론머스크 : ??? / 빌게이츠 : ???",
+    videoTitle: "일론머스크, 빌게이츠를 직원으로 채용했다고? | Gemini GEMS 신기능으로 세계 최고 어드바이저 만들기",
+    intro: {
+      crisis: "아직도 ChatGPT에 일반 질문만 던지고 계신가요? 그거 엄청난 손해입니다",
+      empathy: "일론머스크한테 직접 사업 조언 받고 싶지 않으세요? 빌게이츠한테 투자 의견 듣고 싶죠?",
+      promise: "이 영상 15분이면 Gemini Gems로 일론머스크/빌게이츠 AI 어드바이저 만들기 완성. 와이프 챗봇까지 3단계로 보여드립니다.",
+    },
+    body: {
+      setup: ["Gemini 무료 가입", "Gems 메뉴 진입 (숨겨진 위치)"],
+      practices: [
+        { title: "1단계: 일론머스크 자료 딥리서치", highlight: "GPT Deep Research로 일론머스크 인터뷰/책/논문 수집하는 장면", prompt: "일론머스크의 경영 철학, 주요 의사결정, 최근 인터뷰를 종합적으로 리서치해줘" },
+        { title: "2단계: Gems에 자료 주입 + 페르소나 설정", highlight: "Gem 생성 화면 + 자료 업로드", prompt: "당신은 일론머스크입니다. 아래 자료를 기반으로 일론머스크의 말투, 철학, 의사결정 패턴으로 답변하세요" },
+        { title: "3단계: 일론머스크 챗봇으로 실전 질문", highlight: "실제 비즈니스 질문 → 일론머스크 스타일 답변 받는 장면" },
+        { title: "보너스: 빌게이츠 Gem도 똑같이 만들기" },
+        { title: "보너스2: 와이프 챗봇 만들기 (개인용)", highlight: "감정적 호소 포인트 - 개인 생활 AI" },
+      ],
+      midCta: "이거 만드는 프롬프트 전부 카톡방에서 무료 배포합니다. 따라하려면 꼭 입장하세요",
+    },
+    endingCta: {
+      leadMagnet: "카톡방 입장 시 일론머스크/빌게이츠 Gems 프롬프트 + 딥리서치 프롬프트 무료 제공",
+      subscribe: "매주 새로운 Gems 아이디어 올라옵니다. 구독하고 나만의 AI 어드바이저 팀 만드세요",
+      comment: "다음 영상에서 만들어드릴 Gems 인물 추천해주세요. 댓글 많은 순으로 제작합니다",
+    },
+    additionalRefs: [
+      { id: "gem-setup-2", title: "(무료 자료 제공) 99%가 모르는 Gemini 3 설정법 7가지!", channel: "소형채널(1.83만)", views: 27000, subs: 18300, ratio: 1.5, uploadDate: "2026-01-10", url: "" },
+      { id: "nblm-merge-2", title: "NotebookLM and Gemini Just Merged (Massive Update)", channel: "해외채널", views: 77000, subs: 350000, ratio: 0.2, uploadDate: "2026-04-09", url: "" },
+    ],
+  },
+  {
+    id: "claude-f1",
+    hookType: "시나리오형",
+    bodyFormat: "단계별프롬프트형",
+    anchor: {
+      id: "idVMGLzrrnU-f1",
+      title: "Claude Code Just Changed YouTube Videos Forever (Tutorial)",
+      channel: "Danny Why",
+      views: 219000,
+      subs: 126000,
+      ratio: 1.7,
+      uploadDate: "2026-03-29",
+      url: "https://www.youtube.com/watch?v=idVMGLzrrnU",
+    },
+    rationale: {
+      quantitative: "12.6만 채널 / 11일만에 21.9만뷰 (1.7x)",
+      seo: "Claude Code + 시각적 프로젝트 검색 급상승",
+      structural: "'비현실적 목표' 시나리오 + 단계별 프롬프트 + 실제 결과물 공개",
+    },
+    topic: "클로드코드로 F1 자동차 시승하기 | 테슬라 스타일 3D 자동화 프로젝트",
+    valueMessage: "클로드코드로 실제 F1 자동차 3D 모델을 만들고 조작하는 전 과정 공개",
+    thumbTitle: "F1 시승",
+    thumbSub: "클로드코드로 테슬라 스타일 자동차 만들기",
+    videoTitle: "클로드코드로 F1 자동차 시승하기 | 테슬라 스타일 3D 자동화 프로젝트 (전 과정 공개)",
+    intro: {
+      crisis: "클로드코드 사용법 영상은 많은데, 막상 뭘 만들 수 있는지 감이 안 오시죠?",
+      empathy: "테슬라에서 완전 자동화된 아파트를 만든다면? F1 자동차를 직접 만들어본다면 어떨까요?",
+      promise: "이 영상 18분이면 클로드코드로 3D F1 자동차 만들기 완성. 프롬프트 3개 공개합니다.",
+    },
+    body: {
+      setup: ["클로드코드 설치 (맥/윈도우)", "Three.js 기본 프로젝트 세팅"],
+      practices: [
+        { title: "1단계: 기본 F1 자동차 모델 생성", highlight: "첫 프롬프트 → 와이어프레임 결과", prompt: "Three.js로 F1 레이싱카 3D 모델을 만들어줘. 빨간색 바디에 에어로다이나믹 디자인으로" },
+        { title: "2단계: 조작 가능하게 만들기", highlight: "키보드 조작 + 물리 엔진 적용", prompt: "WASD 키로 조작 가능하게 만들고, 물리 엔진(Cannon.js)을 추가해서 실제 주행 느낌 구현해줘" },
+        { title: "3단계: 서킷 트랙 + 카메라 시점", highlight: "완성된 F1 시승 시뮬레이터 시연", prompt: "모나코 서킷 스타일의 트랙을 만들고, 1인칭/3인칭 카메라 전환 기능 추가해줘" },
+        { title: "보너스: 완전 자동화된 아파트 프로젝트 아이디어" },
+      ],
+      midCta: "여기까지 따라오셨으면 이미 반 성공입니다. 3개 프롬프트 전부 카톡방에서 드립니다",
+    },
+    endingCta: {
+      leadMagnet: "카톡방 입장 시 F1 자동차 3개 프롬프트 + Three.js 기본 세팅 코드 무료 제공",
+      subscribe: "클로드코드로 만드는 비현실적 프로젝트 시리즈 계속 올라옵니다",
+      comment: "다음 프로젝트 아이디어 추천해주세요. 가장 많은 추천받은 프로젝트로 만듭니다",
+    },
+    outro: "디자이너, 영상편집자 becarefull. 조심하세요 ㅎ 끝.",
+    additionalRefs: [
+      { id: "arrKfg0V268-f1", title: "이제 클로드 코드가 기획자이자 편집자입니다. 100% 자동화", channel: "빌더 조쉬", views: 35000, subs: 46000, ratio: 0.8, uploadDate: "2026-04-04", url: "https://www.youtube.com/watch?v=arrKfg0V268" },
+      { id: "remotion-3d", title: "클로드 코드의 리모션을 사용한 완전한 3D 애니메이션", channel: "소형채널(1.58만)", views: 19000, subs: 15800, ratio: 1.2, uploadDate: "2026-03-10", url: "" },
     ],
   },
 ];
@@ -324,6 +436,7 @@ ${plan.body.midCta}
 1) 리드 수집: ${plan.endingCta.leadMagnet}
 2) 구독 유도: ${plan.endingCta.subscribe}
 3) 댓글 유도: ${plan.endingCta.comment}
+${plan.outro ? `\n[아웃트로]\n${plan.outro}` : ""}
 `.trim();
 
   return (
@@ -428,15 +541,22 @@ ${plan.body.midCta}
 
         {/* 실습 사례 */}
         <div className="mb-4">
-          <p className="text-[10px] uppercase text-white/40 mb-2">실습 사례 ({plan.body.practices.length}개)</p>
-          <div className="space-y-1.5">
+          <p className="text-[10px] uppercase text-white/40 mb-2">
+            {plan.bodyFormat === "단계별프롬프트형" || plan.bodyFormat === "3단계구축형" ? "단계별 프롬프트" : "실습 사례"} ({plan.body.practices.length}개)
+          </p>
+          <div className="space-y-2">
             {plan.body.practices.map((p, i) => (
               <div key={i} className="flex gap-2 text-xs">
                 <span className="text-[#CC9965] font-bold flex-shrink-0">{i + 1}.</span>
-                <div className="flex-1">
+                <div className="flex-1 space-y-1">
                   <p className="text-white/80">{p.title}</p>
+                  {p.prompt && (
+                    <div className="p-2 rounded bg-blue-500/[0.06] border border-blue-500/20 text-[10px] text-blue-300 font-mono leading-relaxed">
+                      💬 {p.prompt}
+                    </div>
+                  )}
                   {p.highlight && (
-                    <p className="text-[10px] text-yellow-400 mt-0.5 flex items-center gap-1">
+                    <p className="text-[10px] text-yellow-400 flex items-center gap-1">
                       <Sparkles className="w-3 h-3" /> {p.highlight}
                     </p>
                   )}
@@ -474,6 +594,18 @@ ${plan.body.midCta}
         </div>
       </div>
 
+      {/* 특수 아웃트로 (있을 때만) */}
+      {plan.outro && (
+        <div className="p-5 border-b border-white/[0.04]">
+          <h4 className="text-xs font-semibold text-white/60 mb-2 flex items-center gap-1.5">
+            <Flag className="w-3.5 h-3.5 text-orange-400" /> 아웃트로 멘트
+          </h4>
+          <div className="p-3 rounded-lg bg-orange-400/[0.06] border border-orange-400/20">
+            <p className="text-sm text-orange-200 italic">"{plan.outro}"</p>
+          </div>
+        </div>
+      )}
+
       {/* 보조 레퍼런스 */}
       {plan.additionalRefs.length > 0 && (
         <div className="p-5">
@@ -500,6 +632,15 @@ ${plan.body.midCta}
   );
 }
 
+const HOOK_COLORS: Record<HookType, string> = {
+  "위기형": "border-red-400/40 text-red-400",
+  "시나리오형": "border-purple-400/40 text-purple-400",
+  "숨겨진기능형": "border-yellow-400/40 text-yellow-400",
+  "수치약속형": "border-green-400/40 text-green-400",
+  "감정형": "border-pink-400/40 text-pink-400",
+  "경고형": "border-orange-400/40 text-orange-400",
+};
+
 function PlanCard({ plan, isOpen, onToggle }: { plan: VideoPlan; isOpen: boolean; onToggle: () => void }) {
   return (
     <div className="glass-card overflow-hidden">
@@ -507,14 +648,17 @@ function PlanCard({ plan, isOpen, onToggle }: { plan: VideoPlan; isOpen: boolean
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-2 flex-wrap">
+              <Badge variant="outline" className={`text-[10px] ${HOOK_COLORS[plan.hookType]}`}>
+                {plan.hookType}
+              </Badge>
+              <Badge variant="outline" className="border-blue-400/40 text-blue-400 text-[10px]">
+                {plan.bodyFormat}
+              </Badge>
               <Badge variant="outline" className="border-[#CC9965]/40 text-[#CC9965] text-[10px]">
                 앵커 {plan.anchor.ratio.toFixed(1)}x
               </Badge>
               <Badge variant="outline" className="border-white/20 text-white/50 text-[10px]">
                 {toKr(plan.anchor.views)}뷰 / {toKr(plan.anchor.subs)} 구독자
-              </Badge>
-              <Badge variant="outline" className="border-white/20 text-white/50 text-[10px]">
-                실습 {plan.body.practices.length}개
               </Badge>
             </div>
             <h3 className="text-lg font-bold text-white mb-1">{plan.topic}</h3>
