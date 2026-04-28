@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate } from "@/lib/date-utils";
 import { Calendar, Users, CheckCircle, Loader2 } from "lucide-react";
+import { ChannelSourceField, type ChannelSourceItem } from "@/components/channel-source-field";
 
 /* ── Types ──────────────────────────────────────────── */
 
@@ -74,7 +75,7 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(true);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [masterChannels, setMasterChannels] = useState<string[]>([]);
+  const [masterSources, setMasterSources] = useState<ChannelSourceItem[]>([]);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -92,7 +93,11 @@ export default function RegisterPage() {
       setLive(l);
       setFormConfig(fc);
       setCustomQuestions(Array.isArray(qs) ? qs : []);
-      setMasterChannels(Array.isArray(channels) ? channels.map((c: any) => c.name) : []);
+      setMasterSources(
+        Array.isArray(channels)
+          ? channels.map((c: any) => ({ name: c.name, category: c.category ?? null }))
+          : [],
+      );
     }).finally(() => setLoading(false));
   }, [liveId]);
 
@@ -102,7 +107,18 @@ export default function RegisterPage() {
   const showChannelSource = fc?.showChannelSource ?? true;
   const showMessage = fc?.showMessage ?? true;
   const showMarketingConsent = fc?.showMarketingConsent ?? true;
-  const activeChannels = fc?.channelSourceOptions ?? (masterChannels.length > 0 ? masterChannels : DEFAULT_CHANNELS);
+  // 라이브별 오버라이드(이름 배열)가 있으면 그 순서대로 마스터에서 매칭, 없으면 마스터 전체.
+  // 마스터에 없는 이름(자유 추가된 옵션)은 카테고리 null로 간주 → "기타/직접 입력" 그룹으로 떨어짐.
+  const activeSources: ChannelSourceItem[] = (() => {
+    if (fc?.channelSourceOptions && fc.channelSourceOptions.length > 0) {
+      return fc.channelSourceOptions.map((name) => {
+        const hit = masterSources.find((s) => s.name === name);
+        return hit ?? { name, category: null };
+      });
+    }
+    if (masterSources.length > 0) return masterSources;
+    return DEFAULT_CHANNELS.map((name) => ({ name, category: null }));
+  })();
   const activeIndustries = fc?.industryOptions ?? DEFAULT_INDUSTRIES;
   const aiQuestions = fc?.aiRecommendedQuestions ?? [];
 
@@ -233,21 +249,15 @@ export default function RegisterPage() {
                 <FormField control={form.control} name="channelSource" render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium text-white/70">어디서 보고 오셨나요? <span className="text-red-400">*</span></FormLabel>
-                    <RadioGroup
-                      onValueChange={(v) => field.onChange([v])}
-                      value={(field.value as string[] | undefined)?.[0] ?? ""}
-                      className="pt-1 space-y-2"
-                    >
-                      {activeChannels.map((ch) => (
-                        <div key={ch} className="flex items-center gap-2">
-                          <RadioGroupItem value={ch} id={`r-ch-${ch}`} />
-                          <Label htmlFor={`r-ch-${ch}`} className="text-sm text-white/70 cursor-pointer">{ch}</Label>
-                        </div>
-                      ))}
-                    </RadioGroup>
-                    {((field.value as string[] | undefined)?.[0] === "직접 입력" || (field.value as string[] | undefined)?.[0] === "기타") && (
-                      <Input placeholder="직접 입력해주세요" className="mt-2 rounded-xl border-white/10 bg-white/5 !text-white placeholder:text-white/30" {...form.register("channelSourceCustom")} />
-                    )}
+                    <ChannelSourceField
+                      sources={activeSources}
+                      value={(field.value as string[] | undefined)?.[0]}
+                      onChange={(v) => field.onChange(v ? [v] : [])}
+                      customValue={form.watch("channelSourceCustom") ?? ""}
+                      onCustomChange={(v) => form.setValue("channelSourceCustom", v)}
+                      theme="dark"
+                      idPrefix="r-ch"
+                    />
                   </FormItem>
                 )} />
               )}

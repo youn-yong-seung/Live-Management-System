@@ -24,6 +24,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { ChannelSourceField, type ChannelSourceItem } from "@/components/channel-source-field";
 
 /* ── Constants ──────────────────────────────────────── */
 
@@ -95,7 +96,7 @@ export default function Lives() {
   const [customQuestions, setCustomQuestions] = useState<CustomQuestion[]>([]);
   const [isLoadingQuestions, setIsLoadingQuestions] = useState(false);
   const [formConfig, setFormConfig] = useState<FormConfig | null>(null);
-  const [masterChannels, setMasterChannels] = useState<string[]>([]);
+  const [masterSources, setMasterSources] = useState<ChannelSourceItem[]>([]);
 
   const { data: lives, isLoading } = useGetLives(
     { status: "scheduled" },
@@ -126,7 +127,9 @@ export default function Lives() {
       .then(([qs, fc, channels]) => {
         setCustomQuestions(Array.isArray(qs) ? qs : []);
         setFormConfig(fc);
-        if (Array.isArray(channels)) setMasterChannels(channels.map((c: any) => c.name));
+        if (Array.isArray(channels)) {
+          setMasterSources(channels.map((c: any) => ({ name: c.name, category: c.category ?? null })));
+        }
       })
       .catch(() => { setCustomQuestions([]); setFormConfig(null); })
       .finally(() => setIsLoadingQuestions(false));
@@ -138,7 +141,16 @@ export default function Lives() {
   const showChannelSource = fc?.showChannelSource ?? true;
   const showSkillLevel = fc?.showSkillLevel ?? false;
   const showMessage = fc?.showMessage ?? true;
-  const activeChannels = fc?.channelSourceOptions ?? (masterChannels.length > 0 ? masterChannels : CHANNELS);
+  const activeSources: ChannelSourceItem[] = (() => {
+    if (fc?.channelSourceOptions && fc.channelSourceOptions.length > 0) {
+      return fc.channelSourceOptions.map((name) => {
+        const hit = masterSources.find((s) => s.name === name);
+        return hit ?? { name, category: null };
+      });
+    }
+    if (masterSources.length > 0) return masterSources;
+    return CHANNELS.map((name) => ({ name, category: null }));
+  })();
   const activeIndustries = fc?.industryOptions ?? INDUSTRIES;
   const aiQuestions = fc?.aiRecommendedQuestions ?? [];
 
@@ -493,21 +505,15 @@ export default function Lives() {
                 <FormField control={form.control} name="channelSource" render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium text-gray-700">어디서 보고 오셨나요? <span className="text-red-500">*</span></FormLabel>
-                    <RadioGroup
-                      onValueChange={(v) => field.onChange([v])}
-                      value={(field.value as string[] | undefined)?.[0] ?? ""}
-                      className="pt-1 space-y-2"
-                    >
-                      {activeChannels.map((ch) => (
-                        <div key={ch} className="flex items-center gap-2">
-                          <RadioGroupItem value={ch} id={`ch-${ch}`} />
-                          <Label htmlFor={`ch-${ch}`} className="text-sm text-gray-700 cursor-pointer">{ch}</Label>
-                        </div>
-                      ))}
-                    </RadioGroup>
-                    {((field.value as string[] | undefined)?.[0] === "직접 입력" || (field.value as string[] | undefined)?.[0] === "기타") && (
-                      <Input placeholder="어디서 알게 되셨는지 직접 입력해주세요" className="mt-2 !rounded-xl !border-gray-200 !text-black" {...form.register("channelSourceCustom")} />
-                    )}
+                    <ChannelSourceField
+                      sources={activeSources}
+                      value={(field.value as string[] | undefined)?.[0]}
+                      onChange={(v) => field.onChange(v ? [v] : [])}
+                      customValue={form.watch("channelSourceCustom") ?? ""}
+                      onCustomChange={(v) => form.setValue("channelSourceCustom", v)}
+                      theme="light"
+                      idPrefix="ch"
+                    />
                   </FormItem>
                 )} />
                 )}

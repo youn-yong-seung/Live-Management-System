@@ -63,6 +63,7 @@ export function AdminFormBuilder({ liveId, liveTitle }: { liveId: number; liveTi
   const [selectedQuestions, setSelectedQuestions] = useState<Set<number>>(new Set());
   const [showPreview, setShowPreview] = useState(false);
   const [dragIdx, setDragIdx] = useState<number | null>(null);
+  const [newChannelCategory, setNewChannelCategory] = useState<string>("SNS");
 
   useEffect(() => {
     (async () => {
@@ -183,67 +184,86 @@ export function AdminFormBuilder({ liveId, liveTitle }: { liveId: number; liveTi
             <div className="space-y-2">
               <Label className="text-xs font-bold text-gray-600 uppercase tracking-wider">유입경로 옵션</Label>
               <p className="text-[10px] text-gray-400">드래그로 순서 변경, 체크로 표시/숨김</p>
-              <div className="max-h-[250px] overflow-y-auto space-y-0.5 p-2 bg-gray-50 rounded-lg border">
+              <div className="max-h-[300px] overflow-y-auto space-y-0.5 p-2 bg-gray-50 rounded-lg border">
                 {uniqueSources.map((s, idx) => {
                   const included = !config.channelSourceOptions || config.channelSourceOptions.includes(s.name);
+                  const prevCategory = idx > 0 ? (uniqueSources[idx - 1].category ?? "기타") : null;
+                  const currCategory = s.category ?? "기타";
+                  const showCategoryHeader = prevCategory !== currCategory;
                   return (
-                    <div
-                      key={s.id}
-                      draggable
-                      onDragStart={() => setDragIdx(idx)}
-                      onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add("bg-blue-50"); }}
-                      onDragLeave={(e) => e.currentTarget.classList.remove("bg-blue-50")}
-                      onDrop={(e) => {
-                        e.preventDefault();
-                        e.currentTarget.classList.remove("bg-blue-50");
-                        if (dragIdx === null || dragIdx === idx) return;
-                        setConfig((c) => {
-                          const list = [...(c.channelSourceOptions ?? uniqueSources.map((x) => x.name))];
-                          const [moved] = list.splice(dragIdx, 1);
-                          list.splice(idx, 0, moved);
-                          return { ...c, channelSourceOptions: list };
-                        });
-                        setDragIdx(null);
-                      }}
-                      className={`flex items-center justify-between py-1 px-1 rounded transition-colors ${dragIdx === idx ? "opacity-50" : ""} ${included ? "" : "opacity-40"}`}
-                    >
-                      <div className="flex items-center gap-1.5 flex-1 cursor-grab active:cursor-grabbing">
-                        <GripVertical className="h-3 w-3 text-gray-300 flex-shrink-0" />
-                        <label className="flex items-center gap-2 cursor-pointer text-xs text-gray-700 flex-1">
-                          <input
-                            type="checkbox" checked={included}
-                            onChange={(e) => {
-                              setConfig((c) => {
-                                const current = c.channelSourceOptions ?? uniqueSources.map((x) => x.name);
-                                const next = e.target.checked
-                                  ? current.includes(s.name) ? current : [...current, s.name]
-                                  : current.filter((n) => n !== s.name);
-                                return { ...c, channelSourceOptions: next };
-                              });
-                            }}
-                            className="rounded"
-                          />
-                          {s.name}
-                          {s.category && <span className="text-[9px] text-gray-400">({s.category})</span>}
-                        </label>
+                    <div key={s.id}>
+                      {showCategoryHeader && (
+                        <div className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mt-1.5 mb-0.5 px-1">
+                          {currCategory}
+                        </div>
+                      )}
+                      <div
+                        draggable
+                        onDragStart={() => setDragIdx(idx)}
+                        onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add("bg-blue-50"); }}
+                        onDragLeave={(e) => e.currentTarget.classList.remove("bg-blue-50")}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          e.currentTarget.classList.remove("bg-blue-50");
+                          if (dragIdx === null || dragIdx === idx) return;
+                          setConfig((c) => {
+                            const list = [...(c.channelSourceOptions ?? uniqueSources.map((x) => x.name))];
+                            const [moved] = list.splice(dragIdx, 1);
+                            list.splice(idx, 0, moved);
+                            return { ...c, channelSourceOptions: list };
+                          });
+                          setDragIdx(null);
+                        }}
+                        className={`flex items-center justify-between py-1 px-1 rounded transition-colors ${dragIdx === idx ? "opacity-50" : ""} ${included ? "" : "opacity-40"}`}
+                      >
+                        <div className="flex items-center gap-1.5 flex-1 cursor-grab active:cursor-grabbing">
+                          <GripVertical className="h-3 w-3 text-gray-300 flex-shrink-0" />
+                          <label className="flex items-center gap-2 cursor-pointer text-xs text-gray-700 flex-1">
+                            <input
+                              type="checkbox" checked={included}
+                              onChange={(e) => {
+                                setConfig((c) => {
+                                  const current = c.channelSourceOptions ?? uniqueSources.map((x) => x.name);
+                                  const next = e.target.checked
+                                    ? current.includes(s.name) ? current : [...current, s.name]
+                                    : current.filter((n) => n !== s.name);
+                                  return { ...c, channelSourceOptions: next };
+                                });
+                              }}
+                              className="rounded"
+                            />
+                            {s.name}
+                          </label>
+                        </div>
+                        <button className="text-gray-300 hover:text-red-400 p-0.5 flex-shrink-0" title="삭제" onClick={() => {
+                          apiFetch(`/channel-sources/${s.id}`, { method: "DELETE" }).then(() => {
+                            setChannelSources((prev) => prev.filter((x) => x.id !== s.id));
+                            setConfig((c) => ({
+                              ...c,
+                              channelSourceOptions: (c.channelSourceOptions ?? uniqueSources.map((x) => x.name)).filter((n) => n !== s.name),
+                            }));
+                          });
+                        }}>
+                          <X className="h-3 w-3" />
+                        </button>
                       </div>
-                      <button className="text-gray-300 hover:text-red-400 p-0.5 flex-shrink-0" title="삭제" onClick={() => {
-                        apiFetch(`/channel-sources/${s.id}`, { method: "DELETE" }).then(() => {
-                          setChannelSources((prev) => prev.filter((x) => x.id !== s.id));
-                          setConfig((c) => ({
-                            ...c,
-                            channelSourceOptions: (c.channelSourceOptions ?? uniqueSources.map((x) => x.name)).filter((n) => n !== s.name),
-                          }));
-                        });
-                      }}>
-                        <X className="h-3 w-3" />
-                      </button>
                     </div>
                   );
                 })}
               </div>
               {/* 새 유입경로 추가 */}
               <div className="flex gap-2">
+                <select
+                  value={newChannelCategory}
+                  onChange={(e) => setNewChannelCategory(e.target.value)}
+                  className="h-7 text-xs rounded-md border border-gray-200 bg-white px-2"
+                >
+                  <option value="SNS">SNS</option>
+                  <option value="오픈채팅방">오픈채팅방</option>
+                  <option value="지인 추천">지인 추천</option>
+                  <option value="검색">검색</option>
+                  <option value="기타">기타</option>
+                </select>
                 <Input
                   id="new-channel-input"
                   placeholder="새 유입경로 추가"
@@ -254,7 +274,7 @@ export function AdminFormBuilder({ liveId, liveTitle }: { liveId: number; liveTi
                       const input = e.currentTarget;
                       const name = input.value.trim();
                       if (!name) return;
-                      apiFetch<ChannelSource>("/channel-sources", { method: "POST", body: JSON.stringify({ name, category: "기타" }) }).then((s) => {
+                      apiFetch<ChannelSource>("/channel-sources", { method: "POST", body: JSON.stringify({ name, category: newChannelCategory }) }).then((s) => {
                         setChannelSources((prev) => [...prev, s]);
                         setConfig((c) => ({
                           ...c,
@@ -269,7 +289,7 @@ export function AdminFormBuilder({ liveId, liveTitle }: { liveId: number; liveTi
                   const input = document.getElementById("new-channel-input") as HTMLInputElement;
                   const name = input?.value.trim();
                   if (!name) return;
-                  apiFetch<ChannelSource>("/channel-sources", { method: "POST", body: JSON.stringify({ name, category: "기타" }) }).then((s) => {
+                  apiFetch<ChannelSource>("/channel-sources", { method: "POST", body: JSON.stringify({ name, category: newChannelCategory }) }).then((s) => {
                     setChannelSources((prev) => [...prev, s]);
                     setConfig((c) => ({
                       ...c,
