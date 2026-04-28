@@ -46,6 +46,29 @@ router.post("/channel-sources", requireAdminAuth, async (req: Request, res: Resp
   }
 });
 
+// PATCH /channel-sources/:id — 이름/카테고리 수정
+router.patch("/channel-sources/:id", requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(String(req.params.id), 10);
+    const { name, category } = req.body;
+    const updates: { name?: string; category?: string | null } = {};
+    if (name !== undefined) updates.name = name;
+    if (category !== undefined) updates.category = category;
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ error: "변경할 필드가 없습니다." });
+    }
+    const [updated] = await db.update(channelSourcesTable)
+      .set(updates)
+      .where(eq(channelSourcesTable.id, id))
+      .returning();
+    if (!updated) return res.status(404).json({ error: "Not found" });
+    res.json(updated);
+  } catch (err) {
+    logger.error({ err }, "PATCH /channel-sources/:id failed");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // DELETE /channel-sources/:id
 router.delete("/channel-sources/:id", requireAdminAuth, async (req: Request, res: Response) => {
   try {

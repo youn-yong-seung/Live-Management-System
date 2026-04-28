@@ -9,6 +9,9 @@ import {
   Search,
   MoreHorizontal,
   Check,
+  AtSign,
+  Instagram,
+  Youtube,
   type LucideIcon,
 } from "lucide-react";
 
@@ -31,6 +34,9 @@ const CUSTOM_PLATFORM = "__custom__";
 const CUSTOM_VALUES = new Set(["직접 입력", "기타"]);
 
 const PLATFORM_ICONS: Record<string, LucideIcon> = {
+  스레드: AtSign,
+  인스타: Instagram,
+  유튜브: Youtube,
   SNS: Hash,
   오픈채팅방: MessagesSquare,
   "지인 추천": Users,
@@ -73,7 +79,7 @@ export function ChannelSourceField({
 
   // 플랫폼 표시 순서: SNS → 오픈채팅방 → 지인 추천 → 검색 → 그 외 → 기타/직접입력
   const platforms = useMemo(() => {
-    const preferred = ["SNS", "오픈채팅방", "지인 추천", "지인", "검색"];
+    const preferred = ["스레드", "인스타", "유튜브", "오픈채팅방", "SNS", "지인 추천", "지인", "검색"];
     const all = Array.from(grouped.keys());
     const ordered: string[] = [];
     for (const p of preferred) if (all.includes(p)) ordered.push(p);

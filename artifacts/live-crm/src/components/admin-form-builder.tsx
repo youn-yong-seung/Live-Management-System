@@ -63,7 +63,9 @@ export function AdminFormBuilder({ liveId, liveTitle }: { liveId: number; liveTi
   const [selectedQuestions, setSelectedQuestions] = useState<Set<number>>(new Set());
   const [showPreview, setShowPreview] = useState(false);
   const [dragIdx, setDragIdx] = useState<number | null>(null);
-  const [newChannelCategory, setNewChannelCategory] = useState<string>("SNS");
+  const [dragSourceId, setDragSourceId] = useState<number | null>(null);
+  const [dragOverCategory, setDragOverCategory] = useState<string | null>(null);
+  const [newChannelCategory, setNewChannelCategory] = useState<string>("스레드");
 
   useEffect(() => {
     (async () => {
@@ -180,76 +182,124 @@ export function AdminFormBuilder({ liveId, liveTitle }: { liveId: number; liveTi
             const seen = new Set<number>();
             const uniqueSources = orderedSources.filter((s) => { if (seen.has(s.id)) return false; seen.add(s.id); return true; });
 
+            // 카테고리별로 그룹화 (첫 등장 순서 유지)
+            const groupOrder: string[] = [];
+            const groupMap = new Map<string, ChannelSource[]>();
+            for (const s of uniqueSources) {
+              const cat = s.category ?? "기타";
+              if (!groupMap.has(cat)) { groupOrder.push(cat); groupMap.set(cat, []); }
+              groupMap.get(cat)!.push(s);
+            }
+            const groups = groupOrder.map((cat) => ({ category: cat, items: groupMap.get(cat)! }));
+            // 그룹화된 순서대로 평탄화 — 드래그 인덱스의 기준이 됨
+            const displayList = groups.flatMap((g) => g.items);
+
+            const handleCategoryDrop = (targetCategory: string) => {
+              if (dragSourceId === null) return;
+              const dragged = channelSources.find((s) => s.id === dragSourceId);
+              if (!dragged) return;
+              const currentCat = dragged.category ?? "기타";
+              if (currentCat === targetCategory) return;
+              apiFetch<ChannelSource>(`/channel-sources/${dragSourceId}`, {
+                method: "PATCH",
+                body: JSON.stringify({ category: targetCategory }),
+              }).then((updated) => {
+                setChannelSources((prev) =>
+                  prev.map((s) => (s.id === dragSourceId ? { ...s, category: updated.category } : s))
+                );
+                toast({ title: `"${dragged.name}" → ${targetCategory}` });
+              }).catch((err) => toast({ variant: "destructive", title: (err as Error).message }));
+            };
+
             return (
             <div className="space-y-2">
               <Label className="text-xs font-bold text-gray-600 uppercase tracking-wider">유입경로 옵션</Label>
-              <p className="text-[10px] text-gray-400">드래그로 순서 변경, 체크로 표시/숨김</p>
-              <div className="max-h-[300px] overflow-y-auto space-y-0.5 p-2 bg-gray-50 rounded-lg border">
-                {uniqueSources.map((s, idx) => {
-                  const included = !config.channelSourceOptions || config.channelSourceOptions.includes(s.name);
-                  const prevCategory = idx > 0 ? (uniqueSources[idx - 1].category ?? "기타") : null;
-                  const currCategory = s.category ?? "기타";
-                  const showCategoryHeader = prevCategory !== currCategory;
-                  return (
-                    <div key={s.id}>
-                      {showCategoryHeader && (
-                        <div className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mt-1.5 mb-0.5 px-1">
-                          {currCategory}
-                        </div>
-                      )}
-                      <div
-                        draggable
-                        onDragStart={() => setDragIdx(idx)}
-                        onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add("bg-blue-50"); }}
-                        onDragLeave={(e) => e.currentTarget.classList.remove("bg-blue-50")}
-                        onDrop={(e) => {
-                          e.preventDefault();
-                          e.currentTarget.classList.remove("bg-blue-50");
-                          if (dragIdx === null || dragIdx === idx) return;
-                          setConfig((c) => {
-                            const list = [...(c.channelSourceOptions ?? uniqueSources.map((x) => x.name))];
-                            const [moved] = list.splice(dragIdx, 1);
-                            list.splice(idx, 0, moved);
-                            return { ...c, channelSourceOptions: list };
-                          });
-                          setDragIdx(null);
-                        }}
-                        className={`flex items-center justify-between py-1 px-1 rounded transition-colors ${dragIdx === idx ? "opacity-50" : ""} ${included ? "" : "opacity-40"}`}
-                      >
-                        <div className="flex items-center gap-1.5 flex-1 cursor-grab active:cursor-grabbing">
-                          <GripVertical className="h-3 w-3 text-gray-300 flex-shrink-0" />
-                          <label className="flex items-center gap-2 cursor-pointer text-xs text-gray-700 flex-1">
-                            <input
-                              type="checkbox" checked={included}
-                              onChange={(e) => {
-                                setConfig((c) => {
-                                  const current = c.channelSourceOptions ?? uniqueSources.map((x) => x.name);
-                                  const next = e.target.checked
-                                    ? current.includes(s.name) ? current : [...current, s.name]
-                                    : current.filter((n) => n !== s.name);
-                                  return { ...c, channelSourceOptions: next };
-                                });
-                              }}
-                              className="rounded"
-                            />
-                            {s.name}
-                          </label>
-                        </div>
-                        <button className="text-gray-300 hover:text-red-400 p-0.5 flex-shrink-0" title="삭제" onClick={() => {
-                          apiFetch(`/channel-sources/${s.id}`, { method: "DELETE" }).then(() => {
-                            setChannelSources((prev) => prev.filter((x) => x.id !== s.id));
-                            setConfig((c) => ({
-                              ...c,
-                              channelSourceOptions: (c.channelSourceOptions ?? uniqueSources.map((x) => x.name)).filter((n) => n !== s.name),
-                            }));
-                          });
-                        }}>
-                          <X className="h-3 w-3" />
-                        </button>
-                      </div>
+              <p className="text-[10px] text-gray-400">행 드래그로 순서 변경, 카테고리 헤더에 드롭하면 그 카테고리로 이동</p>
+              <div className="max-h-[300px] overflow-y-auto space-y-1 p-2 bg-gray-50 rounded-lg border">
+                {groups.map(({ category, items }) => (
+                  <div key={category} className="space-y-0.5">
+                    <div
+                      onDragOver={(e) => { e.preventDefault(); setDragOverCategory(category); }}
+                      onDragLeave={() => setDragOverCategory((c) => (c === category ? null : c))}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        setDragOverCategory(null);
+                        handleCategoryDrop(category);
+                        setDragIdx(null);
+                        setDragSourceId(null);
+                      }}
+                      className={`text-[10px] font-bold uppercase tracking-wider mt-1.5 mb-0.5 px-2 py-1 rounded border-2 border-dashed transition-colors ${
+                        dragOverCategory === category
+                          ? "bg-blue-100 border-blue-400 text-blue-700"
+                          : "border-transparent text-gray-500"
+                      }`}
+                    >
+                      {category}
                     </div>
-                  );
-                })}
+                    {items.map((s) => {
+                      const idx = displayList.findIndex((x) => x.id === s.id);
+                      const included = !config.channelSourceOptions || config.channelSourceOptions.includes(s.name);
+                      return (
+                        <div
+                          key={s.id}
+                          draggable
+                          onDragStart={() => { setDragIdx(idx); setDragSourceId(s.id); }}
+                          onDragEnd={() => { setDragIdx(null); setDragSourceId(null); setDragOverCategory(null); }}
+                          onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); e.currentTarget.classList.add("bg-blue-50"); }}
+                          onDragLeave={(e) => e.currentTarget.classList.remove("bg-blue-50")}
+                          onDrop={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            e.currentTarget.classList.remove("bg-blue-50");
+                            if (dragIdx === null || dragIdx === idx) {
+                              setDragIdx(null);
+                              setDragSourceId(null);
+                              return;
+                            }
+                            const newOrder = displayList.map((x) => x.name);
+                            const [moved] = newOrder.splice(dragIdx, 1);
+                            newOrder.splice(idx, 0, moved);
+                            setConfig((c) => ({ ...c, channelSourceOptions: newOrder }));
+                            setDragIdx(null);
+                            setDragSourceId(null);
+                          }}
+                          className={`flex items-center justify-between py-1 px-1 rounded transition-colors ${dragIdx === idx ? "opacity-50" : ""} ${included ? "" : "opacity-40"}`}
+                        >
+                          <div className="flex items-center gap-1.5 flex-1 cursor-grab active:cursor-grabbing">
+                            <GripVertical className="h-3 w-3 text-gray-300 flex-shrink-0" />
+                            <label className="flex items-center gap-2 cursor-pointer text-xs text-gray-700 flex-1">
+                              <input
+                                type="checkbox" checked={included}
+                                onChange={(e) => {
+                                  setConfig((c) => {
+                                    const current = c.channelSourceOptions ?? displayList.map((x) => x.name);
+                                    const next = e.target.checked
+                                      ? current.includes(s.name) ? current : [...current, s.name]
+                                      : current.filter((n) => n !== s.name);
+                                    return { ...c, channelSourceOptions: next };
+                                  });
+                                }}
+                                className="rounded"
+                              />
+                              {s.name}
+                            </label>
+                          </div>
+                          <button className="text-gray-300 hover:text-red-400 p-0.5 flex-shrink-0" title="삭제" onClick={() => {
+                            apiFetch(`/channel-sources/${s.id}`, { method: "DELETE" }).then(() => {
+                              setChannelSources((prev) => prev.filter((x) => x.id !== s.id));
+                              setConfig((c) => ({
+                                ...c,
+                                channelSourceOptions: (c.channelSourceOptions ?? displayList.map((x) => x.name)).filter((n) => n !== s.name),
+                              }));
+                            });
+                          }}>
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ))}
               </div>
               {/* 새 유입경로 추가 */}
               <div className="flex gap-2">
@@ -258,7 +308,9 @@ export function AdminFormBuilder({ liveId, liveTitle }: { liveId: number; liveTi
                   onChange={(e) => setNewChannelCategory(e.target.value)}
                   className="h-7 text-xs rounded-md border border-gray-200 bg-white px-2"
                 >
-                  <option value="SNS">SNS</option>
+                  <option value="스레드">스레드</option>
+                  <option value="인스타">인스타</option>
+                  <option value="유튜브">유튜브</option>
                   <option value="오픈채팅방">오픈채팅방</option>
                   <option value="지인 추천">지인 추천</option>
                   <option value="검색">검색</option>
