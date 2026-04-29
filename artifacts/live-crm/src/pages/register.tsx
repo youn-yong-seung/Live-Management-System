@@ -40,7 +40,16 @@ interface CustomQuestion {
 /* ── Defaults ───────────────────────────────────────── */
 
 const DEFAULT_INDUSTRIES = ["제조업", "도소매업", "음식점/카페", "서비스업", "교육", "IT/소프트웨어", "의료/헬스케어", "부동산", "금융", "프리랜서/1인 기업", "직접 입력"];
-const DEFAULT_CHANNELS = ["유튜브", "인스타그램", "네이버 블로그", "지인 추천", "카카오채널", "구글 검색", "직접 입력"];
+// 마스터 채널 fetch가 실패했을 때만 쓰는 fallback. 카테고리 구조 맞춰둠.
+const DEFAULT_CHANNELS: ChannelSourceItem[] = [
+  { name: "유튜브", category: "유튜브" },
+  { name: "인스타", category: "인스타" },
+  { name: "스레드", category: "스레드" },
+  { name: "오픈채팅방", category: "오픈채팅방" },
+  { name: "지인 추천", category: "지인 추천" },
+  { name: "검색", category: "검색" },
+  { name: "직접 입력", category: null },
+];
 
 const schema = z.object({
   name: z.string().min(2, "이름을 입력해주세요"),
@@ -117,7 +126,7 @@ export default function RegisterPage() {
       });
     }
     if (masterSources.length > 0) return masterSources;
-    return DEFAULT_CHANNELS.map((name) => ({ name, category: null }));
+    return DEFAULT_CHANNELS;
   })();
   const activeIndustries = fc?.industryOptions ?? DEFAULT_INDUSTRIES;
   const aiQuestions = fc?.aiRecommendedQuestions ?? [];

@@ -34,9 +34,15 @@ const INDUSTRIES = [
   "프리랜서/1인 기업", "직접 입력",
 ];
 
-const CHANNELS = [
-  "유튜브", "인스타그램", "네이버 블로그", "지인 추천",
-  "카카오채널", "구글 검색", "직접 입력",
+// 마스터 채널 fetch가 실패했을 때만 쓰는 fallback.
+const CHANNELS: ChannelSourceItem[] = [
+  { name: "유튜브", category: "유튜브" },
+  { name: "인스타", category: "인스타" },
+  { name: "스레드", category: "스레드" },
+  { name: "오픈채팅방", category: "오픈채팅방" },
+  { name: "지인 추천", category: "지인 추천" },
+  { name: "검색", category: "검색" },
+  { name: "직접 입력", category: null },
 ];
 
 const SKILL_LEVELS = [
@@ -149,7 +155,7 @@ export default function Lives() {
       });
     }
     if (masterSources.length > 0) return masterSources;
-    return CHANNELS.map((name) => ({ name, category: null }));
+    return CHANNELS;
   })();
   const activeIndustries = fc?.industryOptions ?? INDUSTRIES;
   const aiQuestions = fc?.aiRecommendedQuestions ?? [];
