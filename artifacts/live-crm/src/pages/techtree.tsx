@@ -58,8 +58,9 @@ const PATHS: TreePath[] = [
       { id: "c2", liveId: 5, level: "Lv.2 기초", title: "Claude Code <기초편> — 설치부터 시작", shortTitle: "클코 기초", description: "나를 위해 일하는 AI, 설치부터 어려우신 분들만", youtubeUrl: "https://www.youtube.com/watch?v=L75Sa_mukpM", tags: ["클로드코드", "AI"], gains: ["실전 환경 세팅", "기본 워크플로", "프롬프트 기초"], children: ["c3", "c4"] },
       { id: "c3", liveId: 6, level: "Lv.3 활용", title: "Claude Code <활용편> — 카드뉴스 자동화", shortTitle: "카드뉴스 자동화", description: "카드뉴스 만들기에 지친 마케터, 1인 사업가분들", youtubeUrl: "https://www.youtube.com/watch?v=e4CWO_5mhpA", tags: ["클로드코드", "자동화"], gains: ["카드뉴스 자동 생성", "프롬프트 엔지니어링", "실전 워크플로"], children: ["c6"] },
       { id: "c4", liveId: 15, level: "Lv.3 분기", title: "커서AI 설치부터 기본사용법까지", shortTitle: "커서AI", description: "Cursor AI 설치 및 기본 사용법 튜토리얼", youtubeUrl: "https://www.youtube.com/watch?v=vOn9S4zh1Qs", tags: ["AI", "튜토리얼"], gains: ["Cursor AI 설치", "AI 코딩 보조 활용", "생산성 극대화"], children: ["c5"] },
-      { id: "c5", liveId: 28, level: "Lv.4 Git", title: "깃허브? 그게 대체 뭔데 — 비개발자를 위한 설명", shortTitle: "깃허브 입문", description: "비개발자도 이해할 수 있는 깃허브 개념 설명", youtubeUrl: "https://www.youtube.com/watch?v=pCi305aj7hc", tags: ["클로드코드", "입문"], gains: ["깃허브 개념 이해", "레포지토리 기초", "협업 워크플로"], children: ["c6"] },
-      { id: "c6", liveId: 54, level: "Lv.5 마스터", title: "윤자동 바이브코딩 유료급 라이브 강의", shortTitle: "바이브코딩", description: "바이브코딩의 핵심을 배우는 유료급 무료 라이브", youtubeUrl: "https://www.youtube.com/watch?v=qInwRkvvGas", tags: ["클로드코드", "AI"], gains: ["바이브코딩 마스터", "실전 프로젝트 제작", "AI 개발 자립"] },
+      { id: "c5", liveId: 65, level: "Lv.4 꿀팁", title: "클로드코드 초보자를 위한 생산성 200% 꿀팁 대방출", shortTitle: "초보 꿀팁", description: "클로드코드 초보자를 위한 생산성 200% 꿀팁 모음", youtubeUrl: "https://www.youtube.com/watch?v=GllmdvH2MpE", tags: ["클로드코드", "꿀팁"], gains: ["클로드코드 생산성 팁", "효율적인 워크플로우", "초보 탈출 가이드"], children: ["c7"] },
+      { id: "c7", liveId: 66, level: "Lv.5 고수", title: "클로드코드 고수의 노하우 대공개", shortTitle: "고수 노하우", description: "고수의 워크플로우와 바로 쓸 수 있는 자료 공개", youtubeUrl: "https://www.youtube.com/watch?v=qYSNj2TmfZc", tags: ["클로드코드", "고수"], gains: ["고수 워크플로우", "실전 자료 수령", "심화 활용법"], children: ["c6"] },
+      { id: "c6", liveId: 54, level: "Lv.6 마스터", title: "윤자동 바이브코딩 유료급 라이브 강의", shortTitle: "바이브코딩", description: "바이브코딩의 핵심을 배우는 유료급 무료 라이브", youtubeUrl: "https://www.youtube.com/watch?v=qInwRkvvGas", tags: ["클로드코드", "AI"], gains: ["바이브코딩 마스터", "실전 프로젝트 제작", "AI 개발 자립"] },
     ],
   },
   {
@@ -87,11 +88,13 @@ const PATHS: TreePath[] = [
     glowColor: "rgba(16, 185, 129, 0.3)",
     nodes: [
       { id: "a1", liveId: 8, level: "Lv.1 입문", title: "퇴근이 빨라지는 Make 자동화 꿀팁 3가지", shortTitle: "Make 입문", description: "Make를 활용한 업무 자동화 꿀팁 3가지", youtubeUrl: "https://www.youtube.com/watch?v=J5Gu0aUcJoM", tags: ["Make", "자동화"], gains: ["Make 기본 사용법", "3가지 자동화 레시피", "퇴근 시간 단축"], children: ["a2", "a3"] },
-      { id: "a2", liveId: 24, level: "Lv.2 명함", title: "명함 자동화 만들기", shortTitle: "명함 자동화", description: "Make를 활용해 명함 정보를 자동 관리", youtubeUrl: "https://www.youtube.com/watch?v=e3Glz81Ublk", tags: ["Make", "자동화"], gains: ["명함 자동 정리", "Make 시나리오 구축", "연락처 자동 관리"], children: ["a5"] },
+      { id: "a2", liveId: 24, level: "Lv.2 명함", title: "명함 자동화 만들기", shortTitle: "명함 자동화", description: "Make를 활용해 명함 정보를 자동 관리", youtubeUrl: "https://www.youtube.com/watch?v=e3Glz81Ublk", tags: ["Make", "자동화"], gains: ["명함 자동 정리", "Make 시나리오 구축", "연락처 자동 관리"], children: ["a7"] },
       { id: "a3", liveId: 25, level: "Lv.2 리뷰", title: "리뷰 댓글 자동화", shortTitle: "리뷰 자동화", description: "리뷰 댓글을 AI로 자동화하는 방법", youtubeUrl: "https://www.youtube.com/watch?v=7TumdPD9nYM", tags: ["자동화", "AI"], gains: ["리뷰 자동 답글", "AI 활용 자동화", "고객 응대 효율화"], children: ["a4"] },
       { id: "a4", liveId: 22, level: "Lv.3 회의록", title: "플라우드노트 프로 — 회의록 자동화 끝판왕", shortTitle: "회의록 자동화", description: "Zapier + 노션 연동 회의록 자동화 완벽 가이드", youtubeUrl: "https://www.youtube.com/watch?v=KSI19aPorh0", tags: ["자동화", "노션"], gains: ["회의록 자동 생성", "Zapier 연동", "노션 자동 정리"], children: ["a5"] },
+      { id: "a7", liveId: 50, level: "Lv.3 AI 명함", title: "메이크로 끝내는 명함 관리 — 리멤버 없이도 가능한 AI 자동화", shortTitle: "AI 명함 자동화", description: "Make + AI로 리멤버 없이 명함 관리", youtubeUrl: "https://www.youtube.com/watch?v=sNMzNZUeAqU", tags: ["Make", "자동화", "AI"], gains: ["AI 명함 인식", "리멤버 대체", "자동 분류 시스템"], children: ["a5"] },
       { id: "a5", liveId: 26, level: "Lv.4 프로그램", title: "150만원짜리 자동화 프로그램 만들기", shortTitle: "150만원 자동화", description: "실제 150만원 가치의 자동화 프로그램 제작", youtubeUrl: "https://www.youtube.com/watch?v=mZAwzv4r9fE", tags: ["자동화", "사업"], gains: ["자동화 프로그램 제작", "수익화 가능 수준", "Make 고급 활용"], children: ["a6"] },
-      { id: "a6", liveId: 27, level: "Lv.5 영업", title: "영업 자동화 프로그램 만들기", shortTitle: "영업 자동화", description: "영업 프로세스를 자동화하는 프로그램 제작", youtubeUrl: "https://www.youtube.com/watch?v=FyXW06iLBGo", tags: ["자동화", "사업"], gains: ["영업 자동화 시스템", "고객 파이프라인 자동화", "매출 자동 추적"] },
+      { id: "a6", liveId: 27, level: "Lv.5 영업", title: "영업 자동화 프로그램 만들기", shortTitle: "영업 자동화", description: "영업 프로세스를 자동화하는 프로그램 제작", youtubeUrl: "https://www.youtube.com/watch?v=FyXW06iLBGo", tags: ["자동화", "사업"], gains: ["영업 자동화 시스템", "고객 파이프라인 자동화", "매출 자동 추적"], children: ["a8"] },
+      { id: "a8", liveId: 53, level: "Lv.6 끝판왕", title: "OpenClaw & n8n 활용 방법 대공개", shortTitle: "n8n 끝판왕", description: "OpenClaw와 n8n으로 자동화 끝판왕 만들기", youtubeUrl: "https://www.youtube.com/watch?v=1tfIZg5hoZ8", tags: ["n8n", "자동화"], gains: ["n8n 활용법", "OpenClaw 연동", "고급 워크플로우"] },
     ],
   },
   {
@@ -102,11 +105,13 @@ const PATHS: TreePath[] = [
     color: "#EC4899",
     glowColor: "rgba(236, 72, 153, 0.3)",
     nodes: [
-      { id: "ab1", liveId: 29, level: "Lv.1 마인드셋", title: "AI 시대에 살아남는 사람의 특징", shortTitle: "AI 생존법", description: "1인사업자, 직장인 필수 시청 무료특강", youtubeUrl: "https://www.youtube.com/watch?v=obq0WnVXpMM", tags: ["AI", "사업"], gains: ["AI 시대 마인드셋", "필수 역량 파악", "생존 전략"], children: ["ab2", "ab3"] },
+      { id: "ab1", liveId: 29, level: "Lv.1 마인드셋", title: "AI 시대에 살아남는 사람의 특징", shortTitle: "AI 생존법", description: "1인사업자, 직장인 필수 시청 무료특강", youtubeUrl: "https://www.youtube.com/watch?v=obq0WnVXpMM", tags: ["AI", "사업"], gains: ["AI 시대 마인드셋", "필수 역량 파악", "생존 전략"], children: ["ab2", "ab3", "ab6"] },
       { id: "ab2", liveId: 35, level: "Lv.2 활용", title: "내 업무를 AI한테 맡기는 방법", shortTitle: "AI 업무 위임", description: "AI에게 업무를 효과적으로 위임하는 방법론", youtubeUrl: "https://www.youtube.com/watch?v=lvlyqWGCB3c", tags: ["AI", "생산성"], gains: ["AI 위임 전략", "프롬프트 설계", "업무 자동화 설계"], children: ["ab4"] },
       { id: "ab3", liveId: 36, level: "Lv.2 트렌드", title: "AI 트렌드 코리아 2026 — 장피엠 X 윤자동", shortTitle: "AI 트렌드", description: "2025 회고부터 2026 전망까지", youtubeUrl: "https://www.youtube.com/watch?v=f_yxK_Eopo0", tags: ["AI", "인터뷰"], gains: ["AI 트렌드 파악", "2026 전망", "투자 방향"], children: ["ab4"] },
+      { id: "ab6", liveId: 40, level: "Lv.2 자동화", title: "AI가 내 PC를 조종한다? 브라우저 자동화 끝판왕 Manus", shortTitle: "Manus", description: "Manus로 PC를 자동 조종하는 AI 에이전트", youtubeUrl: "https://www.youtube.com/watch?v=qANJmiIBOOQ", tags: ["AI", "자동화"], gains: ["Manus 활용법", "AI 에이전트 이해", "브라우저 자동 제어"], children: ["ab4"] },
       { id: "ab4", liveId: 42, level: "Lv.3 실전", title: "당신이 기다렸던 진짜 혼자 다하는 AI 등장", shortTitle: "1인 AI", description: "혼자서 모든 걸 처리할 수 있는 AI 도구", youtubeUrl: "https://www.youtube.com/watch?v=fipV6y2sz64", tags: ["AI", "자동화"], gains: ["최신 AI 도구 활용", "1인 운영 시스템", "AI 자동화 실전"], children: ["ab5"] },
-      { id: "ab5", liveId: 48, level: "Lv.4 스타트업", title: "릴리스AI — 투자 없이 90만 유저 달성한 부부 스타트업", shortTitle: "AI 스타트업", description: "오현수 대표, 김예인 공동창업자 인터뷰", youtubeUrl: "https://www.youtube.com/watch?v=eUhHYs-81Uk", tags: ["AI", "사업"], gains: ["AI 스타트업 전략", "유저 확보 노하우", "부트스트래핑 인사이트"] },
+      { id: "ab5", liveId: 48, level: "Lv.4 스타트업", title: "릴리스AI — 투자 없이 90만 유저 달성한 부부 스타트업", shortTitle: "AI 스타트업", description: "오현수 대표, 김예인 공동창업자 인터뷰", youtubeUrl: "https://www.youtube.com/watch?v=eUhHYs-81Uk", tags: ["AI", "사업"], gains: ["AI 스타트업 전략", "유저 확보 노하우", "부트스트래핑 인사이트"], children: ["ab7"] },
+      { id: "ab7", liveId: 55, level: "Lv.5 토크쇼", title: "AI 어벤져스 총 집합 — AI에 미친 4인의 현실 라이브 토크쇼", shortTitle: "AI 어벤져스", description: "AI 전문가 4인의 실전 토크쇼", youtubeUrl: "https://www.youtube.com/watch?v=-qvAw53awdE", tags: ["AI", "인터뷰"], gains: ["전문가 인사이트", "최신 AI 동향", "실전 활용 노하우"] },
     ],
   },
   {
