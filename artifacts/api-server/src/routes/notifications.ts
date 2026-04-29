@@ -15,6 +15,8 @@ import { requireAdminAuth } from "../middleware/adminAuth";
 
 const router: IRouter = Router();
 
+const FALLBACK_LIVE_LINK = "https://yunjadong-live-class.vercel.app/lives";
+
 const DEFAULT_OFFSETS = [
   { offsetMinutes: -1440, label: "1일 전" },
   { offsetMinutes: -180, label: "3시간 전" },
@@ -200,7 +202,7 @@ router.post("/lives/:id/send-now", requireAdminAuth, async (req: Request, res: R
         autoVars["#{년월일}"] = sa.toLocaleDateString("ko-KR", { timeZone: "Asia/Seoul", year: "numeric", month: "long", day: "numeric" });
         autoVars["#{시간}"] = sa.toLocaleTimeString("ko-KR", { timeZone: "Asia/Seoul", hour: "2-digit", minute: "2-digit" });
       }
-      if (live.youtubeUrl) autoVars["#{라이브링크}"] = live.youtubeUrl;
+      autoVars["#{라이브링크}"] = live.youtubeUrl?.trim() || FALLBACK_LIVE_LINK;
     }
     // Defaults
     autoVars["#{진행자명}"] = variables?.["#{진행자명}"] || "윤자동";
@@ -401,7 +403,7 @@ export async function fireRegistrationTrigger(
           autoVars["#{년월일}"] = sa.toLocaleDateString("ko-KR", { timeZone: "Asia/Seoul", year: "numeric", month: "long", day: "numeric" });
           autoVars["#{시간}"] = sa.toLocaleTimeString("ko-KR", { timeZone: "Asia/Seoul", hour: "2-digit", minute: "2-digit" });
         }
-        if (live.youtubeUrl) autoVars["#{라이브링크}"] = live.youtubeUrl;
+        autoVars["#{라이브링크}"] = live.youtubeUrl?.trim() || FALLBACK_LIVE_LINK;
       }
       autoVars["#{진행자명}"] = "윤자동";
       autoVars["#{준비물}"] = "없음";

@@ -9,6 +9,8 @@ import { eq, and, isNotNull, lte } from "drizzle-orm";
 import { logger } from "./logger";
 import { getSolapiConfig, sendAlimtalkBatch, sendSmsBatch } from "./solapiHelper";
 
+const FALLBACK_LIVE_LINK = "https://yunjadong-live-class.vercel.app/lives";
+
 async function autoPromoteLives(): Promise<void> {
   try {
     const now = new Date();
@@ -38,6 +40,7 @@ async function runScheduler(): Promise<void> {
         liveId: livesTable.id,
         liveTitle: livesTable.title,
         liveScheduledAt: livesTable.scheduledAt,
+        liveYoutubeUrl: livesTable.youtubeUrl,
         offsetMinutes: notificationRulesTable.offsetMinutes,
         messageType: notificationRulesTable.messageType,
         templateId: notificationRulesTable.templateId,
@@ -127,6 +130,7 @@ async function runScheduler(): Promise<void> {
       }
       autoVars["#{진행자명}"] = "윤자동";
       autoVars["#{준비물}"] = "없음";
+      autoVars["#{라이브링크}"] = rule.liveYoutubeUrl?.trim() || FALLBACK_LIVE_LINK;
 
       const { successCount, failCount } = isSms
         ? await sendSmsBatch(config.apiKey, config.apiSecret, config.senderPhone, rule.messageBody!, regs.map((r) => ({ phone: r.phone, name: r.name })))
