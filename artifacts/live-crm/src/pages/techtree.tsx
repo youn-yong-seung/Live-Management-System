@@ -48,19 +48,19 @@ const PATHS: TreePath[] = [
   },
   {
     id: "claude",
-    name: "AI 코딩",
+    name: "바이브코딩",
     emoji: "🤖",
-    description: "AI 코딩 입문에서 바이브코딩까지",
+    description: "내게 맞는 도구로 코딩 시작 → 마스터까지",
     color: "#3B82F6",
     glowColor: "rgba(59, 130, 246, 0.3)",
     nodes: [
-      { id: "c1", liveId: 32, level: "Lv.1 입문", title: "클로드코드 설치 & 사용법 완벽정리 튜토리얼", shortTitle: "클코 설치", description: "무료자료 제공! Claude Code 설치부터 사용법까지 완벽 정리", youtubeUrl: "https://www.youtube.com/watch?v=9XHXmQ3_6Sw", tags: ["클로드코드", "입문"], gains: ["Claude Code 설치", "기본 명령어", "첫 자동화 체험"], children: ["c2"] },
-      { id: "c2", liveId: 5, level: "Lv.2 기초", title: "Claude Code <기초편> — 설치부터 시작", shortTitle: "클코 기초", description: "나를 위해 일하는 AI, 설치부터 어려우신 분들만", youtubeUrl: "https://www.youtube.com/watch?v=L75Sa_mukpM", tags: ["클로드코드", "AI"], gains: ["실전 환경 세팅", "기본 워크플로", "프롬프트 기초"], children: ["c3", "c4"] },
-      { id: "c3", liveId: 6, level: "Lv.3 활용", title: "Claude Code <활용편> — 카드뉴스 자동화", shortTitle: "카드뉴스 자동화", description: "카드뉴스 만들기에 지친 마케터, 1인 사업가분들", youtubeUrl: "https://www.youtube.com/watch?v=e4CWO_5mhpA", tags: ["클로드코드", "자동화"], gains: ["카드뉴스 자동 생성", "프롬프트 엔지니어링", "실전 워크플로"], children: ["c6"] },
-      { id: "c4", liveId: 15, level: "Lv.3 분기", title: "커서AI 설치부터 기본사용법까지", shortTitle: "커서AI", description: "Cursor AI 설치 및 기본 사용법 튜토리얼", youtubeUrl: "https://www.youtube.com/watch?v=vOn9S4zh1Qs", tags: ["AI", "튜토리얼"], gains: ["Cursor AI 설치", "AI 코딩 보조 활용", "생산성 극대화"], children: ["c5"] },
-      { id: "c5", liveId: 65, level: "Lv.4 꿀팁", title: "클로드코드 초보자를 위한 생산성 200% 꿀팁 대방출", shortTitle: "초보 꿀팁", description: "클로드코드 초보자를 위한 생산성 200% 꿀팁 모음", youtubeUrl: "https://www.youtube.com/watch?v=GllmdvH2MpE", tags: ["클로드코드", "꿀팁"], gains: ["클로드코드 생산성 팁", "효율적인 워크플로우", "초보 탈출 가이드"], children: ["c7"] },
-      { id: "c7", liveId: 66, level: "Lv.5 고수", title: "클로드코드 고수의 노하우 대공개", shortTitle: "고수 노하우", description: "고수의 워크플로우와 바로 쓸 수 있는 자료 공개", youtubeUrl: "https://www.youtube.com/watch?v=qYSNj2TmfZc", tags: ["클로드코드", "고수"], gains: ["고수 워크플로우", "실전 자료 수령", "심화 활용법"], children: ["c6"] },
-      { id: "c6", liveId: 54, level: "Lv.6 마스터", title: "윤자동 바이브코딩 유료급 라이브 강의", shortTitle: "바이브코딩", description: "바이브코딩의 핵심을 배우는 유료급 무료 라이브", youtubeUrl: "https://www.youtube.com/watch?v=qInwRkvvGas", tags: ["클로드코드", "AI"], gains: ["바이브코딩 마스터", "실전 프로젝트 제작", "AI 개발 자립"] },
+      { id: "vc0", liveId: 0, level: "Lv.0 시작", title: "바이브코딩 시작 — 도구 선택", shortTitle: "도구 선택", description: "Cursor와 Claude Code 중 자신에게 맞는 도구를 골라 시작하세요", youtubeUrl: "", tags: ["바이브코딩", "입문"], gains: ["도구별 특징 이해", "내 상황에 맞는 도구 선택", "학습 로드맵"], children: ["cur1", "cc1"] },
+      { id: "cur1", liveId: 15, level: "Lv.1 커서", title: "커서AI 설치부터 기본사용법까지", shortTitle: "커서AI", description: "Cursor AI 설치 및 기본 사용법 튜토리얼", youtubeUrl: "https://www.youtube.com/watch?v=vOn9S4zh1Qs", tags: ["커서", "AI 코딩"], gains: ["Cursor 설치", "기본 사용법", "AI 코딩 보조 활용"] },
+      { id: "cc1", liveId: 32, level: "Lv.1 설치", title: "클로드코드 설치 & 사용법 완벽정리", shortTitle: "클코 설치", description: "Claude Code 설치부터 기본 명령어, 환경 세팅까지", youtubeUrl: "https://www.youtube.com/watch?v=9XHXmQ3_6Sw", tags: ["클로드코드", "설치"], gains: ["Claude Code 설치", "기본 명령어", "환경 세팅"], children: ["cc2"] },
+      { id: "cc2", liveId: 5, level: "Lv.2 API 연동", title: "Claude Code 기초편 — API 키 연동부터 시작", shortTitle: "API 연동", description: "API 키 발급, 인증 연동, 첫 워크플로 만들기", youtubeUrl: "https://www.youtube.com/watch?v=L75Sa_mukpM", tags: ["클로드코드", "API"], gains: ["API 키 발급/연동", "기초 워크플로", "프롬프트 기초"], children: ["cc3"] },
+      { id: "cc3", liveId: 67, level: "Lv.3 실무", title: "클로드코드로 실무 자동화 배우기 — 권오서 강사", shortTitle: "권오서 실무", description: "권오서 강사님과 함께하는 클로드코드 실무 자동화", youtubeUrl: "https://youtube.com/live/19xW4hA3AVs?feature=share", tags: ["클로드코드", "자동화"], gains: ["실무 자동화 사례", "워크플로 설계", "현업 적용 노하우"], children: ["cc4"] },
+      { id: "cc4", liveId: 66, level: "Lv.4 고수", title: "클로드코드 고수의 노하우 대공개 — 지피타쿠", shortTitle: "지피타쿠 고수", description: "지피타쿠님의 고수 워크플로 + 바로 쓸 수 있는 자료 공개", youtubeUrl: "https://www.youtube.com/watch?v=qYSNj2TmfZc", tags: ["클로드코드", "고수"], gains: ["고수 워크플로", "실전 자료 수령", "심화 활용법"], children: ["c6"] },
+      { id: "c6", liveId: 54, level: "Lv.5 마스터", title: "윤자동 바이브코딩 유료급 라이브 강의", shortTitle: "바이브 마스터", description: "바이브코딩의 핵심을 배우는 유료급 무료 라이브", youtubeUrl: "https://www.youtube.com/watch?v=qInwRkvvGas", tags: ["바이브코딩", "마스터"], gains: ["바이브코딩 마스터", "실전 프로젝트 제작", "AI 개발 자립"] },
     ],
   },
   {
@@ -239,14 +239,18 @@ function SkillInfoPanel({
             </div>
           </div>
 
-          {/* Watch button */}
-          <button
-            onClick={onWatch}
-            className="w-full py-2.5 rounded-xl text-sm font-bold text-black bg-[#CC9965] hover:bg-[#d4a570] transition-all gold-glow flex items-center justify-center gap-2"
-          >
-            <Play className="h-4 w-4" />
-            100% 무료로 시청하기
-          </button>
+          {/* Watch button — 영상 없는 가상 노드는 안내 문구로 대체 */}
+          {ytId ? (
+            <button
+              onClick={onWatch}
+              className="w-full py-2.5 rounded-xl text-sm font-bold text-black bg-[#CC9965] hover:bg-[#d4a570] transition-all gold-glow flex items-center justify-center gap-2"
+            >
+              <Play className="h-4 w-4" />
+              100% 무료로 시청하기
+            </button>
+          ) : (
+            <p className="text-[11px] text-white/40 text-center py-2">아래 분기점에서 학습 경로를 선택하세요</p>
+          )}
         </div>
       </div>
 
