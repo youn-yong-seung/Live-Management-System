@@ -19,7 +19,7 @@ import {
   Plus, Edit, Trash2, Users, Loader2, RefreshCw, Settings,
   Bell, Send, Eye, CheckCircle, Clock, AlertCircle, KeyRound,
   Zap, Lock, Youtube, TrendingUp, ThumbsUp, X,
-  MessageCircle, PlayCircle, BarChart2, Link2,
+  MessageCircle, PlayCircle, BarChart2, Link2, MonitorPlay,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AdminEditors } from "@/components/admin-editors";
@@ -806,6 +806,9 @@ export default function Admin() {
                           <div className="flex justify-end gap-1.5 flex-wrap">
                             <Button variant="outline" size="sm" className="h-8 rounded-lg border-gray-200 text-gray-500 hover:text-purple-600 hover:border-purple-200 text-xs gap-1" onClick={() => openAnalyticsModal(live)}>
                               <BarChart2 className="h-3.5 w-3.5" />신청 현황
+                            </Button>
+                            <Button variant="outline" size="sm" className="h-8 rounded-lg border-gray-200 text-gray-500 hover:text-[#CC9965] hover:border-[#CC9965]/30 text-xs gap-1" onClick={() => window.open(`/lives/${live.id}/dashboard`, "_blank")} title="라이브 중 화면에 띄울 공개 대시보드">
+                              <MonitorPlay className="h-3.5 w-3.5" />공개 대시보드
                             </Button>
                             <Button variant="outline" size="sm" className="h-8 rounded-lg border-gray-200 text-gray-500 hover:text-blue-600 hover:border-blue-200 text-xs gap-1" onClick={() => openRulesModal(live)}>
                               <Bell className="h-3.5 w-3.5" />캠페인 설정

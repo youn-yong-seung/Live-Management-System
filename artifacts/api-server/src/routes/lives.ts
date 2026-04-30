@@ -4,6 +4,7 @@ import {
   livesTable,
   registrationsTable,
   liveCustomQuestionsTable,
+  liveFormConfigTable,
   reviewsTable,
   insertLiveSchema,
   insertRegistrationSchema,
@@ -436,6 +437,194 @@ router.get("/lives/:liveId/registration-analytics", requireAdminAuth, async (req
     });
   } catch (error) {
     req.log.error({ error }, "Error fetching registration analytics");
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+/* ── GET /lives/:liveId/public-dashboard (public, no PII) ── */
+
+router.get("/lives/:liveId/public-dashboard", async (req: Request, res: Response) => {
+  try {
+    const liveId = parseInt(String(req.params.liveId), 10);
+    if (isNaN(liveId)) return res.status(400).json({ error: "Invalid liveId" });
+
+    const [live] = await db.select({
+      id: livesTable.id,
+      title: livesTable.title,
+      scheduledAt: livesTable.scheduledAt,
+      status: livesTable.status,
+    }).from(livesTable).where(eq(livesTable.id, liveId));
+    if (!live) return res.status(404).json({ error: "Live not found" });
+
+    // 라이브의 폼 빌더 설정 (AI 추천 질문 라벨)
+    const [fc] = await db.select({
+      aiRecommendedQuestions: liveFormConfigTable.aiRecommendedQuestions,
+    }).from(liveFormConfigTable).where(eq(liveFormConfigTable.liveId, liveId));
+    const aiQuestions: Array<{ question: string; questionType: string; options?: string[] | null }> = (fc?.aiRecommendedQuestions as any) ?? [];
+
+    // 라이브의 DB 커스텀 질문
+    const customQuestions = await db
+      .select()
+      .from(liveCustomQuestionsTable)
+      .where(eq(liveCustomQuestionsTable.liveId, liveId))
+      .orderBy(asc(liveCustomQuestionsTable.displayOrder));
+
+    // PII 제외하고 집계용 데이터만 가져옴
+    const regs = await db
+      .select({
+        industry: registrationsTable.industry,
+        channelSource: registrationsTable.channelSource,
+        skillLevel: registrationsTable.skillLevel,
+        customAnswers: registrationsTable.customAnswers,
+        createdAt: registrationsTable.createdAt,
+      })
+      .from(registrationsTable)
+      .where(eq(registrationsTable.liveId, liveId));
+
+    const total = regs.length;
+
+    // KST 기준 오늘
+    const nowKst = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
+    const todayKey = nowKst.toISOString().slice(0, 10);
+    const todayCount = regs.filter((r) => {
+      if (!r.createdAt) return false;
+      const d = new Date(new Date(r.createdAt as unknown as string).toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
+      return d.toISOString().slice(0, 10) === todayKey;
+    }).length;
+
+    // 일별 신청 추이 (최근 14일)
+    const dayMap = new Map<string, number>();
+    for (let i = 13; i >= 0; i--) {
+      const d = new Date(nowKst.getTime() - i * 24 * 60 * 60 * 1000);
+      dayMap.set(d.toISOString().slice(0, 10), 0);
+    }
+    for (const r of regs) {
+      if (!r.createdAt) continue;
+      const d = new Date(new Date(r.createdAt as unknown as string).toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
+      const key = d.toISOString().slice(0, 10);
+      if (dayMap.has(key)) dayMap.set(key, (dayMap.get(key) ?? 0) + 1);
+    }
+    const dailySignups = Array.from(dayMap.entries()).map(([date, count]) => ({ date, count }));
+
+    // 분포 헬퍼
+    const tally = (vals: Array<string | null | undefined>) => {
+      const m = new Map<string, number>();
+      for (const v of vals) {
+        if (!v) continue;
+        m.set(v, (m.get(v) ?? 0) + 1);
+      }
+      return Array.from(m.entries())
+        .map(([value, count]) => ({ value, count }))
+        .sort((a, b) => b.count - a.count);
+    };
+
+    const industryBreakdown = tally(regs.map((r) => r.industry));
+    const skillLevelBreakdown = tally(regs.map((r) => r.skillLevel));
+
+    // channel은 array
+    const channelFlat: string[] = [];
+    for (const r of regs) {
+      if (Array.isArray(r.channelSource)) channelFlat.push(...r.channelSource.filter(Boolean));
+    }
+    const channelBreakdown = tally(channelFlat);
+
+    // 질문 정의 통합 (DB 커스텀 + AI 추천)
+    type QDef = {
+      key: string;
+      question: string;
+      questionType: string;
+      options?: string[] | null;
+    };
+    const questionDefs: QDef[] = [
+      ...customQuestions.map((q) => ({
+        key: String(q.id),
+        question: q.question,
+        questionType: q.questionType,
+        options: q.options ?? null,
+      })),
+      ...aiQuestions.map((q, qi) => ({
+        key: `ai_${qi}`,
+        question: q.question,
+        questionType: q.questionType ?? "radio",
+        options: q.options ?? null,
+      })),
+    ];
+
+    const questions = questionDefs.map((q) => {
+      const isFreeText = q.questionType === "text" || q.questionType === "textarea";
+      let answeredCount = 0;
+      const valTally = new Map<string, number>();
+      for (const r of regs) {
+        const ans = r.customAnswers?.[q.key];
+        if (ans === undefined || ans === null) continue;
+        const arr = Array.isArray(ans) ? ans : [ans];
+        const has = arr.some((v) => String(v).trim() !== "");
+        if (!has) continue;
+        answeredCount += 1;
+        if (!isFreeText) {
+          for (const v of arr) {
+            const key = String(v).trim();
+            if (!key) continue;
+            valTally.set(key, (valTally.get(key) ?? 0) + 1);
+          }
+        }
+      }
+      const breakdown = isFreeText
+        ? null
+        : Array.from(valTally.entries())
+            .map(([value, count]) => ({ value, count }))
+            .sort((a, b) => b.count - a.count);
+      return {
+        key: q.key,
+        question: q.question,
+        questionType: q.questionType,
+        options: q.options ?? null,
+        answeredCount,
+        breakdown,
+      };
+    });
+
+    // 익명 respondents — PII 없음. 클라이언트 크로스 필터링용.
+    // 자유 입력 답변(text/textarea)은 포함하지 않음 (PII 위험)
+    const freeTextKeys = new Set(
+      questionDefs.filter((q) => q.questionType === "text" || q.questionType === "textarea").map((q) => q.key)
+    );
+    const respondents = regs.map((r) => {
+      const safeAnswers: Record<string, string | string[]> = {};
+      if (r.customAnswers) {
+        for (const [k, v] of Object.entries(r.customAnswers)) {
+          if (freeTextKeys.has(k)) continue; // 자유 입력은 제외
+          if (k === "marketing_consent") continue; // 동의 항목은 분포에 의미 없음
+          if (v === null || v === undefined) continue;
+          safeAnswers[k] = v;
+        }
+      }
+      return {
+        industry: r.industry ?? null,
+        channels: r.channelSource ?? null,
+        skillLevel: r.skillLevel ?? null,
+        answers: safeAnswers,
+      };
+    });
+
+    return res.json({
+      live: {
+        id: live.id,
+        title: live.title,
+        scheduledAt: live.scheduledAt,
+        status: live.status,
+      },
+      total,
+      todayCount,
+      dailySignups,
+      industryBreakdown,
+      channelBreakdown,
+      skillLevelBreakdown,
+      questions,
+      respondents,
+    });
+  } catch (error) {
+    req.log.error({ error }, "Error fetching public dashboard");
     return res.status(500).json({ error: "Internal server error" });
   }
 });

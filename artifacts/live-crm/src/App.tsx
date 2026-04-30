@@ -16,6 +16,7 @@ import VideoFactoryDetail from "@/pages/video-factory-detail";
 import ReviewPage from "@/pages/review";
 import EditorPortal from "@/pages/editor-portal";
 import RegisterPage from "@/pages/register";
+import LiveDashboard from "@/pages/live-dashboard";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient();
@@ -49,6 +50,7 @@ function App() {
             {/* Independent layout pages */}
             <Route path="/editor" component={EditorPortal} />
             <Route path="/lives/:id/register" component={RegisterPage} />
+            <Route path="/lives/:id/dashboard" component={LiveDashboard} />
             {/* Main site */}
             <Route>{() => <MainRouter />}</Route>
           </Switch>
