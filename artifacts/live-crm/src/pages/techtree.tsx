@@ -15,6 +15,7 @@ interface TreeNode {
   level: string;
   gains: string[];
   children?: string[];   // ids of next nodes
+  tool?: string;         // 분기점에 표시할 툴 라벨 (예: "커서", "클로드코드", "레플릿")
 }
 
 interface TreePath {
@@ -54,13 +55,13 @@ const PATHS: TreePath[] = [
     color: "#3B82F6",
     glowColor: "rgba(59, 130, 246, 0.3)",
     nodes: [
-      { id: "vc0", liveId: 0, level: "Lv.0 시작", title: "바이브코딩 시작 — 도구 선택", shortTitle: "도구 선택", description: "Cursor와 Claude Code 중 자신에게 맞는 도구를 골라 시작하세요", youtubeUrl: "", tags: ["바이브코딩", "입문"], gains: ["도구별 특징 이해", "내 상황에 맞는 도구 선택", "학습 로드맵"], children: ["cur1", "cc1"] },
-      { id: "cur1", liveId: 15, level: "Lv.1 커서", title: "커서AI 설치부터 기본사용법까지", shortTitle: "커서AI", description: "Cursor AI 설치 및 기본 사용법 튜토리얼", youtubeUrl: "https://www.youtube.com/watch?v=vOn9S4zh1Qs", tags: ["커서", "AI 코딩"], gains: ["Cursor 설치", "기본 사용법", "AI 코딩 보조 활용"] },
-      { id: "cc1", liveId: 32, level: "Lv.1 설치", title: "클로드코드 설치 & 사용법 완벽정리", shortTitle: "클코 설치", description: "Claude Code 설치부터 기본 명령어, 환경 세팅까지", youtubeUrl: "https://www.youtube.com/watch?v=9XHXmQ3_6Sw", tags: ["클로드코드", "설치"], gains: ["Claude Code 설치", "기본 명령어", "환경 세팅"], children: ["cc2"] },
+      { id: "vc0", liveId: 0, level: "Lv.0 시작", title: "바이브코딩 시작 — 도구 선택", shortTitle: "도구 선택", description: "Cursor / Claude Code / Replit 중 자신에게 맞는 도구를 골라 시작하세요", youtubeUrl: "", tags: ["바이브코딩", "입문"], gains: ["도구별 특징 이해", "내 상황에 맞는 도구 선택", "학습 로드맵"], children: ["cur1", "cc1", "rep1"] },
+      { id: "cur1", tool: "커서", liveId: 15, level: "Lv.1 커서", title: "커서AI 설치부터 기본사용법까지", shortTitle: "커서AI", description: "Cursor AI 설치 및 기본 사용법 튜토리얼", youtubeUrl: "https://www.youtube.com/watch?v=vOn9S4zh1Qs", tags: ["커서", "AI 코딩"], gains: ["Cursor 설치", "기본 사용법", "AI 코딩 보조 활용"] },
+      { id: "cc1", tool: "클로드코드", liveId: 32, level: "Lv.1 설치", title: "클로드코드 설치 & 사용법 완벽정리", shortTitle: "설치", description: "Claude Code 설치부터 기본 명령어, 환경 세팅까지", youtubeUrl: "https://www.youtube.com/watch?v=9XHXmQ3_6Sw", tags: ["클로드코드", "설치"], gains: ["Claude Code 설치", "기본 명령어", "환경 세팅"], children: ["cc2"] },
       { id: "cc2", liveId: 5, level: "Lv.2 API 연동", title: "Claude Code 기초편 — API 키 연동부터 시작", shortTitle: "API 연동", description: "API 키 발급, 인증 연동, 첫 워크플로 만들기", youtubeUrl: "https://www.youtube.com/watch?v=L75Sa_mukpM", tags: ["클로드코드", "API"], gains: ["API 키 발급/연동", "기초 워크플로", "프롬프트 기초"], children: ["cc3"] },
-      { id: "cc3", liveId: 67, level: "Lv.3 실무", title: "클로드코드로 실무 자동화 배우기 — 권오서 강사", shortTitle: "권오서 실무", description: "권오서 강사님과 함께하는 클로드코드 실무 자동화", youtubeUrl: "https://youtube.com/live/19xW4hA3AVs?feature=share", tags: ["클로드코드", "자동화"], gains: ["실무 자동화 사례", "워크플로 설계", "현업 적용 노하우"], children: ["cc4"] },
-      { id: "cc4", liveId: 66, level: "Lv.4 고수", title: "클로드코드 고수의 노하우 대공개 — 지피타쿠", shortTitle: "지피타쿠 고수", description: "지피타쿠님의 고수 워크플로 + 바로 쓸 수 있는 자료 공개", youtubeUrl: "https://www.youtube.com/watch?v=qYSNj2TmfZc", tags: ["클로드코드", "고수"], gains: ["고수 워크플로", "실전 자료 수령", "심화 활용법"], children: ["c6"] },
-      { id: "c6", liveId: 54, level: "Lv.5 마스터", title: "윤자동 바이브코딩 유료급 라이브 강의", shortTitle: "바이브 마스터", description: "바이브코딩의 핵심을 배우는 유료급 무료 라이브", youtubeUrl: "https://www.youtube.com/watch?v=qInwRkvvGas", tags: ["바이브코딩", "마스터"], gains: ["바이브코딩 마스터", "실전 프로젝트 제작", "AI 개발 자립"] },
+      { id: "cc3", liveId: 67, level: "Lv.3 초중급", title: "클로드코드 - 초중급자편 (권오서 강사)", shortTitle: "클로드코드 - 초중급자편", description: "권오서 강사님과 함께하는 클로드코드 실무 자동화", youtubeUrl: "https://youtube.com/live/19xW4hA3AVs?feature=share", tags: ["클로드코드", "자동화"], gains: ["실무 자동화 사례", "워크플로 설계", "현업 적용 노하우"], children: ["cc4"] },
+      { id: "cc4", liveId: 66, level: "Lv.4 중상급", title: "클로드코드 - 중상급자편 (지피타쿠)", shortTitle: "클로드코드 - 중상급자편", description: "지피타쿠님의 고수 워크플로 + 바로 쓸 수 있는 자료 공개", youtubeUrl: "https://www.youtube.com/watch?v=qYSNj2TmfZc", tags: ["클로드코드", "고수"], gains: ["고수 워크플로", "실전 자료 수령", "심화 활용법"] },
+      { id: "rep1", tool: "레플릿", liveId: 54, level: "Lv.1 마스터", title: "윤자동 바이브코딩 유료급 라이브 강의 (Replit)", shortTitle: "바이브 마스터", description: "Replit으로 만드는 바이브코딩 — 유료급 무료 라이브", youtubeUrl: "https://www.youtube.com/watch?v=qInwRkvvGas", tags: ["레플릿", "바이브코딩"], gains: ["Replit 활용 바이브코딩", "실전 프로젝트 제작", "AI 개발 자립"] },
     ],
   },
   {
@@ -279,6 +280,21 @@ function TreeNodeCircle({
 
       {/* Skill Info Panel (click) */}
       {isInfoOpen && <SkillInfoPanel node={node} color={color} onWatch={onWatch} onClose={onCloseInfo} />}
+
+      {/* Tool branch label */}
+      {node.tool && (
+        <span
+          className="text-[10px] font-bold px-2.5 py-1 rounded-full mb-2 whitespace-nowrap tracking-wide"
+          style={{
+            background: `${color}20`,
+            color,
+            border: `1px solid ${color}50`,
+            boxShadow: `0 0 12px ${color}30`,
+          }}
+        >
+          {node.tool}
+        </span>
+      )}
 
       <button
         onClick={onClick}
