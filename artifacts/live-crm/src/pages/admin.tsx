@@ -114,6 +114,19 @@ interface CustomQuestion {
   displayOrder: number;
 }
 
+interface RegistrationRow {
+  id: number;
+  name: string;
+  phone: string;
+  email: string | null;
+  message: string | null;
+  industry: string | null;
+  channelSource: string[] | null;
+  skillLevel: string | null;
+  customAnswers: Record<string, string | string[]> | null;
+  createdAt: string | null;
+}
+
 interface RegistrationAnalytics {
   industryBreakdown: { industry: string; count: number }[];
   channelBreakdown: { channel: string; count: number }[];
@@ -284,7 +297,9 @@ export default function Admin() {
   const { data: lives, isLoading: isLivesLoading, refetch: refetchLives } = useGetLives(
     undefined, { query: { queryKey: getGetLivesQueryKey() } }
   );
-  const [registrations, setRegistrations] = useState<Array<{ id: number; name: string; phone: string; email: string | null; createdAt: string | null }>>([]);
+  const [registrations, setRegistrations] = useState<RegistrationRow[]>([]);
+  const [registrationsCustomQuestions, setRegistrationsCustomQuestions] = useState<CustomQuestion[]>([]);
+  const [registrationsAiQuestions, setRegistrationsAiQuestions] = useState<{ question: string }[]>([]);
   const [isRegistrationsLoading, setIsRegistrationsLoading] = useState(false);
   const [isSavingLive, setIsSavingLive] = useState(false);
 
@@ -602,9 +617,17 @@ export default function Admin() {
   const loadRegistrations = async (liveId: number) => {
     setIsRegistrationsLoading(true);
     setRegistrations([]);
+    setRegistrationsCustomQuestions([]);
+    setRegistrationsAiQuestions([]);
     try {
-      const data = await apiFetch<Array<{ id: number; name: string; phone: string; email: string | null; createdAt: string | null }>>(`/lives/${liveId}/registrations`);
-      setRegistrations(data);
+      const [regs, qs, fc] = await Promise.all([
+        apiFetch<RegistrationRow[]>(`/lives/${liveId}/registrations`),
+        apiFetch<CustomQuestion[]>(`/lives/${liveId}/custom-questions`).catch(() => [] as CustomQuestion[]),
+        apiFetch<{ aiRecommendedQuestions: { question: string }[] | null } | null>(`/lives/${liveId}/form-config`).catch(() => null),
+      ]);
+      setRegistrations(regs);
+      setRegistrationsCustomQuestions(Array.isArray(qs) ? qs : []);
+      setRegistrationsAiQuestions(fc?.aiRecommendedQuestions ?? []);
     } catch { /* ignore */ }
     finally { setIsRegistrationsLoading(false); }
   };
@@ -1224,18 +1247,89 @@ export default function Admin() {
 
       {/* ═══ Registrations Modal ══════════════════════ */}
       <Dialog open={isRegistrationsModalOpen} onOpenChange={setIsRegistrationsModalOpen}>
-        <DialogContent className="sm:max-w-[800px] bg-white rounded-2xl border border-gray-100 shadow-xl max-h-[80vh] overflow-hidden flex flex-col">
-          <DialogHeader className="flex-none"><DialogTitle className="text-lg font-bold text-gray-900">신청자 목록</DialogTitle></DialogHeader>
-          <div className="flex-1 overflow-y-auto mt-4">
-            {isRegistrationsLoading ? <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-blue-500" /></div>
-              : registrations && registrations.length > 0 ? (
-                <div className="rounded-xl border border-gray-100 overflow-hidden">
-                  <Table>
-                    <TableHeader><TableRow className="bg-gray-50"><TableHead className="text-xs text-gray-500">이름</TableHead><TableHead className="text-xs text-gray-500">연락처</TableHead><TableHead className="text-xs text-gray-500">이메일</TableHead><TableHead className="text-xs text-gray-500">신청일시</TableHead></TableRow></TableHeader>
-                    <TableBody>{registrations.map((reg) => (<TableRow key={reg.id}><TableCell className="font-medium text-gray-900">{reg.name}</TableCell><TableCell className="text-sm text-gray-600">{reg.phone}</TableCell><TableCell className="text-sm text-gray-600">{reg.email || "—"}</TableCell><TableCell className="text-sm text-gray-400">{formatDate(reg.createdAt)}</TableCell></TableRow>))}</TableBody>
-                  </Table>
+        <DialogContent className="!max-w-[95vw] w-[95vw] bg-white rounded-2xl border border-gray-100 shadow-xl max-h-[85vh] overflow-hidden flex flex-col">
+          <DialogHeader className="flex-none">
+            <DialogTitle className="text-lg font-bold text-gray-900">
+              신청자 목록 {registrations.length > 0 && <span className="text-sm font-normal text-gray-500 ml-2">({registrations.length}명)</span>}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 overflow-auto mt-4 -mx-6 px-6">
+            {isRegistrationsLoading ? (
+              <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-blue-500" /></div>
+            ) : registrations.length > 0 ? (() => {
+              const skillLabel = (s: string | null) => {
+                if (!s) return "—";
+                if (s === "beginner") return "초보";
+                if (s === "intermediate") return "중급";
+                if (s === "advanced") return "고급";
+                return s;
+              };
+              const fmt = (v: string | string[] | null | undefined) => {
+                if (v === null || v === undefined) return "—";
+                if (Array.isArray(v)) return v.length ? v.join(", ") : "—";
+                return v.length ? v : "—";
+              };
+              const aiQs = registrationsAiQuestions;
+              const customQs = registrationsCustomQuestions;
+              const hasMarketing = registrations.some((r) => r.customAnswers?.["marketing_consent"] !== undefined);
+              const cellCls = "text-sm text-gray-600 whitespace-pre-wrap break-words align-top";
+              return (
+                <div className="rounded-xl border border-gray-100 overflow-x-auto">
+                  <table className="w-full border-collapse text-left">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="text-xs text-gray-500 font-medium px-3 py-2 sticky left-0 bg-gray-50 z-10 min-w-[100px]">이름</th>
+                        <th className="text-xs text-gray-500 font-medium px-3 py-2 min-w-[120px]">연락처</th>
+                        <th className="text-xs text-gray-500 font-medium px-3 py-2 min-w-[180px]">이메일</th>
+                        <th className="text-xs text-gray-500 font-medium px-3 py-2 min-w-[120px]">업종</th>
+                        <th className="text-xs text-gray-500 font-medium px-3 py-2 min-w-[180px]">유입경로</th>
+                        <th className="text-xs text-gray-500 font-medium px-3 py-2 min-w-[80px]">AI 수준</th>
+                        <th className="text-xs text-gray-500 font-medium px-3 py-2 min-w-[200px]">사전 질문</th>
+                        {customQs.map((q) => (
+                          <th key={`cq-${q.id}`} className="text-xs text-gray-500 font-medium px-3 py-2 min-w-[180px]">{q.question}</th>
+                        ))}
+                        {aiQs.map((q, qi) => (
+                          <th key={`ai-${qi}`} className="text-xs text-gray-500 font-medium px-3 py-2 min-w-[180px]">{q.question}</th>
+                        ))}
+                        {hasMarketing && (
+                          <th className="text-xs text-gray-500 font-medium px-3 py-2 min-w-[100px]">마케팅 동의</th>
+                        )}
+                        <th className="text-xs text-gray-500 font-medium px-3 py-2 min-w-[140px]">신청일시</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {registrations.map((reg, ri) => (
+                        <tr key={reg.id} className={ri % 2 === 0 ? "bg-white" : "bg-gray-50/40"}>
+                          <td className={`${cellCls} font-medium text-gray-900 px-3 py-2 sticky left-0 z-10 ${ri % 2 === 0 ? "bg-white" : "bg-gray-50/40"}`}>{reg.name}</td>
+                          <td className={`${cellCls} px-3 py-2`}>{reg.phone}</td>
+                          <td className={`${cellCls} px-3 py-2`}>{fmt(reg.email)}</td>
+                          <td className={`${cellCls} px-3 py-2`}>{fmt(reg.industry)}</td>
+                          <td className={`${cellCls} px-3 py-2`}>{fmt(reg.channelSource)}</td>
+                          <td className={`${cellCls} px-3 py-2`}>{skillLabel(reg.skillLevel)}</td>
+                          <td className={`${cellCls} px-3 py-2`}>{fmt(reg.message)}</td>
+                          {customQs.map((q) => (
+                            <td key={`cq-${q.id}`} className={`${cellCls} px-3 py-2`}>
+                              {fmt(reg.customAnswers?.[String(q.id)])}
+                            </td>
+                          ))}
+                          {aiQs.map((_, qi) => (
+                            <td key={`ai-${qi}`} className={`${cellCls} px-3 py-2`}>
+                              {fmt(reg.customAnswers?.[`ai_${qi}`])}
+                            </td>
+                          ))}
+                          {hasMarketing && (
+                            <td className={`${cellCls} px-3 py-2`}>{fmt(reg.customAnswers?.["marketing_consent"])}</td>
+                          )}
+                          <td className={`${cellCls} text-gray-400 px-3 py-2`}>{formatDate(reg.createdAt)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-              ) : <div className="py-16 text-center"><Users className="h-8 w-8 text-gray-200 mx-auto mb-3" /><p className="text-gray-500">아직 신청자가 없습니다.</p></div>}
+              );
+            })() : (
+              <div className="py-16 text-center"><Users className="h-8 w-8 text-gray-200 mx-auto mb-3" /><p className="text-gray-500">아직 신청자가 없습니다.</p></div>
+            )}
           </div>
           <DialogFooter className="flex-none pt-4 border-t border-gray-100 mt-4">
             <Button className="bg-gray-900 hover:bg-gray-800 text-white rounded-xl" onClick={() => setIsRegistrationsModalOpen(false)}>닫기</Button>
