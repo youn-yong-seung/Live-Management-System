@@ -1,18 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRoute } from "wouter";
-import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, LineChart, Line,
-} from "recharts";
-import { Loader2, Users, TrendingUp, Sparkles, Filter, X } from "lucide-react";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
+import { Loader2, Filter, X, Quote } from "lucide-react";
 
 interface DashboardData {
   live: { id: number; title: string; scheduledAt: string | null; status: string };
   total: number;
-  todayCount: number;
-  dailySignups: Array<{ date: string; count: number }>;
   industryBreakdown: Array<{ value: string; count: number }>;
-  channelBreakdown: Array<{ value: string; count: number }>;
   skillLevelBreakdown: Array<{ value: string; count: number }>;
   questions: Array<{
     key: string;
@@ -22,6 +16,7 @@ interface DashboardData {
     answeredCount: number;
     breakdown: Array<{ value: string; count: number }> | null;
   }>;
+  messages: string[];
   respondents: Array<{
     industry: string | null;
     channels: string[] | null;
@@ -32,12 +27,11 @@ interface DashboardData {
 
 type Filter =
   | { type: "industry"; value: string }
-  | { type: "channel"; value: string }
   | { type: "skill"; value: string }
   | { type: "answer"; questionKey: string; value: string }
   | null;
 
-const PALETTE = ["#CC9965", "#00E5E5", "#A78BFA", "#F59E0B", "#10B981", "#EC4899", "#3B82F6", "#F43F5E", "#84CC16", "#06B6D4"];
+const PALETTE = ["#CC9965", "#00E5E5", "#A78BFA", "#F59E0B", "#10B981", "#EC4899", "#3B82F6", "#F472B6", "#84CC16", "#06B6D4"];
 
 function skillLabel(s: string): string {
   if (s === "beginner") return "초보";
@@ -104,7 +98,6 @@ export default function LiveDashboard() {
     if (!filter) return data.respondents;
     return data.respondents.filter((r) => {
       if (filter.type === "industry") return r.industry === filter.value;
-      if (filter.type === "channel") return (r.channels ?? []).includes(filter.value);
       if (filter.type === "skill") return r.skillLevel === filter.value;
       if (filter.type === "answer") {
         const v = r.answers[filter.questionKey];
@@ -115,25 +108,18 @@ export default function LiveDashboard() {
     });
   }, [data, filter]);
 
-  const filteredCount = filteredRespondents.length;
-
-  // 필터 적용 시 각 분포 재계산. 미적용 시 서버 응답 그대로.
   const view = useMemo(() => {
     if (!data) return null;
     if (!filter) {
       return {
         total: data.total,
         industryBreakdown: data.industryBreakdown,
-        channelBreakdown: data.channelBreakdown,
         skillLevelBreakdown: data.skillLevelBreakdown,
         questions: data.questions,
       };
     }
     const ind = tallyClient(filteredRespondents.map((r) => r.industry));
     const skill = tallyClient(filteredRespondents.map((r) => r.skillLevel));
-    const channelFlat: string[] = [];
-    for (const r of filteredRespondents) if (r.channels) channelFlat.push(...r.channels);
-    const ch = tallyClient(channelFlat);
     const questions = data.questions.map((q) => {
       if (q.breakdown === null) return { ...q, answeredCount: filteredRespondents.filter((r) => r.answers[q.key] !== undefined).length };
       const m = new Map<string, number>();
@@ -160,7 +146,6 @@ export default function LiveDashboard() {
     return {
       total: filteredRespondents.length,
       industryBreakdown: ind,
-      channelBreakdown: ch,
       skillLevelBreakdown: skill,
       questions,
     };
@@ -181,304 +166,369 @@ export default function LiveDashboard() {
     );
   }
 
-  const denom = view.total || 1;
-
   const filterLabel = filter
     ? filter.type === "industry" ? `업종: ${filter.value}`
-      : filter.type === "channel" ? `유입: ${filter.value}`
       : filter.type === "skill" ? `AI 수준: ${skillLabel(filter.value)}`
-      : `${data.questions.find((q) => q.key === filter.questionKey)?.question ?? ""}: ${filter.value}`
+      : `${data.questions.find((q) => q.key === filter.questionKey)?.question ?? ""} → ${filter.value}`
     : null;
 
   return (
-    <div className="min-h-screen text-white" style={{ background: "#050A0A" }}>
-      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-8">
-        {/* Header */}
-        <div className="text-center mb-10">
-          <p className="text-[#00E5E5]/60 text-xs font-semibold uppercase tracking-[0.2em] mb-3">LIVE DASHBOARD</p>
-          <h1 className="text-2xl sm:text-3xl font-extrabold leading-snug" style={{ textShadow: "0 0 30px rgba(0,229,229,0.15)" }}>
+    <div
+      className="min-h-screen text-white relative overflow-hidden"
+      style={{
+        background:
+          "radial-gradient(ellipse at top left, rgba(204,153,101,0.08) 0%, transparent 50%), radial-gradient(ellipse at bottom right, rgba(0,229,229,0.06) 0%, transparent 50%), #050A0A",
+      }}
+    >
+      {/* Decorative grid */}
+      <div
+        className="absolute inset-0 pointer-events-none opacity-[0.03]"
+        style={{
+          backgroundImage:
+            "linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)",
+          backgroundSize: "80px 80px",
+        }}
+      />
+
+      <div className="relative max-w-[1200px] mx-auto px-5 sm:px-8 py-12 sm:py-16">
+        {/* ── HERO ─────────────────────────────────── */}
+        <div className="text-center mb-16 sm:mb-20">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-6 border border-[#CC9965]/30 bg-[#CC9965]/5">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#CC9965] animate-pulse" />
+            <span className="text-[10px] font-bold tracking-[0.25em] uppercase text-[#CC9965]">LIVE BRIEFING</span>
+          </div>
+
+          <h1 className="text-2xl sm:text-4xl font-extrabold leading-tight mb-3 max-w-3xl mx-auto"
+            style={{ textShadow: "0 0 60px rgba(204,153,101,0.2)" }}>
             {data.live.title}
           </h1>
           {data.live.scheduledAt && (
-            <p className="text-white/50 text-sm mt-2">{fmtDate(data.live.scheduledAt)}</p>
+            <p className="text-white/40 text-sm sm:text-base">{fmtDate(data.live.scheduledAt)}</p>
           )}
+
+          {/* Big total count */}
+          <div className="mt-12 sm:mt-14">
+            <p className="text-[11px] sm:text-xs font-medium tracking-[0.3em] uppercase text-white/40 mb-3">
+              {filter ? "선택된 신청자" : "오늘 모셔본 분"}
+            </p>
+            <div className="relative inline-block">
+              <p
+                className="font-extrabold tabular-nums leading-none"
+                style={{
+                  fontSize: "clamp(80px, 18vw, 180px)",
+                  background: "linear-gradient(135deg, #CC9965 0%, #FFD89B 50%, #CC9965 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                  filter: "drop-shadow(0 0 40px rgba(204,153,101,0.3))",
+                }}
+              >
+                {view.total}
+              </p>
+              <span className="absolute -bottom-1 -right-8 sm:-right-10 text-2xl sm:text-3xl font-bold text-white/70">명</span>
+            </div>
+            {filter && (
+              <p className="mt-4 text-sm text-white/40">전체 {data.total}명 중</p>
+            )}
+          </div>
+
+          {/* Filter pill */}
+          {filter && (
+            <div className="mt-8">
+              <button
+                onClick={() => setFilter(null)}
+                className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full text-sm font-semibold bg-[#CC9965]/15 text-[#CC9965] border border-[#CC9965]/40 hover:bg-[#CC9965]/25 transition-colors"
+              >
+                <Filter className="h-4 w-4" />
+                {filterLabel}
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          )}
+
           {updatedAt && (
-            <p className="text-white/30 text-[11px] mt-3">
-              업데이트: {updatedAt.toLocaleTimeString("ko-KR")} · 30초마다 자동 갱신
+            <p className="text-white/25 text-[11px] mt-10 tracking-wider">
+              UPDATED {updatedAt.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", second: "2-digit" })} · 30초마다 자동 갱신
             </p>
           )}
         </div>
 
-        {/* Filter pill */}
-        {filter && (
-          <div className="mb-6 flex items-center justify-center">
-            <button
-              onClick={() => setFilter(null)}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold bg-[#CC9965]/15 text-[#CC9965] border border-[#CC9965]/40 hover:bg-[#CC9965]/25"
-            >
-              <Filter className="h-3.5 w-3.5" />
-              필터: {filterLabel} ({filteredCount}명)
-              <X className="h-3.5 w-3.5" />
-            </button>
-          </div>
+        {/* ── DEMOGRAPHICS — 어떤 분들이 ──────────── */}
+        {(view.industryBreakdown.length > 0 || view.skillLevelBreakdown.length > 0) && (
+          <SectionHeader
+            eyebrow="WHO"
+            title="어떤 분들이 오셨나요"
+          />
         )}
-
-        {/* KPI Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
-          <KpiCard
-            icon={<Users className="h-4 w-4" />}
-            label={filter ? "필터링된 신청자" : "총 신청자"}
-            value={`${view.total}명`}
-            sub={filter ? `전체 ${data.total}명 중` : undefined}
-          />
-          <KpiCard
-            icon={<TrendingUp className="h-4 w-4" />}
-            label="오늘 신청"
-            value={`${data.todayCount}명`}
-            accent="#00E5E5"
-          />
-          <KpiCard
-            icon={<Sparkles className="h-4 w-4" />}
-            label="응답 완료율"
-            value={view.questions.length === 0 ? "—" : `${pct(view.questions.reduce((s, q) => s + q.answeredCount, 0), view.questions.length * (view.total || 1))}%`}
-          />
-        </div>
-
-        {/* Daily signups sparkline */}
-        {data.dailySignups.length > 0 && (
-          <Section title="최근 14일 신청 추이">
-            <div className="h-[160px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={data.dailySignups}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
-                  <XAxis dataKey="date" tickFormatter={(d) => d.slice(5)} stroke="#ffffff40" tick={{ fontSize: 11 }} />
-                  <YAxis stroke="#ffffff40" tick={{ fontSize: 11 }} allowDecimals={false} />
-                  <Tooltip contentStyle={{ background: "rgba(5,10,10,0.95)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8 }} labelStyle={{ color: "#fff" }} />
-                  <Line type="monotone" dataKey="count" stroke="#00E5E5" strokeWidth={2} dot={{ r: 3, fill: "#00E5E5" }} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </Section>
-        )}
-
-        {/* 업종 / 유입 / 스킬 */}
-        <div className="grid md:grid-cols-2 gap-6 mb-6">
+        <div className="grid md:grid-cols-2 gap-5 mb-20">
           {view.industryBreakdown.length > 0 && (
-            <BreakdownCard
-              title="업종 분포"
+            <DonutCard
+              title="직군 / 업종"
               data={view.industryBreakdown}
-              total={denom}
-              variant="pie"
+              total={view.total}
               activeValue={filter?.type === "industry" ? filter.value : undefined}
               onPick={(v) => setFilter(filter?.type === "industry" && filter.value === v ? null : { type: "industry", value: v })}
             />
           )}
           {view.skillLevelBreakdown.length > 0 && (
-            <BreakdownCard
+            <DonutCard
               title="AI / 툴 활용 수준"
-              data={view.skillLevelBreakdown.map((d) => ({ ...d, value: skillLabel(d.value) }))}
-              total={denom}
-              variant="pie"
+              data={view.skillLevelBreakdown.map((d) => ({ ...d, value: skillLabel(d.value), _origValue: d.value }))}
+              total={view.total}
               activeValue={filter?.type === "skill" ? skillLabel(filter.value) : undefined}
-              onPick={(v) => {
-                const code = v === "초보" ? "beginner" : v === "중급" ? "intermediate" : v === "고급" ? "advanced" : v;
+              onPick={(v, orig) => {
+                const code = orig ?? (v === "초보" ? "beginner" : v === "중급" ? "intermediate" : v === "고급" ? "advanced" : v);
                 setFilter(filter?.type === "skill" && filter.value === code ? null : { type: "skill", value: code });
               }}
             />
           )}
-          {view.channelBreakdown.length > 0 && (
-            <BreakdownCard
-              title="유입 경로"
-              data={view.channelBreakdown}
-              total={denom}
-              variant="bar"
-              activeValue={filter?.type === "channel" ? filter.value : undefined}
-              onPick={(v) => setFilter(filter?.type === "channel" && filter.value === v ? null : { type: "channel", value: v })}
-            />
-          )}
         </div>
 
-        {/* 질문별 응답 */}
+        {/* ── INSIGHTS — 어떤 상황 / 고민 ───────────── */}
         {view.questions.length > 0 && (
-          <div className="space-y-6">
-            <h2 className="text-sm font-semibold uppercase tracking-widest text-white/50">설문 응답 분포</h2>
-            {view.questions.map((q) => (
-              <QuestionCard
-                key={q.key}
-                question={q.question}
-                breakdown={q.breakdown}
-                answeredCount={q.answeredCount}
-                isFreeText={q.questionType === "text" || q.questionType === "textarea"}
-                total={denom}
-                activeValue={filter?.type === "answer" && filter.questionKey === q.key ? filter.value : undefined}
-                onPick={(v) => setFilter(filter?.type === "answer" && filter.questionKey === q.key && filter.value === v ? null : { type: "answer", questionKey: q.key, value: v })}
-              />
-            ))}
-          </div>
+          <>
+            <SectionHeader
+              eyebrow="INSIGHT"
+              title="이런 상황에서 오셨어요"
+            />
+            <div className="space-y-5 mb-20">
+              {view.questions.map((q) => (
+                <QuestionCard
+                  key={q.key}
+                  question={q.question}
+                  breakdown={q.breakdown}
+                  answeredCount={q.answeredCount}
+                  isFreeText={q.questionType === "text" || q.questionType === "textarea"}
+                  activeValue={filter?.type === "answer" && filter.questionKey === q.key ? filter.value : undefined}
+                  onPick={(v) =>
+                    setFilter(filter?.type === "answer" && filter.questionKey === q.key && filter.value === v ? null : { type: "answer", questionKey: q.key, value: v })
+                  }
+                />
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* ── MESSAGES — 사전 질문 ─────────────────── */}
+        {data.messages.length > 0 && (
+          <>
+            <SectionHeader
+              eyebrow="VOICE"
+              title="남겨주신 질문"
+              sub={`${data.messages.length}분이 사전 질문을 남겨주셨어요`}
+            />
+            <MessagesGrid messages={data.messages} />
+          </>
         )}
 
         {/* Footer */}
-        <p className="mt-12 text-center text-xs text-white/30">
-          개인정보는 노출되지 않으며, 응답 분포만 집계되어 표시됩니다.
+        <p className="mt-20 text-center text-[11px] text-white/25 tracking-wider">
+          개인을 식별할 수 있는 정보는 표시되지 않습니다.
         </p>
       </div>
     </div>
   );
 }
 
-/* ── Small components ─────────────────────────────────── */
-
-function KpiCard({
-  icon, label, value, sub, accent,
-}: { icon: React.ReactNode; label: string; value: string; sub?: string; accent?: string }) {
+/* ── Section Header ───────────────────────────────────── */
+function SectionHeader({ eyebrow, title, sub }: { eyebrow: string; title: string; sub?: string }) {
   return (
-    <div
-      className="rounded-2xl border border-white/10 p-4 sm:p-5"
-      style={{ background: "rgba(255,255,255,0.03)", backdropFilter: "blur(12px)" }}
-    >
-      <div className="flex items-center gap-2 text-white/50 text-xs">
-        <span style={{ color: accent ?? "#CC9965" }}>{icon}</span>
-        {label}
-      </div>
-      <p className="mt-2 text-2xl sm:text-3xl font-bold" style={{ color: accent ?? "#fff", textShadow: accent ? `0 0 24px ${accent}40` : undefined }}>
-        {value}
-      </p>
-      {sub && <p className="text-[11px] text-white/40 mt-1">{sub}</p>}
+    <div className="text-center mb-8">
+      <p className="text-[10px] font-bold tracking-[0.3em] uppercase text-[#CC9965]/70 mb-2">{eyebrow}</p>
+      <h2 className="text-xl sm:text-2xl font-bold text-white">{title}</h2>
+      {sub && <p className="text-sm text-white/40 mt-2">{sub}</p>}
     </div>
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+/* ── Frosted Card ─────────────────────────────────────── */
+function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className="rounded-2xl border border-white/10 p-5 mb-6" style={{ background: "rgba(255,255,255,0.03)" }}>
-      <h3 className="text-xs font-semibold uppercase tracking-widest text-white/50 mb-4">{title}</h3>
+    <div
+      className={`rounded-3xl border border-white/[0.08] p-6 sm:p-7 ${className}`}
+      style={{
+        background:
+          "linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.02) 100%)",
+        backdropFilter: "blur(20px)",
+        boxShadow: "0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)",
+      }}
+    >
       {children}
     </div>
   );
 }
 
-function BreakdownCard({
-  title, data, total, variant, activeValue, onPick,
+/* ── Donut Chart Card (industry / skill) ──────────────── */
+function DonutCard({
+  title, data, total, activeValue, onPick,
 }: {
   title: string;
-  data: Array<{ value: string; count: number }>;
+  data: Array<{ value: string; count: number; _origValue?: string }>;
   total: number;
-  variant: "pie" | "bar";
   activeValue?: string;
-  onPick: (v: string) => void;
+  onPick: (v: string, orig?: string) => void;
 }) {
   const TOP_N = 8;
-  const sorted = [...data].slice(0, TOP_N);
+  const sorted = data.slice(0, TOP_N);
   return (
-    <div className="rounded-2xl border border-white/10 p-5" style={{ background: "rgba(255,255,255,0.03)" }}>
-      <h3 className="text-xs font-semibold uppercase tracking-widest text-white/50 mb-3">{title}</h3>
-      {variant === "pie" ? (
-        <div className="flex items-center gap-3">
-          <div className="w-[140px] h-[140px] flex-shrink-0">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie data={sorted} dataKey="count" nameKey="value" innerRadius={42} outerRadius={66} paddingAngle={2}>
-                  {sorted.map((d, i) => (
-                    <Cell
-                      key={d.value}
-                      fill={PALETTE[i % PALETTE.length]}
-                      opacity={activeValue && activeValue !== d.value ? 0.3 : 1}
-                      style={{ cursor: "pointer" }}
-                      onClick={() => onPick(d.value)}
-                    />
-                  ))}
-                </Pie>
-                <Tooltip contentStyle={{ background: "rgba(5,10,10,0.95)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8 }} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="flex-1 min-w-0 space-y-1.5">
-            {sorted.map((d, i) => (
+    <Card>
+      <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-[#CC9965]/70 mb-5">{title}</p>
+      <div className="flex flex-col sm:flex-row sm:items-center gap-6">
+        <div className="w-[180px] h-[180px] flex-shrink-0 mx-auto sm:mx-0">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie data={sorted} dataKey="count" nameKey="value" innerRadius={56} outerRadius={84} paddingAngle={3} stroke="none">
+                {sorted.map((d, i) => (
+                  <Cell
+                    key={d.value}
+                    fill={PALETTE[i % PALETTE.length]}
+                    opacity={activeValue && activeValue !== d.value ? 0.25 : 1}
+                    style={{ cursor: "pointer", transition: "opacity 0.2s" }}
+                    onClick={() => onPick(d.value, d._origValue)}
+                  />
+                ))}
+              </Pie>
+              <Tooltip
+                contentStyle={{ background: "rgba(5,10,10,0.98)", border: "1px solid rgba(204,153,101,0.3)", borderRadius: 12, fontSize: 12 }}
+                itemStyle={{ color: "#fff" }}
+                formatter={(v: number, _name, item: any) => [`${v}명 · ${pct(v, total)}%`, item.payload.value]}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+        <div className="flex-1 min-w-0 space-y-2.5">
+          {sorted.map((d, i) => {
+            const dimmed = activeValue && activeValue !== d.value;
+            return (
               <button
                 key={d.value}
-                onClick={() => onPick(d.value)}
-                className={`w-full flex items-center gap-2 text-xs hover:opacity-100 transition-opacity ${activeValue && activeValue !== d.value ? "opacity-40" : "opacity-90"}`}
+                onClick={() => onPick(d.value, d._origValue)}
+                className={`w-full flex items-center gap-3 text-left transition-all duration-200 ${dimmed ? "opacity-30" : "opacity-100"}`}
               >
-                <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: PALETTE[i % PALETTE.length] }} />
-                <span className="text-white/70 truncate flex-1 text-left">{d.value}</span>
-                <span className="text-white/50 tabular-nums flex-shrink-0">{d.count}명 · {pct(d.count, total)}%</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      ) : (
-        <div className="space-y-2">
-          {sorted.map((d, i) => (
-            <button
-              key={d.value}
-              onClick={() => onPick(d.value)}
-              className={`w-full text-left ${activeValue && activeValue !== d.value ? "opacity-40" : ""}`}
-            >
-              <div className="flex items-baseline justify-between text-xs mb-1">
-                <span className="text-white/80 truncate">{d.value}</span>
-                <span className="text-white/50 tabular-nums">{d.count}명 · {pct(d.count, total)}%</span>
-              </div>
-              <div className="h-1.5 rounded-full bg-white/5 overflow-hidden">
-                <div
-                  className="h-full rounded-full transition-all"
-                  style={{ width: `${pct(d.count, total)}%`, background: PALETTE[i % PALETTE.length] }}
+                <span
+                  className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                  style={{ background: PALETTE[i % PALETTE.length], boxShadow: `0 0 12px ${PALETTE[i % PALETTE.length]}80` }}
                 />
-              </div>
-            </button>
-          ))}
+                <span className="text-sm text-white/85 leading-relaxed flex-1 break-words">{d.value}</span>
+                <span className="text-[13px] font-semibold text-white/60 tabular-nums whitespace-nowrap flex-shrink-0">
+                  {d.count}<span className="text-white/30 ml-0.5">명</span>
+                  <span className="text-white/35 ml-2">{pct(d.count, total)}%</span>
+                </span>
+              </button>
+            );
+          })}
+          {data.length > TOP_N && (
+            <p className="text-[11px] text-white/30 pt-2">+ {data.length - TOP_N}개 더</p>
+          )}
         </div>
-      )}
-      {data.length > TOP_N && (
-        <p className="text-[10px] text-white/30 mt-2">상위 {TOP_N}개만 표시 · 전체 {data.length}개</p>
-      )}
-    </div>
+      </div>
+    </Card>
   );
 }
 
+/* ── Question Card with custom HTML bars ──────────────── */
 function QuestionCard({
-  question, breakdown, answeredCount, isFreeText, total, activeValue, onPick,
+  question, breakdown, answeredCount, isFreeText, activeValue, onPick,
 }: {
   question: string;
   breakdown: Array<{ value: string; count: number }> | null;
   answeredCount: number;
   isFreeText: boolean;
-  total: number;
   activeValue?: string;
   onPick: (v: string) => void;
 }) {
+  const total = answeredCount;
+  const max = breakdown && breakdown.length > 0 ? breakdown[0].count : 1;
   return (
-    <div className="rounded-2xl border border-white/10 p-5" style={{ background: "rgba(255,255,255,0.03)" }}>
-      <div className="flex items-baseline justify-between gap-3 mb-4">
-        <h3 className="text-sm font-semibold text-white/90 leading-snug">{question}</h3>
-        <span className="text-[11px] text-white/40 flex-shrink-0">{answeredCount}명 응답 · {pct(answeredCount, total)}%</span>
+    <Card>
+      <div className="flex items-start justify-between gap-4 mb-5">
+        <h3 className="text-base sm:text-lg font-bold text-white leading-snug flex-1">
+          {question}
+        </h3>
+        <div className="flex-shrink-0 text-right">
+          <p className="text-sm font-bold text-[#CC9965] tabular-nums">{answeredCount}<span className="text-white/40 text-xs ml-1 font-normal">명 응답</span></p>
+        </div>
       </div>
+
       {isFreeText ? (
-        <p className="text-xs text-white/40 italic">자유 입력 응답 — 개인정보 보호를 위해 분포만 집계 (총 {answeredCount}건)</p>
+        <p className="text-sm text-white/40 italic">자유 입력 응답 — 텍스트 비공개, 응답 수만 집계</p>
       ) : !breakdown || breakdown.length === 0 ? (
-        <p className="text-xs text-white/30">아직 응답이 없습니다.</p>
+        <p className="text-sm text-white/30">아직 응답이 없습니다.</p>
       ) : (
-        <div className="h-[180px] sm:h-[220px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={breakdown} layout="vertical" margin={{ left: 8, right: 24 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#ffffff08" horizontal={false} />
-              <XAxis type="number" stroke="#ffffff40" tick={{ fontSize: 11 }} allowDecimals={false} />
-              <YAxis dataKey="value" type="category" stroke="#ffffff60" tick={{ fontSize: 11 }} width={120} interval={0} />
-              <Tooltip
-                contentStyle={{ background: "rgba(5,10,10,0.95)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8 }}
-                formatter={(v: number) => [`${v}명 · ${pct(v, answeredCount)}%`, "응답"]}
-                cursor={{ fill: "rgba(204,153,101,0.08)" }}
-              />
-              <Bar dataKey="count" radius={[0, 6, 6, 0]} onClick={(d: any) => onPick(d.value)} style={{ cursor: "pointer" }}>
-                {breakdown.map((d, i) => (
-                  <Cell
-                    key={d.value}
-                    fill={PALETTE[i % PALETTE.length]}
-                    opacity={activeValue && activeValue !== d.value ? 0.3 : 1}
+        <div className="space-y-4">
+          {breakdown.map((d, i) => {
+            const dimmed = activeValue && activeValue !== d.value;
+            const widthPct = max > 0 ? (d.count / max) * 100 : 0;
+            const sharePct = pct(d.count, total);
+            const color = PALETTE[i % PALETTE.length];
+            return (
+              <button
+                key={d.value}
+                onClick={() => onPick(d.value)}
+                className={`w-full text-left group transition-all duration-200 ${dimmed ? "opacity-30" : ""}`}
+              >
+                <div className="flex items-baseline justify-between gap-3 mb-2">
+                  <span className="text-[15px] sm:text-base text-white/90 leading-relaxed flex-1 group-hover:text-white">
+                    {d.value}
+                  </span>
+                  <span className="text-sm font-bold tabular-nums whitespace-nowrap flex-shrink-0">
+                    <span style={{ color }}>{d.count}</span>
+                    <span className="text-white/30 mx-1">·</span>
+                    <span className="text-white/60">{sharePct}%</span>
+                  </span>
+                </div>
+                <div className="h-2 rounded-full bg-white/[0.04] overflow-hidden">
+                  <div
+                    className="h-full rounded-full transition-all duration-700 ease-out"
+                    style={{
+                      width: `${widthPct}%`,
+                      background: `linear-gradient(90deg, ${color}, ${color}cc)`,
+                      boxShadow: `0 0 16px ${color}40`,
+                    }}
                   />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </Card>
+  );
+}
+
+/* ── Messages Grid ────────────────────────────────────── */
+function MessagesGrid({ messages }: { messages: string[] }) {
+  const [expanded, setExpanded] = useState(false);
+  const VISIBLE = 6;
+  const list = expanded ? messages : messages.slice(0, VISIBLE);
+  return (
+    <div>
+      <div className="grid sm:grid-cols-2 gap-4">
+        {list.map((m, i) => (
+          <div
+            key={i}
+            className="rounded-2xl border border-white/[0.08] p-5 relative"
+            style={{
+              background:
+                "linear-gradient(135deg, rgba(204,153,101,0.05) 0%, rgba(255,255,255,0.02) 100%)",
+              backdropFilter: "blur(16px)",
+            }}
+          >
+            <Quote className="h-4 w-4 text-[#CC9965]/40 mb-2" />
+            <p className="text-[14px] text-white/85 leading-relaxed whitespace-pre-wrap break-words">
+              {m}
+            </p>
+          </div>
+        ))}
+      </div>
+      {messages.length > VISIBLE && (
+        <div className="text-center mt-6">
+          <button
+            onClick={() => setExpanded(!expanded)}
+            className="text-xs font-semibold text-[#CC9965] hover:text-[#FFD89B] tracking-wider uppercase transition-colors"
+          >
+            {expanded ? "접기" : `+ ${messages.length - VISIBLE}개 더 보기`}
+          </button>
         </div>
       )}
     </div>

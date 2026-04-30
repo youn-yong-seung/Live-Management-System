@@ -469,12 +469,13 @@ router.get("/lives/:liveId/public-dashboard", async (req: Request, res: Response
       .where(eq(liveCustomQuestionsTable.liveId, liveId))
       .orderBy(asc(liveCustomQuestionsTable.displayOrder));
 
-    // PII 제외하고 집계용 데이터만 가져옴
+    // PII 제외하고 집계용 데이터만 가져옴 (이름/연락처/이메일은 select 자체를 안 함)
     const regs = await db
       .select({
         industry: registrationsTable.industry,
         channelSource: registrationsTable.channelSource,
         skillLevel: registrationsTable.skillLevel,
+        message: registrationsTable.message,
         customAnswers: registrationsTable.customAnswers,
         createdAt: registrationsTable.createdAt,
       })
@@ -607,6 +608,12 @@ router.get("/lives/:liveId/public-dashboard", async (req: Request, res: Response
       };
     });
 
+    // 사전 질문(자유 입력)도 라이브 중 시청자에게 보여줄 수 있도록 포함.
+    // 단, 익명 처리되어 누가 작성했는지는 식별 불가.
+    const messages = regs
+      .map((r) => (r.message ?? "").trim())
+      .filter((m) => m.length > 0);
+
     return res.json({
       live: {
         id: live.id,
@@ -621,6 +628,7 @@ router.get("/lives/:liveId/public-dashboard", async (req: Request, res: Response
       channelBreakdown,
       skillLevelBreakdown,
       questions,
+      messages,
       respondents,
     });
   } catch (error) {
