@@ -126,10 +126,19 @@ router.put("/lives/:id/notification-rules", requireAdminAuth, async (req: Reques
     const updates = req.body as {
       id: number; offsetMinutes: number; messageType?: string;
       templateId: string | null; templateName: string | null;
-      messageBody?: string | null; customTime?: string | null; enabled: boolean;
+      messageBody?: string | null; customTime?: string | null;
+      customVariables?: Record<string, string> | null;
+      enabled: boolean;
     }[];
 
     for (const u of updates) {
+      const cv = u.customVariables && typeof u.customVariables === "object"
+        ? Object.fromEntries(
+            Object.entries(u.customVariables).filter(
+              ([, v]) => typeof v === "string" && v.trim() !== "",
+            ),
+          )
+        : null;
       await db.update(notificationRulesTable)
         .set({
           offsetMinutes: u.offsetMinutes,
@@ -138,6 +147,7 @@ router.put("/lives/:id/notification-rules", requireAdminAuth, async (req: Reques
           templateName: u.templateName,
           messageBody: u.messageBody ?? null,
           customTime: u.customTime && u.customTime.trim() !== "" ? u.customTime.trim() : null,
+          customVariables: cv && Object.keys(cv).length > 0 ? cv : null,
           enabled: u.enabled,
         })
         .where(and(eq(notificationRulesTable.id, u.id), eq(notificationRulesTable.liveId, liveId)));
@@ -233,6 +243,88 @@ router.post("/lives/:id/send-now", requireAdminAuth, async (req: Request, res: R
     return res.json({ success: true, recipientCount: regs.length, successCount, failCount });
   } catch (err) {
     logger.error({ err }, "POST /lives/:id/send-now failed");
+    return res.status(500).json({ error: String(err) });
+  }
+});
+
+/* ── Test Send (single recipient, no log) ──────────────
+   Sends one message with the same variable mapping logic as the scheduler,
+   so admins can verify a campaign rule before it fires. */
+
+router.post("/lives/:id/test-send", requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const liveId = parseInt(String(req.params.id), 10);
+    if (isNaN(liveId)) return res.status(400).json({ error: "Invalid id" });
+
+    const {
+      phone,
+      name,
+      messageType = "alimtalk",
+      templateId,
+      messageBody,
+      customVariables,
+    } = req.body as {
+      phone?: string;
+      name?: string;
+      messageType?: string;
+      templateId?: string | null;
+      messageBody?: string | null;
+      customVariables?: Record<string, string> | null;
+    };
+
+    const cleanedPhone = (phone ?? "").replace(/[^0-9]/g, "");
+    if (cleanedPhone.length < 10 || cleanedPhone.length > 11) {
+      return res.status(400).json({ error: "유효한 전화번호를 입력해주세요." });
+    }
+
+    const isSms = messageType === "sms";
+    if (!isSms && !templateId) return res.status(400).json({ error: "templateId is required for alimtalk" });
+    if (isSms && !messageBody?.trim()) return res.status(400).json({ error: "messageBody is required for sms" });
+
+    const config = await getSolapiConfig();
+    if (!config?.apiKey || !config?.apiSecret || !config?.senderPhone) {
+      return res.status(400).json({ error: "Solapi credentials not configured" });
+    }
+    if (!isSms && !config.senderKey) {
+      return res.status(400).json({ error: "Solapi senderKey (pfId) not configured for alimtalk" });
+    }
+
+    const [live] = await db.select().from(livesTable).where(eq(livesTable.id, liveId));
+    if (!live) return res.status(404).json({ error: "Live not found" });
+
+    // Auto-compute variables — same logic as scheduler/send-now
+    const autoVars: Record<string, string> = {};
+    autoVars["#{방송타이틀}"] = live.title;
+    if (live.scheduledAt) {
+      const sa = new Date(live.scheduledAt);
+      const now = new Date();
+      const diffMs = sa.getTime() - now.getTime();
+      const diffH = Math.floor(Math.abs(diffMs) / (1000 * 60 * 60));
+      const diffM = Math.floor((Math.abs(diffMs) % (1000 * 60 * 60)) / (1000 * 60));
+      const diffD = Math.floor(diffH / 24); const diffHr = diffH % 24;
+      autoVars["#{남은시간}"] = diffMs > 0 ? (diffD > 0 ? `${diffD}일 ${diffHr}시간 ${diffM}분` : `${diffHr}시간 ${diffM}분`) : "곧";
+      autoVars["#{방송시작시간}"] = sa.toLocaleString("ko-KR", { timeZone: "Asia/Seoul", hour: "2-digit", minute: "2-digit" });
+      autoVars["#{년월일}"] = sa.toLocaleDateString("ko-KR", { timeZone: "Asia/Seoul", year: "numeric", month: "long", day: "numeric" });
+      autoVars["#{시간}"] = sa.toLocaleTimeString("ko-KR", { timeZone: "Asia/Seoul", hour: "2-digit", minute: "2-digit" });
+    }
+    autoVars["#{진행자명}"] = "윤자동";
+    autoVars["#{준비물}"] = "없음";
+    autoVars["#{라이브링크}"] = live.youtubeUrl?.trim() || FALLBACK_LIVE_LINK;
+
+    const customVars = customVariables && typeof customVariables === "object" ? customVariables : {};
+    const recipientName = name?.trim() || "테스트";
+
+    const { successCount, failCount } = isSms
+      ? await sendSmsBatch(config.apiKey, config.apiSecret, config.senderPhone, messageBody!, [{ phone: cleanedPhone, name: recipientName }])
+      : await sendAlimtalkBatch(config.apiKey, config.apiSecret, config.senderKey!, config.senderPhone, templateId!, [{
+          phone: cleanedPhone,
+          name: recipientName,
+          variables: { ...autoVars, ...customVars, "#{고객명}": recipientName },
+        }]);
+
+    return res.json({ success: failCount === 0, successCount, failCount });
+  } catch (err) {
+    logger.error({ err }, "POST /lives/:id/test-send failed");
     return res.status(500).json({ error: String(err) });
   }
 });

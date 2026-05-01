@@ -47,6 +47,7 @@ async function runScheduler(): Promise<void> {
         templateName: notificationRulesTable.templateName,
         messageBody: notificationRulesTable.messageBody,
         customTime: notificationRulesTable.customTime,
+        customVariables: notificationRulesTable.customVariables,
       })
       .from(notificationRulesTable)
       .innerJoin(livesTable, eq(notificationRulesTable.liveId, livesTable.id))
@@ -132,9 +133,11 @@ async function runScheduler(): Promise<void> {
       autoVars["#{준비물}"] = "없음";
       autoVars["#{라이브링크}"] = rule.liveYoutubeUrl?.trim() || FALLBACK_LIVE_LINK;
 
+      const customVars = rule.customVariables ?? {};
+
       const { successCount, failCount } = isSms
         ? await sendSmsBatch(config.apiKey, config.apiSecret, config.senderPhone, rule.messageBody!, regs.map((r) => ({ phone: r.phone, name: r.name })))
-        : await sendAlimtalkBatch(config.apiKey, config.apiSecret, config.senderKey!, config.senderPhone, rule.templateId!, regs.map((r) => ({ phone: r.phone, name: r.name, variables: { ...autoVars, "#{고객명}": r.name } })));
+        : await sendAlimtalkBatch(config.apiKey, config.apiSecret, config.senderKey!, config.senderPhone, rule.templateId!, regs.map((r) => ({ phone: r.phone, name: r.name, variables: { ...autoVars, ...customVars, "#{고객명}": r.name } })));
 
       await db.insert(notificationLogTable).values({
         liveId: rule.liveId,

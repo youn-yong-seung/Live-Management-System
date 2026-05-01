@@ -259,6 +259,10 @@ export default function Admin() {
     messageType: "alimtalk", templateId: null, templateName: null, messageBody: null, enabled: false,
   });
 
+  /* ── Test send (per-rule) state ────────────────── */
+  const [testPhone, setTestPhone] = useState("010-7151-1070");
+  const [testSendingKey, setTestSendingKey] = useState<string | null>(null);
+
   /* ── Offset edit state ─────────────────────────── */
   const [editingOffsetIdx, setEditingOffsetIdx] = useState<number | null>(null);
   const [offsetEdit, setOffsetEdit] = useState({ days: 0, hours: 0, mins: 0, dir: "before" as "before" | "after" });
@@ -540,6 +544,43 @@ export default function Admin() {
       toast({ variant: "destructive", title: "오류", description: String(err) });
     } finally {
       setIsLoadingRules(false);
+    }
+  };
+
+  /* ── Test send (single recipient, current modal state) ───── */
+  const testSendRule = async (
+    key: string,
+    payload: {
+      messageType: "alimtalk" | "sms";
+      templateId: string | null;
+      messageBody: string | null;
+      customVariables: Record<string, string> | null;
+    },
+  ) => {
+    if (!rulesModal.live) return;
+    const cleanedPhone = testPhone.replace(/[^0-9]/g, "");
+    if (cleanedPhone.length < 10 || cleanedPhone.length > 11) {
+      toast({ variant: "destructive", title: "전화번호를 확인해주세요." });
+      return;
+    }
+    setTestSendingKey(key);
+    try {
+      const result = await apiFetch<{ success: boolean; successCount: number; failCount: number }>(
+        `/lives/${rulesModal.live.id}/test-send`,
+        {
+          method: "POST",
+          body: JSON.stringify({ phone: cleanedPhone, ...payload }),
+        },
+      );
+      if (result.successCount > 0) {
+        toast({ title: "테스트 발송 완료", description: `${testPhone}로 발송했습니다.` });
+      } else {
+        toast({ variant: "destructive", title: "테스트 발송 실패", description: "Solapi 응답 확인이 필요합니다." });
+      }
+    } catch (err) {
+      toast({ variant: "destructive", title: "테스트 발송 실패", description: String(err) });
+    } finally {
+      setTestSendingKey(null);
     }
   };
 
@@ -1498,6 +1539,21 @@ export default function Admin() {
             </div>
           )}
 
+          {/* ═══ 테스트 발송 전화번호 ══════════════════════ */}
+          <div className="flex-none mx-1 mt-2 p-3 bg-purple-50/60 rounded-xl border border-purple-100">
+            <div className="flex items-center gap-2">
+              <Send className="h-4 w-4 text-purple-600 flex-none" />
+              <Label className="text-xs font-semibold text-purple-700 flex-none">테스트 발송 번호</Label>
+              <Input
+                value={testPhone}
+                onChange={(e) => setTestPhone(e.target.value)}
+                placeholder="010-0000-0000"
+                className="h-8 text-sm rounded-lg border-purple-200 bg-white flex-1 max-w-[200px]"
+              />
+              <span className="text-[11px] text-purple-500/80">활성·템플릿 선택된 메시지마다 우측 [테스트 발송] 버튼이 표시됩니다.</span>
+            </div>
+          </div>
+
           <div className="flex-1 overflow-y-auto px-1 py-4 space-y-4">
 
             {/* ═══ 신청 즉시 발송 (Trigger) ══════════════════════ */}
@@ -1553,6 +1609,25 @@ export default function Admin() {
                       onChange={(e) => setTriggerConfig((s) => ({ ...s, templateId: e.target.value || null, templateName: null }))}
                       className="rounded-lg border-gray-200 h-9 text-sm"
                     />
+                  )}
+
+                  {/* Test send (trigger) */}
+                  {triggerConfig.enabled && triggerConfig.templateId && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => testSendRule("trigger", {
+                        messageType: "alimtalk",
+                        templateId: triggerConfig.templateId,
+                        messageBody: null,
+                        customVariables: null,
+                      })}
+                      disabled={testSendingKey !== null || !solapiConfig?.configured}
+                      className="w-full h-8 text-xs rounded-lg border-purple-200 text-purple-700 hover:bg-purple-50"
+                    >
+                      {testSendingKey === "trigger" ? <Loader2 className="h-3 w-3 mr-1.5 animate-spin" /> : <Send className="h-3 w-3 mr-1.5" />}
+                      {testPhone}로 테스트 발송
+                    </Button>
                   )}
 
                   {/* Trigger variable detail toggle */}
@@ -1806,6 +1881,29 @@ export default function Admin() {
                           className="rounded-lg border-gray-200 h-9 text-sm"
                         />
                       )}
+
+                      {/* Test send (scheduled rule) */}
+                      {rule.enabled && rule.templateId && (() => {
+                        const key = `rule-${rule.id ?? idx}`;
+                        const customVars = (rule as { customVariables?: Record<string, string> }).customVariables ?? null;
+                        return (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => testSendRule(key, {
+                              messageType: "alimtalk",
+                              templateId: rule.templateId,
+                              messageBody: null,
+                              customVariables: customVars,
+                            })}
+                            disabled={testSendingKey !== null || !solapiConfig?.configured}
+                            className="w-full h-8 text-xs rounded-lg border-purple-200 text-purple-700 hover:bg-purple-50"
+                          >
+                            {testSendingKey === key ? <Loader2 className="h-3 w-3 mr-1.5 animate-spin" /> : <Send className="h-3 w-3 mr-1.5" />}
+                            {testPhone}로 테스트 발송
+                          </Button>
+                        );
+                      })()}
 
                       {/* Variable detail toggle */}
                       {rule.templateId && (() => {
