@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Star, Play, ChevronDown, Sparkles, ExternalLink, Users, MessageSquare } from "lucide-react";
 import { ReplayModal } from "@/components/replay-modal";
 
@@ -30,7 +30,8 @@ interface TreePath {
 
 /* ── Tech Tree Data ─────────────────────────────────── */
 
-const PATHS: TreePath[] = [
+// API fetch 실패 시 fallback. 정상 경로에선 API에서 받아옴.
+const FALLBACK_PATHS: TreePath[] = [
   {
     id: "notion",
     name: "노션 마스터",
@@ -329,8 +330,21 @@ export default function TechTree() {
   const [hoveredNode, setHoveredNode] = useState<string | null>(null);
   const [infoNode, setInfoNode] = useState<string | null>(null);
   const [modalReplay, setModalReplay] = useState<{ id: number; title: string; description: string | null; youtubeUrl: string | null; tags?: string[] | null } | null>(null);
+  const [paths, setPaths] = useState<TreePath[]>(FALLBACK_PATHS);
   const treeRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    fetch("/api/tech-tree")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data && Array.isArray(data.paths) && data.paths.length > 0) {
+          setPaths(data.paths as TreePath[]);
+        }
+      })
+      .catch(() => { /* fallback 유지 */ });
+  }, []);
+
+  const PATHS = paths;
   const currentPath = PATHS.find((p) => p.id === selectedPath);
 
   const handleNodeClick = (node: TreeNode) => {

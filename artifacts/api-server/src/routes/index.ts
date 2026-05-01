@@ -6,6 +6,7 @@ import adminRouter from "./admin";
 import editorsRouter from "./editors";
 import youtubeUploadRouter from "./youtube-upload";
 import marketingRouter from "./marketing";
+import techTreeRouter from "./tech-tree";
 
 const router: IRouter = Router();
 
@@ -16,5 +17,6 @@ router.use(adminRouter);
 router.use(editorsRouter);
 router.use(youtubeUploadRouter);
 router.use(marketingRouter);
+router.use(techTreeRouter);
 
 export default router;

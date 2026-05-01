@@ -24,6 +24,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { AdminEditors } from "@/components/admin-editors";
 import { AdminFormBuilder } from "@/components/admin-form-builder";
+import { AdminTechTreeEditor } from "@/components/admin-techtree-editor";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
@@ -743,6 +744,7 @@ export default function Admin() {
           <TabsTrigger value="schedule" className="rounded-lg text-sm font-medium" onClick={loadSchedule}>발송 현황</TabsTrigger>
           <TabsTrigger value="youtube" className="rounded-lg text-sm font-medium" onClick={loadYtStatsAll}>YouTube 성과</TabsTrigger>
           <TabsTrigger value="editors" className="rounded-lg text-sm font-medium">편집자 관리</TabsTrigger>
+          <TabsTrigger value="techtree" className="rounded-lg text-sm font-medium">테크트리</TabsTrigger>
         </TabsList>
 
         {/* ── Tab 1: Live Management ─────────────────── */}
@@ -1213,6 +1215,11 @@ export default function Admin() {
         {/* ── Tab 5: 편집자 관리 ──────────────────── */}
         <TabsContent value="editors" className="mt-6">
           <AdminEditors />
+        </TabsContent>
+
+        {/* ── Tab 6: 테크트리 편집 ───────────────── */}
+        <TabsContent value="techtree" className="mt-6">
+          <AdminTechTreeEditor />
         </TabsContent>
 
       </Tabs>

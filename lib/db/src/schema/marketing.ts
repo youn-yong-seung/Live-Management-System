@@ -65,8 +65,17 @@ export const liveFormConfigTable = pgTable("live_form_config", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+/* ── 테크트리 설정 (단일 row 글로벌) ──────────────────── */
+
+export const techTreeConfigTable = pgTable("tech_tree_config", {
+  id: serial("id").primaryKey(),
+  paths: jsonb("paths").$type<unknown[]>().notNull(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 /* ── Types ──────────────────────────────────────────── */
 
 export type ChannelSource = typeof channelSourcesTable.$inferSelect;
 export type ChannelSourceStats = typeof channelSourceStatsTable.$inferSelect;
 export type LiveFormConfig = typeof liveFormConfigTable.$inferSelect;
+export type TechTreeConfig = typeof techTreeConfigTable.$inferSelect;
