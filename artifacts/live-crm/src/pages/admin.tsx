@@ -1652,7 +1652,10 @@ export default function Admin() {
                         const dD = Math.floor(dH / 24); const dHr = dH % 24;
                         autoMap["#{남은시간}"] = diffMs > 0 ? (dD > 0 ? `${dD}일 ${dHr}시간 ${dM}분` : `${dHr}시간 ${dM}분`) : "곧";
                       }
-                      autoMap["#{라이브링크}"] = liveData.youtubeUrl ?? "";
+                      const liveLink = liveData.youtubeUrl ?? "";
+                      autoMap["#{라이브링크}"] = liveLink;
+                      autoMap["#{라이브주소}"] = liveLink;
+                      autoMap["#{라이브URL}"] = liveLink;
                     }
                     autoMap["#{고객명}"] = "(신청자 이름)";
                     autoMap["#{이름}"] = "(신청자 이름)";

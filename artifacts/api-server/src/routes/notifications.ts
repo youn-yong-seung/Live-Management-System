@@ -212,7 +212,10 @@ router.post("/lives/:id/send-now", requireAdminAuth, async (req: Request, res: R
         autoVars["#{년월일}"] = sa.toLocaleDateString("ko-KR", { timeZone: "Asia/Seoul", year: "numeric", month: "long", day: "numeric" });
         autoVars["#{시간}"] = sa.toLocaleTimeString("ko-KR", { timeZone: "Asia/Seoul", hour: "2-digit", minute: "2-digit" });
       }
-      autoVars["#{라이브링크}"] = live.youtubeUrl?.trim() || FALLBACK_LIVE_LINK;
+      const liveLink = live.youtubeUrl?.trim() || FALLBACK_LIVE_LINK;
+      autoVars["#{라이브링크}"] = liveLink;
+      autoVars["#{라이브주소}"] = liveLink;
+      autoVars["#{라이브URL}"] = liveLink;
     }
     // Defaults
     autoVars["#{진행자명}"] = variables?.["#{진행자명}"] || "윤자동";
@@ -309,7 +312,12 @@ router.post("/lives/:id/test-send", requireAdminAuth, async (req: Request, res: 
     }
     autoVars["#{진행자명}"] = "윤자동";
     autoVars["#{준비물}"] = "없음";
-    autoVars["#{라이브링크}"] = live.youtubeUrl?.trim() || FALLBACK_LIVE_LINK;
+    {
+      const liveLink = live.youtubeUrl?.trim() || FALLBACK_LIVE_LINK;
+      autoVars["#{라이브링크}"] = liveLink;
+      autoVars["#{라이브주소}"] = liveLink;
+      autoVars["#{라이브URL}"] = liveLink;
+    }
 
     const customVars = customVariables && typeof customVariables === "object" ? customVariables : {};
     const recipientName = name?.trim() || "테스트";
@@ -495,7 +503,10 @@ export async function fireRegistrationTrigger(
           autoVars["#{년월일}"] = sa.toLocaleDateString("ko-KR", { timeZone: "Asia/Seoul", year: "numeric", month: "long", day: "numeric" });
           autoVars["#{시간}"] = sa.toLocaleTimeString("ko-KR", { timeZone: "Asia/Seoul", hour: "2-digit", minute: "2-digit" });
         }
-        autoVars["#{라이브링크}"] = live.youtubeUrl?.trim() || FALLBACK_LIVE_LINK;
+        const liveLink = live.youtubeUrl?.trim() || FALLBACK_LIVE_LINK;
+        autoVars["#{라이브링크}"] = liveLink;
+        autoVars["#{라이브주소}"] = liveLink;
+        autoVars["#{라이브URL}"] = liveLink;
       }
       autoVars["#{진행자명}"] = "윤자동";
       autoVars["#{준비물}"] = "없음";

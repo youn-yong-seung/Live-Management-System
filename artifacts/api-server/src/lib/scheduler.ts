@@ -131,7 +131,10 @@ async function runScheduler(): Promise<void> {
       }
       autoVars["#{진행자명}"] = "윤자동";
       autoVars["#{준비물}"] = "없음";
-      autoVars["#{라이브링크}"] = rule.liveYoutubeUrl?.trim() || FALLBACK_LIVE_LINK;
+      const liveLink = rule.liveYoutubeUrl?.trim() || FALLBACK_LIVE_LINK;
+      autoVars["#{라이브링크}"] = liveLink;
+      autoVars["#{라이브주소}"] = liveLink;
+      autoVars["#{라이브URL}"] = liveLink;
 
       const customVars = rule.customVariables ?? {};
 
