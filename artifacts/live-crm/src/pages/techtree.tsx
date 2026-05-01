@@ -297,27 +297,68 @@ function TreeNodeCircle({
         </span>
       )}
 
-      <button
-        onClick={onClick}
-        className={`relative w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 group cursor-pointer ${isInfoOpen ? "ring-2 ring-offset-2 ring-offset-transparent" : ""}`}
-        style={{
-          background: isActive || isInfoOpen ? `${color}30` : "rgba(255,255,255,0.05)",
-          border: `2px solid ${isActive || isInfoOpen ? color : "rgba(255,255,255,0.1)"}`,
-          boxShadow: isInfoOpen
-            ? `0 0 25px ${glowColor}, 0 0 50px ${glowColor.replace("0.3", "0.1")}`
-            : isActive ? `0 0 20px ${glowColor}` : "none",
-          ringColor: isInfoOpen ? color : undefined,
-        }}
-      >
-        <Play className="h-5 w-5 transition-colors" style={{ color: isActive || isInfoOpen ? color : "rgba(255,255,255,0.3)" }} />
-        <span className="absolute -top-1 -right-1 text-[9px] font-bold px-1.5 py-0.5 rounded-full"
-          style={{ background: isActive || isInfoOpen ? color : "rgba(255,255,255,0.1)", color: isActive || isInfoOpen ? "#050A0A" : "rgba(255,255,255,0.4)" }}>
-          {node.level.split(" ")[0]}
-        </span>
-      </button>
-      <span className={`mt-2 text-xs font-medium text-center max-w-[100px] leading-tight ${isActive || isInfoOpen ? "text-white" : "text-white/40"}`}>
-        {node.shortTitle}
-      </span>
+      {/* Card-style node */}
+      {(() => {
+        const ytId = extractYoutubeId(node.youtubeUrl);
+        const thumb = ytId ? `https://img.youtube.com/vi/${ytId}/mqdefault.jpg` : null;
+        const highlighted = isActive || isInfoOpen;
+        return (
+          <button
+            onClick={onClick}
+            className="group relative w-[150px] sm:w-[170px] rounded-2xl overflow-hidden transition-all duration-300 cursor-pointer"
+            style={{
+              background: "rgba(255,255,255,0.03)",
+              border: `2px solid ${highlighted ? color : "rgba(255,255,255,0.08)"}`,
+              boxShadow: isInfoOpen
+                ? `0 0 28px ${glowColor}, 0 0 56px ${glowColor.replace("0.3", "0.12")}`
+                : isActive ? `0 0 18px ${glowColor}` : "0 4px 16px rgba(0,0,0,0.4)",
+            }}
+          >
+            {/* Thumbnail */}
+            <div className="relative w-full aspect-video bg-black/40 overflow-hidden">
+              {thumb ? (
+                <img src={thumb} alt="" className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${color}10 0%, ${color}30 100%)` }}>
+                  <Play className="h-7 w-7" style={{ color: `${color}80` }} />
+                </div>
+              )}
+              {/* Gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+              {/* Play button overlay */}
+              {thumb && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/15 transition-colors">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-sm transition-all"
+                    style={{
+                      background: highlighted ? `${color}` : "rgba(255,255,255,0.15)",
+                      boxShadow: highlighted ? `0 0 16px ${glowColor}` : "0 2px 8px rgba(0,0,0,0.3)",
+                    }}
+                  >
+                    <Play className="h-4 w-4 ml-0.5" style={{ color: highlighted ? "#050A0A" : "rgba(255,255,255,0.9)" }} fill="currentColor" />
+                  </div>
+                </div>
+              )}
+              {/* Level badge */}
+              <span
+                className="absolute top-2 left-2 text-[10px] font-bold px-2 py-0.5 rounded-full backdrop-blur-sm"
+                style={{
+                  background: highlighted ? color : "rgba(0,0,0,0.6)",
+                  color: highlighted ? "#050A0A" : "rgba(255,255,255,0.9)",
+                  border: highlighted ? "none" : `1px solid ${color}40`,
+                }}
+              >
+                {node.level.split(" ")[0]}
+              </span>
+            </div>
+            {/* Title */}
+            <div className="p-2.5">
+              <p className={`text-[12px] font-semibold text-center leading-tight ${highlighted ? "text-white" : "text-white/75"}`}>
+                {node.shortTitle}
+              </p>
+            </div>
+          </button>
+        );
+      })()}
     </div>
   );
 }
@@ -568,7 +609,7 @@ export default function TechTree() {
                 )}
 
                 {/* Nodes */}
-                <div className="flex justify-center gap-8 sm:gap-16">
+                <div className="flex justify-center items-start gap-4 sm:gap-6 flex-wrap">
                   {level.map((node) => (
                     <TreeNodeCircle
                       key={node.id}
