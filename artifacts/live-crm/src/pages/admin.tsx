@@ -784,6 +784,7 @@ export default function Admin() {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-gray-50 hover:bg-gray-50">
+                    <TableHead className="text-gray-500 font-medium text-xs w-12">ID</TableHead>
                     <TableHead className="text-gray-500 font-medium text-xs">상태</TableHead>
                     <TableHead className="text-gray-500 font-medium text-xs">제목</TableHead>
                     <TableHead className="text-gray-500 font-medium text-xs">예정 일시</TableHead>
@@ -796,6 +797,7 @@ export default function Admin() {
                     const s = statusConfig[live.status] ?? { label: live.status, className: "bg-gray-100 text-gray-500" };
                     return (
                       <TableRow key={live.id} className="hover:bg-gray-50/50">
+                        <TableCell className="text-xs font-mono text-gray-400 tabular-nums">#{live.id}</TableCell>
                         <TableCell><span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${s.className}`}>{s.label}</span></TableCell>
                         <TableCell className="font-medium text-gray-900">{live.title}</TableCell>
                         <TableCell className="text-gray-500 text-sm">{formatDate(live.scheduledAt)}</TableCell>
