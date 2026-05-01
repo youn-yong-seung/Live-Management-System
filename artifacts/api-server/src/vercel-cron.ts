@@ -9,6 +9,8 @@ import { eq, and, isNotNull, lte } from "drizzle-orm";
 import { getSolapiConfig, sendAlimtalkBatch, sendSmsBatch } from "./lib/solapiHelper";
 import type { IncomingMessage, ServerResponse } from "http";
 
+const FALLBACK_LIVE_LINK = "https://yunjadong-live-class.vercel.app/lives";
+
 export default async function handler(req: IncomingMessage, res: ServerResponse) {
   const authHeader = req.headers.authorization;
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
@@ -37,12 +39,14 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
         liveId: livesTable.id,
         liveTitle: livesTable.title,
         liveScheduledAt: livesTable.scheduledAt,
+        liveYoutubeUrl: livesTable.youtubeUrl,
         offsetMinutes: notificationRulesTable.offsetMinutes,
         messageType: notificationRulesTable.messageType,
         templateId: notificationRulesTable.templateId,
         templateName: notificationRulesTable.templateName,
         messageBody: notificationRulesTable.messageBody,
         customTime: notificationRulesTable.customTime,
+        customVariables: notificationRulesTable.customVariables,
       })
       .from(notificationRulesTable)
       .innerJoin(livesTable, eq(notificationRulesTable.liveId, livesTable.id))
@@ -120,10 +124,13 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       }
       autoVars["#{진행자명}"] = "윤자동";
       autoVars["#{준비물}"] = "없음";
+      autoVars["#{라이브링크}"] = rule.liveYoutubeUrl?.trim() || FALLBACK_LIVE_LINK;
+
+      const customVars = rule.customVariables ?? {};
 
       const { successCount, failCount } = isSms
         ? await sendSmsBatch(config.apiKey, config.apiSecret, config.senderPhone, rule.messageBody!, regs.map((r) => ({ phone: r.phone, name: r.name })))
-        : await sendAlimtalkBatch(config.apiKey, config.apiSecret, config.senderKey!, config.senderPhone, rule.templateId!, regs.map((r) => ({ phone: r.phone, name: r.name, variables: { ...autoVars, "#{고객명}": r.name } })));
+        : await sendAlimtalkBatch(config.apiKey, config.apiSecret, config.senderKey!, config.senderPhone, rule.templateId!, regs.map((r) => ({ phone: r.phone, name: r.name, variables: { ...autoVars, ...customVars, "#{고객명}": r.name } })));
 
       await db.insert(notificationLogTable).values({
         liveId: rule.liveId,
