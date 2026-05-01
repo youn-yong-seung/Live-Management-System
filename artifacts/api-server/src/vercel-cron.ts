@@ -58,13 +58,16 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       );
 
     let sentCount = 0;
+    const debug: Array<Record<string, unknown>> = [];
 
     for (const rule of rules) {
-      if (!rule.liveScheduledAt) continue;
+      const dbg: Record<string, unknown> = { ruleId: rule.ruleId, liveId: rule.liveId, offset: rule.offsetMinutes, customTime: rule.customTime };
+      if (!rule.liveScheduledAt) { dbg.skip = "no-scheduled"; debug.push(dbg); continue; }
+      dbg.scheduledAt = rule.liveScheduledAt.toISOString();
 
       const isSms = rule.messageType === "sms";
-      if (!isSms && !rule.templateId) continue;
-      if (isSms && !rule.messageBody) continue;
+      if (!isSms && !rule.templateId) { dbg.skip = "no-template"; debug.push(dbg); continue; }
+      if (isSms && !rule.messageBody) { dbg.skip = "no-body"; debug.push(dbg); continue; }
 
       let fireAt = new Date(rule.liveScheduledAt.getTime() + rule.offsetMinutes * 60 * 1000);
       if (rule.customTime && /^\d{2}:\d{2}$/.test(rule.customTime)) {
@@ -72,8 +75,11 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
         fireAt = new Date(fireAt);
         fireAt.setHours(hh, mm, 0, 0);
       }
+      dbg.fireAt = fireAt.toISOString();
+      dbg.windowStart = windowStart.toISOString();
+      dbg.windowEnd = windowEnd.toISOString();
 
-      if (fireAt < windowStart || fireAt > windowEnd) continue;
+      if (fireAt < windowStart || fireAt > windowEnd) { dbg.skip = "out-of-window"; debug.push(dbg); continue; }
 
       const alreadySent = await db
         .select()
@@ -81,7 +87,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
         .where(eq(notificationLogTable.ruleId, rule.ruleId))
         .limit(1);
 
-      if (alreadySent.length > 0) continue;
+      if (alreadySent.length > 0) { dbg.skip = "already-sent"; debug.push(dbg); continue; }
 
       const config = await getSolapiConfig();
       if (!config?.apiKey || !config?.apiSecret || !config?.senderPhone) continue;
@@ -91,6 +97,8 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
         .select()
         .from(registrationsTable)
         .where(eq(registrationsTable.liveId, rule.liveId));
+
+      dbg.regs = regs.length;
 
       if (regs.length === 0) {
         await db.insert(notificationLogTable).values({
@@ -104,6 +112,8 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
           status: "sent",
           isImmediate: false,
         });
+        dbg.skip = "no-regs-empty-log-written";
+        debug.push(dbg);
         continue;
       }
 
@@ -147,12 +157,16 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
         isImmediate: false,
       });
 
+      dbg.fired = true;
+      dbg.successCount = successCount;
+      dbg.failCount = failCount;
+      debug.push(dbg);
       sentCount++;
     }
 
     res.statusCode = 200;
     res.setHeader("Content-Type", "application/json");
-    res.end(JSON.stringify({ ok: true, sentCount }));
+    res.end(JSON.stringify({ ok: true, sentCount, debug, ruleCount: rules.length, now: now.toISOString() }));
   } catch (err) {
     console.error("Cron scheduler error:", err);
     res.statusCode = 500;
