@@ -5,7 +5,7 @@ import {
   livesTable,
   registrationsTable,
 } from "@workspace/db";
-import { eq, and, isNotNull, lte } from "drizzle-orm";
+import { eq, and, isNotNull, lte, sql } from "drizzle-orm";
 import { getSolapiConfig, sendAlimtalkBatch, sendSmsBatch } from "./lib/solapiHelper";
 import type { IncomingMessage, ServerResponse } from "http";
 
@@ -38,7 +38,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
         ruleId: notificationRulesTable.id,
         liveId: livesTable.id,
         liveTitle: livesTable.title,
-        liveScheduledAt: livesTable.scheduledAt,
+        liveScheduledAtEpoch: sql<string>`EXTRACT(EPOCH FROM ${livesTable.scheduledAt})`.as("live_scheduled_epoch"),
         liveYoutubeUrl: livesTable.youtubeUrl,
         offsetMinutes: notificationRulesTable.offsetMinutes,
         messageType: notificationRulesTable.messageType,
@@ -62,14 +62,16 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
 
     for (const rule of rules) {
       const dbg: Record<string, unknown> = { ruleId: rule.ruleId, liveId: rule.liveId, offset: rule.offsetMinutes, customTime: rule.customTime };
-      if (!rule.liveScheduledAt) { dbg.skip = "no-scheduled"; debug.push(dbg); continue; }
-      dbg.scheduledAt = rule.liveScheduledAt.toISOString();
+      const epochSec = rule.liveScheduledAtEpoch != null ? parseFloat(String(rule.liveScheduledAtEpoch)) : NaN;
+      if (!Number.isFinite(epochSec)) { dbg.skip = "no-scheduled"; debug.push(dbg); continue; }
+      const liveScheduledAt = new Date(epochSec * 1000);
+      dbg.scheduledAt = liveScheduledAt.toISOString();
 
       const isSms = rule.messageType === "sms";
       if (!isSms && !rule.templateId) { dbg.skip = "no-template"; debug.push(dbg); continue; }
       if (isSms && !rule.messageBody) { dbg.skip = "no-body"; debug.push(dbg); continue; }
 
-      let fireAt = new Date(rule.liveScheduledAt.getTime() + rule.offsetMinutes * 60 * 1000);
+      let fireAt = new Date(liveScheduledAt.getTime() + rule.offsetMinutes * 60 * 1000);
       if (rule.customTime && /^\d{2}:\d{2}$/.test(rule.customTime)) {
         const [hh, mm] = rule.customTime.split(":").map(Number);
         fireAt = new Date(fireAt);
@@ -120,8 +122,8 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       // Auto-compute variables
       const autoVars: Record<string, string> = {};
       autoVars["#{방송타이틀}"] = rule.liveTitle;
-      if (rule.liveScheduledAt) {
-        const sa = rule.liveScheduledAt;
+      {
+        const sa = liveScheduledAt;
         const nowTs = new Date();
         const diffMs = sa.getTime() - nowTs.getTime();
         const diffH = Math.floor(Math.abs(diffMs) / (1000 * 60 * 60));
@@ -166,7 +168,17 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
 
     res.statusCode = 200;
     res.setHeader("Content-Type", "application/json");
-    res.end(JSON.stringify({ ok: true, sentCount, debug, ruleCount: rules.length, now: now.toISOString() }));
+    res.end(JSON.stringify({
+      ok: true,
+      sentCount,
+      debug,
+      ruleCount: rules.length,
+      now: now.toISOString(),
+      env: {
+        TZ: process.env.TZ ?? null,
+        nodeNow: new Date().toString(),
+      },
+    }));
   } catch (err) {
     console.error("Cron scheduler error:", err);
     res.statusCode = 500;

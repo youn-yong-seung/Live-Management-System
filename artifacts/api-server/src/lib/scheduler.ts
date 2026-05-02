@@ -5,7 +5,7 @@ import {
   livesTable,
   registrationsTable,
 } from "@workspace/db";
-import { eq, and, isNotNull, lte } from "drizzle-orm";
+import { eq, and, isNotNull, lte, sql } from "drizzle-orm";
 import { logger } from "./logger";
 import { getSolapiConfig, sendAlimtalkBatch, sendSmsBatch } from "./solapiHelper";
 
@@ -39,7 +39,7 @@ async function runScheduler(): Promise<void> {
         ruleId: notificationRulesTable.id,
         liveId: livesTable.id,
         liveTitle: livesTable.title,
-        liveScheduledAt: livesTable.scheduledAt,
+        liveScheduledAtEpoch: sql<string>`EXTRACT(EPOCH FROM ${livesTable.scheduledAt})`.as("live_scheduled_epoch"),
         liveYoutubeUrl: livesTable.youtubeUrl,
         offsetMinutes: notificationRulesTable.offsetMinutes,
         messageType: notificationRulesTable.messageType,
@@ -59,13 +59,15 @@ async function runScheduler(): Promise<void> {
       );
 
     for (const rule of rules) {
-      if (!rule.liveScheduledAt) continue;
+      const epochSec = rule.liveScheduledAtEpoch != null ? parseFloat(String(rule.liveScheduledAtEpoch)) : NaN;
+      if (!Number.isFinite(epochSec)) continue;
+      const liveScheduledAt = new Date(epochSec * 1000);
 
       const isSms = rule.messageType === "sms";
       if (!isSms && !rule.templateId) continue;
       if (isSms && !rule.messageBody) continue;
 
-      let fireAt = new Date(rule.liveScheduledAt.getTime() + rule.offsetMinutes * 60 * 1000);
+      let fireAt = new Date(liveScheduledAt.getTime() + rule.offsetMinutes * 60 * 1000);
       if (rule.customTime && /^\d{2}:\d{2}$/.test(rule.customTime)) {
         const [hh, mm] = rule.customTime.split(":").map(Number);
         fireAt = new Date(fireAt);
@@ -117,8 +119,8 @@ async function runScheduler(): Promise<void> {
       // Auto-compute variables
       const autoVars: Record<string, string> = {};
       autoVars["#{방송타이틀}"] = rule.liveTitle;
-      if (rule.liveScheduledAt) {
-        const sa = rule.liveScheduledAt;
+      {
+        const sa = liveScheduledAt;
         const now = new Date();
         const diffMs = sa.getTime() - now.getTime();
         const diffH = Math.floor(Math.abs(diffMs) / (1000 * 60 * 60));
