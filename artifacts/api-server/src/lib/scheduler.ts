@@ -1,20 +1,17 @@
 import { db } from "@workspace/db";
 import {
-  notificationRulesTable,
   notificationLogTable,
   livesTable,
   registrationsTable,
 } from "@workspace/db";
-import { eq, and, isNotNull, lte, sql } from "drizzle-orm";
+import { eq, and, isNotNull, lte } from "drizzle-orm";
 import { logger } from "./logger";
-import { getSolapiConfig, sendAlimtalkBatch, sendSmsBatch } from "./solapiHelper";
-
-const FALLBACK_LIVE_LINK = "https://yunjadong-live-class.vercel.app/lives";
+import { getSolapiConfig } from "./solapiHelper";
+import { computeFireAt, fireRuleOnce, loadAllEnabledRules } from "./firing";
 
 async function autoPromoteLives(): Promise<void> {
   try {
     const now = new Date();
-    // scheduled → live: when scheduledAt has passed
     await db.update(livesTable)
       .set({ status: "live" })
       .where(and(
@@ -34,46 +31,14 @@ async function runScheduler(): Promise<void> {
     const windowStart = new Date(now.getTime() - 2 * 60 * 1000);
     const windowEnd = new Date(now.getTime() + 30 * 1000);
 
-    const rules = await db
-      .select({
-        ruleId: notificationRulesTable.id,
-        liveId: livesTable.id,
-        liveTitle: livesTable.title,
-        liveScheduledAtEpoch: sql<string>`EXTRACT(EPOCH FROM ${livesTable.scheduledAt})`.as("live_scheduled_epoch"),
-        liveYoutubeUrl: livesTable.youtubeUrl,
-        offsetMinutes: notificationRulesTable.offsetMinutes,
-        messageType: notificationRulesTable.messageType,
-        templateId: notificationRulesTable.templateId,
-        templateName: notificationRulesTable.templateName,
-        messageBody: notificationRulesTable.messageBody,
-        customTime: notificationRulesTable.customTime,
-        customVariables: notificationRulesTable.customVariables,
-      })
-      .from(notificationRulesTable)
-      .innerJoin(livesTable, eq(notificationRulesTable.liveId, livesTable.id))
-      .where(
-        and(
-          eq(notificationRulesTable.enabled, true),
-          isNotNull(livesTable.scheduledAt)
-        )
-      );
+    const rules = await loadAllEnabledRules();
 
     for (const rule of rules) {
-      const epochSec = rule.liveScheduledAtEpoch != null ? parseFloat(String(rule.liveScheduledAtEpoch)) : NaN;
-      if (!Number.isFinite(epochSec)) continue;
-      const liveScheduledAt = new Date(epochSec * 1000);
-
       const isSms = rule.messageType === "sms";
       if (!isSms && !rule.templateId) continue;
       if (isSms && !rule.messageBody) continue;
 
-      let fireAt = new Date(liveScheduledAt.getTime() + rule.offsetMinutes * 60 * 1000);
-      if (rule.customTime && /^\d{2}:\d{2}$/.test(rule.customTime)) {
-        const [hh, mm] = rule.customTime.split(":").map(Number);
-        fireAt = new Date(fireAt);
-        fireAt.setHours(hh, mm, 0, 0);
-      }
-
+      const fireAt = computeFireAt(rule.liveScheduledAt, rule.offsetMinutes, rule.customTime);
       if (fireAt < windowStart || fireAt > windowEnd) continue;
 
       const alreadySent = await db
@@ -81,7 +46,6 @@ async function runScheduler(): Promise<void> {
         .from(notificationLogTable)
         .where(eq(notificationLogTable.ruleId, rule.ruleId))
         .limit(1);
-
       if (alreadySent.length > 0) continue;
 
       logger.info({ ruleId: rule.ruleId, liveId: rule.liveId, fireAt, messageType: rule.messageType }, "Firing scheduled notification");
@@ -116,33 +80,17 @@ async function runScheduler(): Promise<void> {
         continue;
       }
 
-      // Auto-compute variables
-      const autoVars: Record<string, string> = {};
-      autoVars["#{방송타이틀}"] = rule.liveTitle;
-      {
-        const sa = liveScheduledAt;
-        const now = new Date();
-        const diffMs = sa.getTime() - now.getTime();
-        const diffH = Math.floor(Math.abs(diffMs) / (1000 * 60 * 60));
-        const diffM = Math.floor((Math.abs(diffMs) % (1000 * 60 * 60)) / (1000 * 60));
-        const diffD = Math.floor(diffH / 24); const diffHr = diffH % 24;
-        autoVars["#{남은시간}"] = diffMs > 0 ? (diffD > 0 ? `${diffD}일 ${diffHr}시간 ${diffM}분` : `${diffHr}시간 ${diffM}분`) : "곧";
-        autoVars["#{방송시작시간}"] = sa.toLocaleString("ko-KR", { timeZone: "Asia/Seoul", hour: "2-digit", minute: "2-digit" });
-        autoVars["#{년월일}"] = sa.toLocaleDateString("ko-KR", { timeZone: "Asia/Seoul", year: "numeric", month: "long", day: "numeric" });
-        autoVars["#{시간}"] = sa.toLocaleTimeString("ko-KR", { timeZone: "Asia/Seoul", hour: "2-digit", minute: "2-digit" });
-      }
-      autoVars["#{진행자명}"] = "윤자동";
-      autoVars["#{준비물}"] = "없음";
-      const liveLink = rule.liveYoutubeUrl?.trim() || FALLBACK_LIVE_LINK;
-      autoVars["#{라이브링크}"] = liveLink;
-      autoVars["#{라이브주소}"] = liveLink;
-      autoVars["#{라이브URL}"] = liveLink;
-
-      const customVars = rule.customVariables ?? {};
-
-      const { successCount, failCount } = isSms
-        ? await sendSmsBatch(config.apiKey, config.apiSecret, config.senderPhone, rule.messageBody!, regs.map((r) => ({ phone: r.phone, name: r.name })))
-        : await sendAlimtalkBatch(config.apiKey, config.apiSecret, config.senderKey!, config.senderPhone, rule.templateId!, regs.map((r) => ({ phone: r.phone, name: r.name, variables: { ...autoVars, ...customVars, "#{고객명}": r.name } })));
+      const { successCount, failCount } = await fireRuleOnce(
+        rule,
+        regs.map((r) => ({ phone: r.phone, name: r.name })),
+        {
+          apiKey: config.apiKey,
+          apiSecret: config.apiSecret,
+          senderPhone: config.senderPhone,
+          senderKey: config.senderKey,
+          referenceTime: fireAt,
+        },
+      );
 
       await db.insert(notificationLogTable).values({
         liveId: rule.liveId,

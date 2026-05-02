@@ -11,6 +11,7 @@ import {
 import { eq, and, count, isNotNull, inArray } from "drizzle-orm";
 import { logger } from "../lib/logger";
 import { getSolapiConfig, fetchSolapiTemplates, sendAlimtalkBatch, sendSmsBatch } from "../lib/solapiHelper";
+import { computeFireAt, fireRuleOnce, loadRuleSnapshot, loadTriggerSnapshot } from "../lib/firing";
 import { requireAdminAuth } from "../middleware/adminAuth";
 
 const router: IRouter = Router();
@@ -250,29 +251,23 @@ router.post("/lives/:id/send-now", requireAdminAuth, async (req: Request, res: R
   }
 });
 
-/* ── Test Send (single recipient, no log) ──────────────
-   Sends one message with the same variable mapping logic as the scheduler,
-   so admins can verify a campaign rule before it fires. */
+/* ── Test Send ─────────────────────────────────────────
+   cron이 실제로 사용하는 firing helper를 그대로 호출. 단,
+     - window/alreadySent 체크는 우회 (테스트는 즉시 발송)
+     - DB에 저장된 룰 또는 트리거 스냅샷을 그대로 사용 (저장된 customVariables 포함)
+     - 단일 수신자(테스트번호)로만, notification_log 미기록
+   "테스트 발송 = cron 발송"을 보장. */
 
 router.post("/lives/:id/test-send", requireAdminAuth, async (req: Request, res: Response) => {
   try {
     const liveId = parseInt(String(req.params.id), 10);
     if (isNaN(liveId)) return res.status(400).json({ error: "Invalid id" });
 
-    const {
-      phone,
-      name,
-      messageType = "alimtalk",
-      templateId,
-      messageBody,
-      customVariables,
-    } = req.body as {
+    const { phone, name, ruleId, kind } = req.body as {
       phone?: string;
       name?: string;
-      messageType?: string;
-      templateId?: string | null;
-      messageBody?: string | null;
-      customVariables?: Record<string, string> | null;
+      ruleId?: number;
+      kind?: "rule" | "trigger";
     };
 
     const cleanedPhone = (phone ?? "").replace(/[^0-9]/g, "");
@@ -280,55 +275,59 @@ router.post("/lives/:id/test-send", requireAdminAuth, async (req: Request, res: 
       return res.status(400).json({ error: "유효한 전화번호를 입력해주세요." });
     }
 
-    const isSms = messageType === "sms";
-    if (!isSms && !templateId) return res.status(400).json({ error: "templateId is required for alimtalk" });
-    if (isSms && !messageBody?.trim()) return res.status(400).json({ error: "messageBody is required for sms" });
-
     const config = await getSolapiConfig();
     if (!config?.apiKey || !config?.apiSecret || !config?.senderPhone) {
       return res.status(400).json({ error: "Solapi credentials not configured" });
     }
-    if (!isSms && !config.senderKey) {
-      return res.status(400).json({ error: "Solapi senderKey (pfId) not configured for alimtalk" });
-    }
 
-    const [live] = await db.select().from(livesTable).where(eq(livesTable.id, liveId));
-    if (!live) return res.status(404).json({ error: "Live not found" });
-
-    // Auto-compute variables — same logic as scheduler/send-now
-    const autoVars: Record<string, string> = {};
-    autoVars["#{방송타이틀}"] = live.title;
-    if (live.scheduledAt) {
-      const sa = new Date(live.scheduledAt);
-      const now = new Date();
-      const diffMs = sa.getTime() - now.getTime();
-      const diffH = Math.floor(Math.abs(diffMs) / (1000 * 60 * 60));
-      const diffM = Math.floor((Math.abs(diffMs) % (1000 * 60 * 60)) / (1000 * 60));
-      const diffD = Math.floor(diffH / 24); const diffHr = diffH % 24;
-      autoVars["#{남은시간}"] = diffMs > 0 ? (diffD > 0 ? `${diffD}일 ${diffHr}시간 ${diffM}분` : `${diffHr}시간 ${diffM}분`) : "곧";
-      autoVars["#{방송시작시간}"] = sa.toLocaleString("ko-KR", { timeZone: "Asia/Seoul", hour: "2-digit", minute: "2-digit" });
-      autoVars["#{년월일}"] = sa.toLocaleDateString("ko-KR", { timeZone: "Asia/Seoul", year: "numeric", month: "long", day: "numeric" });
-      autoVars["#{시간}"] = sa.toLocaleTimeString("ko-KR", { timeZone: "Asia/Seoul", hour: "2-digit", minute: "2-digit" });
-    }
-    autoVars["#{진행자명}"] = "윤자동";
-    autoVars["#{준비물}"] = "없음";
-    {
-      const liveLink = live.youtubeUrl?.trim() || FALLBACK_LIVE_LINK;
-      autoVars["#{라이브링크}"] = liveLink;
-      autoVars["#{라이브주소}"] = liveLink;
-      autoVars["#{라이브URL}"] = liveLink;
-    }
-
-    const customVars = customVariables && typeof customVariables === "object" ? customVariables : {};
     const recipientName = name?.trim() || "테스트";
+    const recipient = { phone: cleanedPhone, name: recipientName };
 
-    const { successCount, failCount } = isSms
-      ? await sendSmsBatch(config.apiKey, config.apiSecret, config.senderPhone, messageBody!, [{ phone: cleanedPhone, name: recipientName }])
-      : await sendAlimtalkBatch(config.apiKey, config.apiSecret, config.senderKey!, config.senderPhone, templateId!, [{
-          phone: cleanedPhone,
-          name: recipientName,
-          variables: { ...autoVars, ...customVars, "#{고객명}": recipientName },
-        }]);
+    if (kind === "trigger") {
+      const trigger = await loadTriggerSnapshot(liveId);
+      if (!trigger) return res.status(404).json({ error: "Trigger or live not found" });
+      if (trigger.messageType !== "sms" && !config.senderKey) {
+        return res.status(400).json({ error: "senderKey not configured for alimtalk" });
+      }
+      const { successCount, failCount } = await fireRuleOnce(
+        {
+          messageType: trigger.messageType,
+          templateId: trigger.templateId,
+          templateName: trigger.templateName,
+          messageBody: trigger.messageBody,
+          customVariables: null,
+          liveTitle: trigger.liveTitle,
+          liveScheduledAt: trigger.liveScheduledAt,
+          liveYoutubeUrl: trigger.liveYoutubeUrl,
+        },
+        [recipient],
+        {
+          apiKey: config.apiKey,
+          apiSecret: config.apiSecret,
+          senderPhone: config.senderPhone,
+          senderKey: config.senderKey,
+          referenceTime: new Date(),
+        },
+      );
+      return res.json({ success: failCount === 0, successCount, failCount });
+    }
+
+    if (typeof ruleId !== "number") return res.status(400).json({ error: "ruleId required" });
+    const rule = await loadRuleSnapshot(ruleId);
+    if (!rule || rule.liveId !== liveId) return res.status(404).json({ error: "Rule not found for this live" });
+    if (rule.messageType !== "sms" && !config.senderKey) {
+      return res.status(400).json({ error: "senderKey not configured for alimtalk" });
+    }
+
+    // cron이 사용할 fireAt을 referenceTime으로 넘겨, "남은시간" 표시도 실제 발송 시점과 동일.
+    const fireAt = computeFireAt(rule.liveScheduledAt, rule.offsetMinutes, rule.customTime);
+    const { successCount, failCount } = await fireRuleOnce(rule, [recipient], {
+      apiKey: config.apiKey,
+      apiSecret: config.apiSecret,
+      senderPhone: config.senderPhone,
+      senderKey: config.senderKey,
+      referenceTime: fireAt,
+    });
 
     return res.json({ success: failCount === 0, successCount, failCount });
   } catch (err) {

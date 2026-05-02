@@ -547,15 +547,10 @@ export default function Admin() {
     }
   };
 
-  /* ── Test send (single recipient, current modal state) ───── */
+  /* ── Test send (DB에 저장된 룰/트리거 그대로 cron path로 발송) ───── */
   const testSendRule = async (
     key: string,
-    payload: {
-      messageType: "alimtalk" | "sms";
-      templateId: string | null;
-      messageBody: string | null;
-      customVariables: Record<string, string> | null;
-    },
+    target: { kind: "rule"; ruleId: number } | { kind: "trigger" },
   ) => {
     if (!rulesModal.live) return;
     const cleanedPhone = testPhone.replace(/[^0-9]/g, "");
@@ -565,15 +560,14 @@ export default function Admin() {
     }
     setTestSendingKey(key);
     try {
+      const body: Record<string, unknown> = { phone: cleanedPhone, kind: target.kind };
+      if (target.kind === "rule") body.ruleId = target.ruleId;
       const result = await apiFetch<{ success: boolean; successCount: number; failCount: number }>(
         `/lives/${rulesModal.live.id}/test-send`,
-        {
-          method: "POST",
-          body: JSON.stringify({ phone: cleanedPhone, ...payload }),
-        },
+        { method: "POST", body: JSON.stringify(body) },
       );
       if (result.successCount > 0) {
-        toast({ title: "테스트 발송 완료", description: `${testPhone}로 발송했습니다.` });
+        toast({ title: "테스트 발송 완료", description: `${testPhone}로 발송했습니다. (저장된 캠페인 설정 그대로)` });
       } else {
         toast({ variant: "destructive", title: "테스트 발송 실패", description: "Solapi 응답 확인이 필요합니다." });
       }
@@ -1616,12 +1610,7 @@ export default function Admin() {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => testSendRule("trigger", {
-                        messageType: "alimtalk",
-                        templateId: triggerConfig.templateId,
-                        messageBody: null,
-                        customVariables: null,
-                      })}
+                      onClick={() => testSendRule("trigger", { kind: "trigger" })}
                       disabled={testSendingKey !== null || !solapiConfig?.configured}
                       className="w-full h-8 text-xs rounded-lg border-purple-200 text-purple-700 hover:bg-purple-50"
                     >
@@ -1886,24 +1875,19 @@ export default function Admin() {
                       )}
 
                       {/* Test send (scheduled rule) */}
-                      {rule.enabled && rule.templateId && (() => {
-                        const key = `rule-${rule.id ?? idx}`;
-                        const customVars = (rule as { customVariables?: Record<string, string> }).customVariables ?? null;
+                      {rule.enabled && rule.templateId && rule.id != null && (() => {
+                        const key = `rule-${rule.id}`;
+                        const ruleId = rule.id as number;
                         return (
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => testSendRule(key, {
-                              messageType: "alimtalk",
-                              templateId: rule.templateId,
-                              messageBody: null,
-                              customVariables: customVars,
-                            })}
+                            onClick={() => testSendRule(key, { kind: "rule", ruleId })}
                             disabled={testSendingKey !== null || !solapiConfig?.configured}
                             className="w-full h-8 text-xs rounded-lg border-purple-200 text-purple-700 hover:bg-purple-50"
                           >
                             {testSendingKey === key ? <Loader2 className="h-3 w-3 mr-1.5 animate-spin" /> : <Send className="h-3 w-3 mr-1.5" />}
-                            {testPhone}로 테스트 발송
+                            {testPhone}로 테스트 발송 (저장된 설정 그대로)
                           </Button>
                         );
                       })()}
