@@ -25,6 +25,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AdminEditors } from "@/components/admin-editors";
 import { AdminFormBuilder } from "@/components/admin-form-builder";
 import { AdminTechTreeEditor } from "@/components/admin-techtree-editor";
+import { AdminDashboard } from "@/components/admin-dashboard";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
@@ -772,8 +773,9 @@ export default function Admin() {
         </Button>
       </div>
 
-      <Tabs defaultValue="lives">
-        <TabsList className="bg-gray-100 rounded-xl p-1">
+      <Tabs defaultValue="dashboard">
+        <TabsList className="bg-gray-100 rounded-xl p-1 flex-wrap h-auto">
+          <TabsTrigger value="dashboard" className="rounded-lg text-sm font-medium">📊 대시보드</TabsTrigger>
           <TabsTrigger value="lives" className="rounded-lg text-sm font-medium">라이브 관리</TabsTrigger>
           <TabsTrigger value="settings" className="rounded-lg text-sm font-medium">API 설정</TabsTrigger>
           <TabsTrigger value="schedule" className="rounded-lg text-sm font-medium" onClick={loadSchedule}>발송 현황</TabsTrigger>
@@ -781,6 +783,11 @@ export default function Admin() {
           <TabsTrigger value="editors" className="rounded-lg text-sm font-medium">편집자 관리</TabsTrigger>
           <TabsTrigger value="techtree" className="rounded-lg text-sm font-medium">테크트리</TabsTrigger>
         </TabsList>
+
+        {/* ── Tab: Dashboard ─────────────────────────── */}
+        <TabsContent value="dashboard" className="mt-6">
+          <AdminDashboard />
+        </TabsContent>
 
         {/* ── Tab 1: Live Management ─────────────────── */}
         <TabsContent value="lives" className="mt-6">

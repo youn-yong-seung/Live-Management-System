@@ -316,4 +316,182 @@ function generateRecommendedQuestions(title: string, description: string): Array
   return questions;
 }
 
+/* ════════════════════════════════════════════════════════
+   비즈니스 대시보드 — 한방에 분석 데이터 반환
+   ════════════════════════════════════════════════════════ */
+
+router.get("/admin/dashboard", requireAdminAuth, async (_req: Request, res: Response) => {
+  try {
+    // 활성 라이브 = scheduled_at 있는 진짜 라이브 (다시보기 갤러리 더미 제외)
+    const activeLivesCte = sql`
+      WITH active_lives AS (
+        SELECT id, title, scheduled_at, status
+        FROM lives
+        WHERE scheduled_at IS NOT NULL
+      ),
+      norm AS (
+        SELECT
+          r.id, r.live_id, r.name, r.email, r.industry, r.created_at,
+          r.channel_source,
+          regexp_replace(r.phone, '[^0-9]', '', 'g') AS phone_n,
+          r.phone AS phone_raw
+        FROM registrations r
+        INNER JOIN active_lives al ON al.id = r.live_id
+        WHERE r.phone IS NOT NULL
+      ),
+      member_first_live AS (
+        SELECT phone_n, MIN(live_id) AS first_live_id, MIN(created_at) AS first_seen, MAX(created_at) AS last_seen, COUNT(*) AS reg_count
+        FROM norm
+        GROUP BY phone_n
+      )`;
+
+    /* ---- 1. Overview KPIs ---- */
+    const overviewQ = await db.execute(sql`
+      ${activeLivesCte},
+      kpi AS (
+        SELECT
+          (SELECT COUNT(DISTINCT phone_n) FROM norm) AS total_members,
+          (SELECT COUNT(*) FROM norm) AS total_registrations,
+          (SELECT COUNT(*) FROM active_lives) AS total_lives,
+          (SELECT COUNT(*) FILTER (WHERE reg_count >= 2) FROM member_first_live) AS returning_members,
+          (SELECT COUNT(*) FILTER (WHERE reg_count >= 3) FROM member_first_live) AS super_fans,
+          (SELECT COUNT(DISTINCT phone_n) FROM norm WHERE created_at >= NOW() - INTERVAL '7 days') AS members_last_7d
+      )
+      SELECT * FROM kpi
+    `);
+
+    /* ---- 2. Channel Performance ---- */
+    const channelQ = await db.execute(sql`
+      ${activeLivesCte},
+      flat AS (
+        SELECT n.phone_n, ch AS source_name
+        FROM norm n, jsonb_array_elements_text(n.channel_source) AS ch
+        WHERE n.channel_source IS NOT NULL
+      )
+      SELECT
+        f.source_name,
+        COALESCE(cs.category, '기타') AS category,
+        COUNT(DISTINCT f.phone_n)::int AS unique_members,
+        COUNT(*)::int AS total_registrations,
+        COUNT(DISTINCT f.phone_n) FILTER (WHERE m.reg_count >= 2)::int AS returning_members
+      FROM flat f
+      JOIN member_first_live m ON m.phone_n = f.phone_n
+      LEFT JOIN channel_sources cs ON cs.name = f.source_name
+      GROUP BY f.source_name, cs.category
+      ORDER BY total_registrations DESC
+    `);
+
+    /* ---- 3. Category Performance (groups) ---- */
+    const categoryQ = await db.execute(sql`
+      ${activeLivesCte},
+      flat AS (
+        SELECT n.phone_n, ch AS source_name
+        FROM norm n, jsonb_array_elements_text(n.channel_source) AS ch
+        WHERE n.channel_source IS NOT NULL
+      )
+      SELECT
+        COALESCE(cs.category, '기타') AS category,
+        COUNT(DISTINCT f.phone_n)::int AS unique_members,
+        COUNT(*)::int AS total_registrations
+      FROM flat f
+      LEFT JOIN channel_sources cs ON cs.name = f.source_name
+      GROUP BY cs.category
+      ORDER BY total_registrations DESC
+    `);
+
+    /* ---- 4. Live Performance (신규 vs 재참여) ---- */
+    const liveQ = await db.execute(sql`
+      ${activeLivesCte}
+      SELECT
+        al.id AS live_id,
+        al.title,
+        al.scheduled_at,
+        al.status,
+        COUNT(n.id)::int AS total_apps,
+        COUNT(*) FILTER (WHERE m.first_live_id = al.id)::int AS new_signups,
+        COUNT(*) FILTER (WHERE m.first_live_id <> al.id)::int AS returning
+      FROM active_lives al
+      LEFT JOIN norm n ON n.live_id = al.id
+      LEFT JOIN member_first_live m ON m.phone_n = n.phone_n
+      GROUP BY al.id, al.title, al.scheduled_at, al.status
+      ORDER BY al.scheduled_at ASC NULLS LAST
+    `);
+
+    /* ---- 5. Industry Distribution ---- */
+    const industryQ = await db.execute(sql`
+      ${activeLivesCte}
+      SELECT industry, COUNT(DISTINCT phone_n)::int AS count
+      FROM norm
+      WHERE industry IS NOT NULL AND industry <> '' AND industry <> '직접 입력'
+      GROUP BY industry
+      ORDER BY count DESC
+      LIMIT 12
+    `);
+
+    /* ---- 6. Super Fans (3회 이상 신청) ---- */
+    const superFansQ = await db.execute(sql`
+      ${activeLivesCte},
+      ranked AS (
+        SELECT
+          n.phone_n,
+          (array_agg(n.name ORDER BY n.created_at DESC))[1] AS name,
+          (array_agg(n.email ORDER BY n.created_at DESC))[1] AS email,
+          (array_agg(n.phone_raw ORDER BY n.created_at DESC))[1] AS phone,
+          (array_agg(n.industry ORDER BY n.created_at DESC) FILTER (WHERE n.industry IS NOT NULL))[1] AS industry,
+          COUNT(*)::int AS registration_count,
+          MIN(n.created_at) AS first_seen,
+          MAX(n.created_at) AS last_seen,
+          array_agg(DISTINCT n.live_id ORDER BY n.live_id) AS live_ids
+        FROM norm n
+        GROUP BY n.phone_n
+        HAVING COUNT(*) >= 3
+      )
+      SELECT * FROM ranked ORDER BY registration_count DESC, last_seen DESC LIMIT 50
+    `);
+
+    /* ---- 7. Hourly Apply Distribution (KST = UTC + 9) ---- */
+    const hourlyQ = await db.execute(sql`
+      ${activeLivesCte}
+      SELECT
+        ((EXTRACT(HOUR FROM created_at)::int + 9) % 24) AS hour,
+        COUNT(*)::int AS count
+      FROM norm
+      GROUP BY hour
+      ORDER BY hour
+    `);
+
+    /* ---- 8. Weekly Acquisition Trend (라이브 단위, 최근 8개) ---- */
+    const trendQ = await db.execute(sql`
+      ${activeLivesCte}
+      SELECT
+        al.id AS live_id,
+        al.title,
+        al.scheduled_at,
+        COUNT(*) FILTER (WHERE m.first_live_id = al.id)::int AS new_signups,
+        COUNT(*) FILTER (WHERE m.first_live_id <> al.id)::int AS returning
+      FROM active_lives al
+      LEFT JOIN norm n ON n.live_id = al.id
+      LEFT JOIN member_first_live m ON m.phone_n = n.phone_n
+      GROUP BY al.id, al.title, al.scheduled_at
+      ORDER BY al.scheduled_at DESC NULLS LAST
+      LIMIT 8
+    `);
+
+    res.json({
+      overview: overviewQ.rows[0] ?? null,
+      channelPerformance: channelQ.rows,
+      categoryPerformance: categoryQ.rows,
+      livePerformance: liveQ.rows,
+      industryDistribution: industryQ.rows,
+      superFans: superFansQ.rows,
+      hourlyDistribution: hourlyQ.rows,
+      weeklyTrend: trendQ.rows.reverse(), // 시간 오름차순으로
+      generatedAt: new Date().toISOString(),
+    });
+  } catch (err) {
+    logger.error({ err }, "GET /admin/dashboard failed");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 export default router;

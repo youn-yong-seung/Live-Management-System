@@ -48,6 +48,9 @@ Thumbs.db
 .cache/
 .local/
 
+# DB 백업 (PII 포함)
+artifacts/db-backup/
+
 # Environment
 .env
 .env.local
