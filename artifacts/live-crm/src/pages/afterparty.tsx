@@ -1,0 +1,266 @@
+import { useEffect, useState } from "react";
+import { useRoute } from "wouter";
+import {
+  PlayCircle,
+  Download,
+  ExternalLink,
+  Sparkles,
+  Calendar,
+  ArrowRight,
+  Loader2,
+  Gift,
+  MessageCircle,
+  Check,
+  FileText,
+} from "lucide-react";
+import { formatDate } from "@/lib/date-utils";
+
+interface AfterpartyMaterial {
+  title: string;
+  url: string;
+}
+
+interface AfterpartyData {
+  live: {
+    id: number;
+    title: string;
+    description: string | null;
+    scheduledAt: string | null;
+    youtubeUrl: string | null;
+    thumbnailUrl: string | null;
+  };
+  materials: AfterpartyMaterial[];
+  kakao: {
+    url: string;
+    headline: string;
+    body: string;
+    buttonLabel: string;
+  };
+}
+
+const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+
+function extractYoutubeId(url: string) {
+  const m = url.match(/(?:youtu\.be\/|v=|\/embed\/|\/live\/)([^#&?]{11})/);
+  return m ? m[1] : null;
+}
+
+export default function Afterparty() {
+  const [, params] = useRoute("/lives/:id/after");
+  const liveId = parseInt(params?.id ?? "0", 10);
+  const [data, setData] = useState<AfterpartyData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!liveId) {
+      setError("잘못된 접근입니다.");
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    fetch(`${BASE}/api/lives/${liveId}/after`)
+      .then((r) => {
+        if (!r.ok) throw new Error("페이지를 불러오지 못했습니다.");
+        return r.json();
+      })
+      .then((d: AfterpartyData) => setData(d))
+      .catch((e) => setError((e as Error).message))
+      .finally(() => setLoading(false));
+  }, [liveId]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#050A0A] flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-[#CC9965]" />
+      </div>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <div className="min-h-screen bg-[#050A0A] flex flex-col items-center justify-center p-8 text-center">
+        <p className="text-white/70 text-lg font-medium mb-2">{error ?? "라이브를 찾을 수 없습니다."}</p>
+        <p className="text-white/40 text-sm">URL을 다시 확인해주세요.</p>
+      </div>
+    );
+  }
+
+  const youtubeId = data.live.youtubeUrl ? extractYoutubeId(data.live.youtubeUrl) : null;
+  const hasMaterials = data.materials.length > 0;
+  const hasKakao = data.kakao.url.trim() !== "";
+
+  return (
+    <div className="min-h-screen bg-[#050A0A] text-white">
+      {/* ── Decorative ambient blobs ──────────────────── */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
+        <div className="absolute top-[-10%] left-[-10%] w-[40rem] h-[40rem] rounded-full bg-[#005051]/20 blur-[120px]" />
+        <div className="absolute bottom-[-15%] right-[-10%] w-[40rem] h-[40rem] rounded-full bg-[#CC9965]/10 blur-[120px]" />
+      </div>
+
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10 sm:py-16 space-y-10 sm:space-y-14">
+        {/* ── Hero ──────────────────────────────────── */}
+        <header className="text-center space-y-4">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#CC9965]/10 border border-[#CC9965]/30 text-[#CC9965] text-xs font-bold uppercase tracking-wider">
+            <Sparkles className="h-3.5 w-3.5" />
+            오늘의 라이브 보너스
+          </div>
+          <h1 className="text-2xl sm:text-4xl font-black leading-tight">
+            오늘 함께해주셔서<br className="sm:hidden" />
+            <span className="text-[#CC9965]"> 정말 고맙습니다 🙏</span>
+          </h1>
+          <p className="text-white/60 text-sm sm:text-base leading-relaxed max-w-xl mx-auto">
+            아래에서 <span className="text-white font-semibold">오늘 라이브 다시보기</span>와{" "}
+            <span className="text-white font-semibold">무료 자료</span>를 받아가시고,<br className="hidden sm:block" />
+            매주 무료 특강이 열리는 카톡방에도 꼭 입장해보세요.
+          </p>
+        </header>
+
+        {/* ── Live info card ────────────────────────── */}
+        <div className="glass-card p-5 sm:p-7">
+          <div className="flex items-start gap-3 mb-3">
+            <div className="w-9 h-9 rounded-xl bg-[#CC9965]/15 border border-[#CC9965]/30 flex items-center justify-center flex-shrink-0">
+              <PlayCircle className="h-4.5 w-4.5 text-[#CC9965]" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-white/40 font-medium mb-1 flex items-center gap-1.5">
+                <Calendar className="h-3 w-3" />
+                {data.live.scheduledAt ? formatDate(data.live.scheduledAt) : "오늘의 라이브"}
+              </p>
+              <h2 className="text-lg sm:text-xl font-bold text-white leading-tight">{data.live.title}</h2>
+            </div>
+          </div>
+          {data.live.description && (
+            <p className="text-sm text-white/50 leading-relaxed mt-3 whitespace-pre-line">
+              {data.live.description}
+            </p>
+          )}
+        </div>
+
+        {/* ── Replay video ──────────────────────────── */}
+        <section className="space-y-3">
+          <div className="flex items-center gap-2 px-1">
+            <PlayCircle className="h-4 w-4 text-[#CC9965]" />
+            <h3 className="text-sm font-bold text-white/90 uppercase tracking-wider">다시보기</h3>
+          </div>
+          <div className="glass-card overflow-hidden p-0">
+            <div className="aspect-video w-full bg-black">
+              {youtubeId ? (
+                <iframe
+                  src={`https://www.youtube.com/embed/${youtubeId}`}
+                  title={data.live.title}
+                  className="w-full h-full"
+                  frameBorder={0}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              ) : (
+                <div className="w-full h-full flex flex-col items-center justify-center text-white/30 gap-2">
+                  <PlayCircle className="h-12 w-12" />
+                  <p className="text-sm">아직 다시보기 영상이 등록되지 않았습니다</p>
+                </div>
+              )}
+            </div>
+          </div>
+          {data.live.youtubeUrl && youtubeId && (
+            <a
+              href={data.live.youtubeUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-xs text-white/40 hover:text-[#CC9965] transition-colors px-1"
+            >
+              <ExternalLink className="h-3 w-3" />
+              YouTube에서 보기
+            </a>
+          )}
+        </section>
+
+        {/* ── Materials ─────────────────────────────── */}
+        {hasMaterials && (
+          <section className="space-y-3">
+            <div className="flex items-center gap-2 px-1">
+              <Gift className="h-4 w-4 text-[#CC9965]" />
+              <h3 className="text-sm font-bold text-white/90 uppercase tracking-wider">오늘의 무료 자료</h3>
+              <span className="text-xs text-white/30 font-medium">({data.materials.length}개)</span>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {data.materials.map((m, i) => (
+                <a
+                  key={`${m.url}-${i}`}
+                  href={m.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="glass-card p-4 sm:p-5 flex items-center gap-3 group hover:-translate-y-0.5 transition-all duration-300"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-[#CC9965]/15 border border-[#CC9965]/30 flex items-center justify-center flex-shrink-0 group-hover:bg-[#CC9965]/25 transition-colors">
+                    <FileText className="h-4.5 w-4.5 text-[#CC9965]" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-white truncate">{m.title}</p>
+                    <p className="text-xs text-white/40 mt-0.5 flex items-center gap-1">
+                      <Download className="h-3 w-3" />
+                      받기
+                    </p>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-white/30 group-hover:text-[#CC9965] group-hover:translate-x-0.5 transition-all flex-shrink-0" />
+                </a>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* ── Kakao CTA ─────────────────────────────── */}
+        {hasKakao && (
+          <section className="space-y-3">
+            <div className="flex items-center gap-2 px-1">
+              <MessageCircle className="h-4 w-4 text-[#CC9965]" />
+              <h3 className="text-sm font-bold text-white/90 uppercase tracking-wider">매주 무료 특강 카톡방</h3>
+            </div>
+
+            <div className="glass-card-gold p-6 sm:p-8 space-y-5">
+              <div className="space-y-2">
+                <h2 className="text-xl sm:text-2xl font-black leading-tight text-white">
+                  {data.kakao.headline}
+                </h2>
+                <p className="text-sm sm:text-base text-white/75 leading-relaxed whitespace-pre-line">
+                  {data.kakao.body}
+                </p>
+              </div>
+
+              <ul className="space-y-2 pt-1">
+                {[
+                  "매주 분야별 AI 실무자가 진행하는 무료 라이브 특강",
+                  "톡방에 들어오기만 해도 매주 무료 자료 발송",
+                  "지나간 모든 라이브 다시보기 무료 제공",
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-2 text-sm text-white/80">
+                    <Check className="h-4 w-4 text-[#CC9965] mt-0.5 flex-shrink-0" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <a
+                href={data.kakao.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="gold-glow flex items-center justify-center gap-2 w-full bg-[#CC9965] hover:bg-[#d4a570] text-black font-black text-base sm:text-lg py-4 rounded-2xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.99]"
+              >
+                <MessageCircle className="h-5 w-5" />
+                {data.kakao.buttonLabel}
+                <ArrowRight className="h-4 w-4" />
+              </a>
+            </div>
+          </section>
+        )}
+
+        {/* ── Footer ────────────────────────────────── */}
+        <footer className="pt-6 text-center">
+          <p className="text-xs text-white/30">
+            자동화가 필요하면 <span className="text-[#CC9965] font-semibold">윤자동</span> · 구독
+          </p>
+        </footer>
+      </div>
+    </div>
+  );
+}

@@ -20,6 +20,7 @@ import {
   Bell, Send, Eye, CheckCircle, Clock, AlertCircle, KeyRound,
   Zap, Lock, Youtube, TrendingUp, ThumbsUp, X,
   MessageCircle, PlayCircle, BarChart2, Link2, MonitorPlay,
+  ExternalLink, Gift, FileText, Sparkles,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AdminEditors } from "@/components/admin-editors";
@@ -232,6 +233,15 @@ export default function Admin() {
   const [isFetchingTemplates, setIsFetchingTemplates] = useState(false);
   const [isTestingConn, setIsTestingConn] = useState(false);
 
+  /* ── Afterparty global config state ────────────── */
+  const [afterpartyForm, setAfterpartyForm] = useState({
+    defaultKakaoUrl: "",
+    kakaoHeadline: "",
+    kakaoBody: "",
+    buttonLabel: "",
+  });
+  const [isSavingAfterparty, setIsSavingAfterparty] = useState(false);
+
   /* ── Live management state ─────────────────────── */
   const [isLiveModalOpen, setIsLiveModalOpen] = useState(false);
   const [isRegistrationsModalOpen, setIsRegistrationsModalOpen] = useState(false);
@@ -239,7 +249,13 @@ export default function Admin() {
   const [liveForm, setLiveForm] = useState<{
     id?: number; title: string; description: string; youtubeUrl: string;
     scheduledAt: string; status: LiveStatus; thumbnailUrl: string;
-  }>({ title: "", description: "", youtubeUrl: "", scheduledAt: "", status: "scheduled", thumbnailUrl: "" });
+    afterpartyKakaoUrl: string;
+    afterpartyMaterials: { title: string; url: string }[];
+  }>({
+    title: "", description: "", youtubeUrl: "", scheduledAt: "", status: "scheduled", thumbnailUrl: "",
+    afterpartyKakaoUrl: "",
+    afterpartyMaterials: [],
+  });
 
   /* ── Immediate send state ──────────────────────── */
   const [sendModal, setSendModal] = useState<{ live: Live | null; open: boolean }>({ live: null, open: false });
@@ -417,6 +433,33 @@ export default function Admin() {
       })
       .catch(() => {});
   }, [isAuthenticated]);
+
+  /* ── Load afterparty global config on mount ────── */
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    apiFetch<{ defaultKakaoUrl: string | null; kakaoHeadline: string | null; kakaoBody: string | null; buttonLabel: string | null }>("/afterparty-config")
+      .then((cfg) => {
+        setAfterpartyForm({
+          defaultKakaoUrl: cfg.defaultKakaoUrl ?? "",
+          kakaoHeadline: cfg.kakaoHeadline ?? "",
+          kakaoBody: cfg.kakaoBody ?? "",
+          buttonLabel: cfg.buttonLabel ?? "",
+        });
+      })
+      .catch(() => {});
+  }, [isAuthenticated]);
+
+  const handleSaveAfterpartyConfig = async () => {
+    setIsSavingAfterparty(true);
+    try {
+      await apiFetch("/afterparty-config", { method: "PUT", body: JSON.stringify(afterpartyForm) });
+      toast({ title: "후기 페이지 글로벌 설정 저장 완료" });
+    } catch {
+      toast({ variant: "destructive", title: "저장 실패", description: "잠시 후 다시 시도해주세요." });
+    } finally {
+      setIsSavingAfterparty(false);
+    }
+  };
 
   /* ── Fetch templates ───────────────────────────── */
   const fetchTemplates = useCallback(async (silent = false) => {
@@ -622,9 +665,18 @@ export default function Admin() {
     if (live) {
       const scheduledAtDate = live.scheduledAt ? new Date(live.scheduledAt) : new Date();
       const local = new Date(scheduledAtDate.getTime() - scheduledAtDate.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
-      setLiveForm({ id: live.id, title: live.title, description: live.description || "", youtubeUrl: live.youtubeUrl || "", scheduledAt: live.scheduledAt ? local : "", status: live.status, thumbnailUrl: live.thumbnailUrl || "" });
+      const liveAny = live as unknown as { afterpartyKakaoUrl?: string | null; afterpartyMaterials?: { title: string; url: string }[] | null };
+      setLiveForm({
+        id: live.id, title: live.title, description: live.description || "", youtubeUrl: live.youtubeUrl || "",
+        scheduledAt: live.scheduledAt ? local : "", status: live.status, thumbnailUrl: live.thumbnailUrl || "",
+        afterpartyKakaoUrl: liveAny.afterpartyKakaoUrl ?? "",
+        afterpartyMaterials: Array.isArray(liveAny.afterpartyMaterials) ? liveAny.afterpartyMaterials : [],
+      });
     } else {
-      setLiveForm({ title: "", description: "", youtubeUrl: "", scheduledAt: "", status: "scheduled", thumbnailUrl: "" });
+      setLiveForm({
+        title: "", description: "", youtubeUrl: "", scheduledAt: "", status: "scheduled", thumbnailUrl: "",
+        afterpartyKakaoUrl: "", afterpartyMaterials: [],
+      });
     }
     setIsLiveModalOpen(true);
   };
@@ -633,7 +685,19 @@ export default function Admin() {
     if (!liveForm.title) { toast({ variant: "destructive", title: "오류", description: "제목을 입력해주세요." }); return; }
     setIsSavingLive(true);
     try {
-      const data = { title: liveForm.title, description: liveForm.description || null, youtubeUrl: liveForm.youtubeUrl || null, scheduledAt: liveForm.scheduledAt ? new Date(liveForm.scheduledAt).toISOString() : null, status: liveForm.status, thumbnailUrl: liveForm.thumbnailUrl || null };
+      const cleanedMaterials = liveForm.afterpartyMaterials
+        .map((m) => ({ title: m.title.trim(), url: m.url.trim() }))
+        .filter((m) => m.title !== "" && m.url !== "");
+      const data = {
+        title: liveForm.title,
+        description: liveForm.description || null,
+        youtubeUrl: liveForm.youtubeUrl || null,
+        scheduledAt: liveForm.scheduledAt ? new Date(liveForm.scheduledAt).toISOString() : null,
+        status: liveForm.status,
+        thumbnailUrl: liveForm.thumbnailUrl || null,
+        afterpartyKakaoUrl: liveForm.afterpartyKakaoUrl.trim() || null,
+        afterpartyMaterials: cleanedMaterials,
+      };
       if (liveForm.id) { await apiFetch(`/lives/${liveForm.id}`, { method: "PUT", body: JSON.stringify(data) }); toast({ title: "수정 완료" }); }
       else { await apiFetch("/lives", { method: "POST", body: JSON.stringify(data) }); toast({ title: "생성 완료" }); }
       setIsLiveModalOpen(false);
@@ -876,6 +940,28 @@ export default function Admin() {
                                 <MessageCircle className="h-3.5 w-3.5" />후기 보기
                               </Button>
                             )}
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-8 rounded-lg border-amber-200 bg-amber-50/40 text-amber-700 hover:bg-amber-100/60 hover:text-amber-800 hover:border-amber-300 text-xs gap-1 font-semibold"
+                              title="후기첨부용 페이지 열기"
+                              onClick={() => window.open(`/lives/${live.id}/after`, "_blank")}
+                            >
+                              <Gift className="h-3.5 w-3.5" />후기첨부용
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className="h-8 w-8 rounded-lg border-amber-200 bg-amber-50/40 text-amber-700 hover:bg-amber-100/60 hover:text-amber-800 hover:border-amber-300"
+                              title="후기첨부용 링크 복사"
+                              onClick={() => {
+                                const link = `${window.location.origin}/lives/${live.id}/after`;
+                                navigator.clipboard.writeText(link);
+                                toast({ title: "후기첨부용 링크 복사됨!", description: link });
+                              }}
+                            >
+                              <Link2 className="h-3.5 w-3.5" />
+                            </Button>
                             <Button variant="outline" size="icon" className="h-8 w-8 rounded-lg border-gray-200 text-gray-500 hover:text-blue-600 hover:border-blue-200" onClick={() => handleOpenLiveModal(live)}><Edit className="h-3.5 w-3.5" /></Button>
                             <Button variant="outline" size="icon" className="h-8 w-8 rounded-lg border-gray-200 text-gray-500 hover:text-red-600 hover:border-red-200" onClick={() => handleDeleteLive(live.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
                           </div>
@@ -1001,6 +1087,67 @@ export default function Admin() {
               </div>
             </div>
           )}
+
+          {/* ── 후기첨부용 페이지 글로벌 설정 ─────────── */}
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-9 h-9 bg-amber-50 rounded-xl flex items-center justify-center">
+                <Gift className="h-4 w-4 text-amber-600" />
+              </div>
+              <div className="flex-1">
+                <h2 className="font-bold text-gray-900">후기첨부용 페이지 — 글로벌 기본값</h2>
+                <p className="text-xs text-gray-400 mt-0.5">모든 라이브의 후기 페이지(/lives/:id/after)에서 공통으로 쓰이는 카톡방 입장 안내. 각 라이브가 자체 카톡방 링크를 지정하지 않은 경우 이 값이 사용됩니다.</p>
+              </div>
+            </div>
+            <div className="grid gap-4">
+              <div className="grid gap-2">
+                <Label className="text-sm font-medium text-gray-700">기본 카톡방 입장 링크</Label>
+                <Input
+                  value={afterpartyForm.defaultKakaoUrl}
+                  onChange={(e) => setAfterpartyForm({ ...afterpartyForm, defaultKakaoUrl: e.target.value })}
+                  placeholder="https://open.kakao.com/o/..."
+                  className="rounded-xl border-gray-200"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label className="text-sm font-medium text-gray-700">카톡 CTA 헤드라인</Label>
+                <Input
+                  value={afterpartyForm.kakaoHeadline}
+                  onChange={(e) => setAfterpartyForm({ ...afterpartyForm, kakaoHeadline: e.target.value })}
+                  placeholder="매주 무료 AI 실무 특강 — 지금 카톡방으로 입장하세요"
+                  className="rounded-xl border-gray-200"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label className="text-sm font-medium text-gray-700">카톡 CTA 본문 안내 멘트</Label>
+                <Textarea
+                  value={afterpartyForm.kakaoBody}
+                  onChange={(e) => setAfterpartyForm({ ...afterpartyForm, kakaoBody: e.target.value })}
+                  placeholder="라이브 대기방에 들어오시면 매주 각 분야의 AI 실무자들이 실제 현장에서 어떻게 AI를 활용하는지 무료 특강을 진행합니다..."
+                  rows={4}
+                  className="rounded-xl border-gray-200 resize-none"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label className="text-sm font-medium text-gray-700">버튼 라벨</Label>
+                <Input
+                  value={afterpartyForm.buttonLabel}
+                  onChange={(e) => setAfterpartyForm({ ...afterpartyForm, buttonLabel: e.target.value })}
+                  placeholder="무료 카톡방 입장하기"
+                  className="rounded-xl border-gray-200"
+                />
+              </div>
+              <div className="flex justify-end pt-2">
+                <Button
+                  onClick={handleSaveAfterpartyConfig}
+                  disabled={isSavingAfterparty}
+                  className="bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-semibold"
+                >
+                  {isSavingAfterparty && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}저장
+                </Button>
+              </div>
+            </div>
+          </div>
         </TabsContent>
 
         {/* ── Tab 3: Schedule & Log ─────────────────── */}
@@ -1270,7 +1417,7 @@ export default function Admin() {
 
       {/* ═══ Live CRUD Modal ═══════════════════════════ */}
       <Dialog open={isLiveModalOpen} onOpenChange={setIsLiveModalOpen}>
-        <DialogContent className="sm:max-w-[600px] bg-white rounded-2xl border border-gray-100 shadow-xl">
+        <DialogContent className="sm:max-w-[640px] bg-white rounded-2xl border border-gray-100 shadow-xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-lg font-bold text-gray-900">{liveForm.id ? "라이브 수정" : "새 라이브 생성"}</DialogTitle>
             <DialogDescription className="text-sm text-gray-500">라이브 스트리밍의 상세 정보를 입력하세요.</DialogDescription>
@@ -1287,8 +1434,90 @@ export default function Admin() {
               </div>
               <div className="grid gap-2"><Label className="text-sm font-medium text-gray-700">예정 일시</Label><Input type="datetime-local" value={liveForm.scheduledAt} onChange={(e) => setLiveForm({ ...liveForm, scheduledAt: e.target.value })} className="rounded-xl border-gray-200" /></div>
             </div>
-            <div className="grid gap-2"><Label className="text-sm font-medium text-gray-700">YouTube URL</Label><Input value={liveForm.youtubeUrl} onChange={(e) => setLiveForm({ ...liveForm, youtubeUrl: e.target.value })} placeholder="https://youtube.com/watch?v=..." className="rounded-xl border-gray-200" /></div>
+            <div className="grid gap-2"><Label className="text-sm font-medium text-gray-700">YouTube URL <span className="text-gray-400 font-normal">(다시보기 영상으로도 사용)</span></Label><Input value={liveForm.youtubeUrl} onChange={(e) => setLiveForm({ ...liveForm, youtubeUrl: e.target.value })} placeholder="https://youtube.com/watch?v=..." className="rounded-xl border-gray-200" /></div>
             <div className="grid gap-2"><Label className="text-sm font-medium text-gray-700">썸네일 URL</Label><Input value={liveForm.thumbnailUrl} onChange={(e) => setLiveForm({ ...liveForm, thumbnailUrl: e.target.value })} placeholder="https://example.com/image.jpg" className="rounded-xl border-gray-200" /></div>
+
+            {/* ── 후기첨부용 페이지 설정 ─────────────────────────── */}
+            <div className="mt-2 rounded-2xl border border-amber-200/70 bg-amber-50/40 p-4 space-y-4">
+              <div className="flex items-start gap-2">
+                <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0">
+                  <Gift className="h-4 w-4 text-amber-700" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold text-sm text-amber-900">후기첨부용 페이지 설정</h3>
+                  <p className="text-xs text-amber-700/80 mt-0.5">라이브 종료 후 시청자에게 공유할 보너스 페이지 (다시보기 + 무료 자료 + 카톡방 입장).</p>
+                </div>
+                {liveForm.id && (
+                  <button
+                    type="button"
+                    className="text-xs text-amber-700 hover:text-amber-900 font-semibold inline-flex items-center gap-1 flex-shrink-0"
+                    onClick={() => window.open(`/lives/${liveForm.id}/after`, "_blank")}
+                  >
+                    <ExternalLink className="h-3 w-3" />미리보기
+                  </button>
+                )}
+              </div>
+
+              <div className="grid gap-2">
+                <Label className="text-xs font-semibold text-amber-900">이 라이브 전용 카톡방 링크 <span className="text-amber-600/80 font-normal">(비우면 글로벌 기본값 사용)</span></Label>
+                <Input
+                  value={liveForm.afterpartyKakaoUrl}
+                  onChange={(e) => setLiveForm({ ...liveForm, afterpartyKakaoUrl: e.target.value })}
+                  placeholder="https://open.kakao.com/o/..."
+                  className="rounded-xl border-amber-200 bg-white"
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs font-semibold text-amber-900">무료 자료 <span className="text-amber-600/80 font-normal">(구글 드라이브 링크 등 N개)</span></Label>
+                  <button
+                    type="button"
+                    className="text-xs font-bold text-amber-700 hover:text-amber-900 inline-flex items-center gap-1 px-2 py-1 rounded-md hover:bg-amber-100"
+                    onClick={() => setLiveForm({ ...liveForm, afterpartyMaterials: [...liveForm.afterpartyMaterials, { title: "", url: "" }] })}
+                  >
+                    <Plus className="h-3 w-3" />자료 추가
+                  </button>
+                </div>
+                {liveForm.afterpartyMaterials.length === 0 && (
+                  <p className="text-xs text-amber-700/60 px-1 py-2">아직 등록된 자료가 없습니다. 위 "자료 추가" 버튼을 눌러주세요.</p>
+                )}
+                {liveForm.afterpartyMaterials.map((m, idx) => (
+                  <div key={idx} className="flex items-start gap-2">
+                    <div className="flex-1 grid gap-1.5">
+                      <Input
+                        value={m.title}
+                        onChange={(e) => {
+                          const next = [...liveForm.afterpartyMaterials];
+                          next[idx] = { ...next[idx], title: e.target.value };
+                          setLiveForm({ ...liveForm, afterpartyMaterials: next });
+                        }}
+                        placeholder="자료 제목 (예: 문사부님 강의 슬라이드)"
+                        className="rounded-lg border-amber-200 bg-white text-sm h-9"
+                      />
+                      <Input
+                        value={m.url}
+                        onChange={(e) => {
+                          const next = [...liveForm.afterpartyMaterials];
+                          next[idx] = { ...next[idx], url: e.target.value };
+                          setLiveForm({ ...liveForm, afterpartyMaterials: next });
+                        }}
+                        placeholder="https://drive.google.com/..."
+                        className="rounded-lg border-amber-200 bg-white text-sm h-9"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      className="h-9 w-9 rounded-lg border border-amber-200 bg-white text-amber-600 hover:text-red-600 hover:border-red-200 flex items-center justify-center flex-shrink-0"
+                      onClick={() => setLiveForm({ ...liveForm, afterpartyMaterials: liveForm.afterpartyMaterials.filter((_, i) => i !== idx) })}
+                      title="삭제"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" className="rounded-xl border-gray-200" onClick={() => setIsLiveModalOpen(false)}>취소</Button>

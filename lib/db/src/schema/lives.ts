@@ -25,6 +25,8 @@ export const livesTable = pgTable("lives", {
   status: liveStatusEnum("status").notNull().default("scheduled"),
   thumbnailUrl: text("thumbnail_url"),
   tags: jsonb("tags").$type<string[]>(),
+  afterpartyKakaoUrl: text("afterparty_kakao_url"),
+  afterpartyMaterials: jsonb("afterparty_materials").$type<{ title: string; url: string }[]>(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

@@ -6,6 +6,7 @@ import {
   liveCustomQuestionsTable,
   liveFormConfigTable,
   reviewsTable,
+  afterpartyGlobalConfigTable,
   insertLiveSchema,
   insertRegistrationSchema,
   insertReviewSchema,
@@ -45,6 +46,8 @@ router.get("/lives", async (req: Request, res: Response) => {
         status: livesTable.status,
         thumbnailUrl: livesTable.thumbnailUrl,
         tags: livesTable.tags,
+        afterpartyKakaoUrl: livesTable.afterpartyKakaoUrl,
+        afterpartyMaterials: livesTable.afterpartyMaterials,
         createdAt: livesTable.createdAt,
         registrationCount: count(registrationsTable.id),
       })
@@ -73,6 +76,14 @@ router.post("/lives", requireAdminAuth, async (req: Request, res: Response) => {
       status: body.status,
       thumbnailUrl: body.thumbnailUrl ?? null,
       tags: Array.isArray(rawBody.tags) ? rawBody.tags : null,
+      afterpartyKakaoUrl: typeof rawBody.afterpartyKakaoUrl === "string" && rawBody.afterpartyKakaoUrl.trim() !== ""
+        ? rawBody.afterpartyKakaoUrl.trim()
+        : null,
+      afterpartyMaterials: Array.isArray(rawBody.afterpartyMaterials)
+        ? (rawBody.afterpartyMaterials as Array<{ title?: unknown; url?: unknown }>)
+            .map((m) => ({ title: String(m?.title ?? "").trim(), url: String(m?.url ?? "").trim() }))
+            .filter((m) => m.title !== "" && m.url !== "")
+        : null,
     });
 
     const [live] = await db.insert(livesTable).values(insertData).returning();
@@ -87,6 +98,8 @@ router.post("/lives", requireAdminAuth, async (req: Request, res: Response) => {
         status: livesTable.status,
         thumbnailUrl: livesTable.thumbnailUrl,
         tags: livesTable.tags,
+        afterpartyKakaoUrl: livesTable.afterpartyKakaoUrl,
+        afterpartyMaterials: livesTable.afterpartyMaterials,
         createdAt: livesTable.createdAt,
         registrationCount: count(registrationsTable.id),
       })
@@ -150,6 +163,8 @@ router.get("/lives/:id", async (req: Request, res: Response) => {
         status: livesTable.status,
         thumbnailUrl: livesTable.thumbnailUrl,
         tags: livesTable.tags,
+        afterpartyKakaoUrl: livesTable.afterpartyKakaoUrl,
+        afterpartyMaterials: livesTable.afterpartyMaterials,
         createdAt: livesTable.createdAt,
         registrationCount: count(registrationsTable.id),
       })
@@ -184,6 +199,19 @@ router.put("/lives/:id", requireAdminAuth, async (req: Request, res: Response) =
     if (body.thumbnailUrl !== undefined) updateData.thumbnailUrl = body.thumbnailUrl ?? null;
     const rawBody = req.body as Record<string, unknown>;
     if (rawBody.tags !== undefined) updateData.tags = Array.isArray(rawBody.tags) ? rawBody.tags : null;
+    if (rawBody.afterpartyKakaoUrl !== undefined) {
+      updateData.afterpartyKakaoUrl =
+        typeof rawBody.afterpartyKakaoUrl === "string" && rawBody.afterpartyKakaoUrl.trim() !== ""
+          ? rawBody.afterpartyKakaoUrl.trim()
+          : null;
+    }
+    if (rawBody.afterpartyMaterials !== undefined) {
+      updateData.afterpartyMaterials = Array.isArray(rawBody.afterpartyMaterials)
+        ? (rawBody.afterpartyMaterials as Array<{ title?: unknown; url?: unknown }>)
+            .map((m) => ({ title: String(m?.title ?? "").trim(), url: String(m?.url ?? "").trim() }))
+            .filter((m) => m.title !== "" && m.url !== "")
+        : null;
+    }
 
     const [updated] = await db.update(livesTable).set(updateData).where(eq(livesTable.id, id)).returning();
 
@@ -202,6 +230,8 @@ router.put("/lives/:id", requireAdminAuth, async (req: Request, res: Response) =
         status: livesTable.status,
         thumbnailUrl: livesTable.thumbnailUrl,
         tags: livesTable.tags,
+        afterpartyKakaoUrl: livesTable.afterpartyKakaoUrl,
+        afterpartyMaterials: livesTable.afterpartyMaterials,
         createdAt: livesTable.createdAt,
         registrationCount: count(registrationsTable.id),
       })
@@ -722,6 +752,108 @@ router.post("/lives/:liveId/reviews", async (req: Request, res: Response) => {
   } catch (error) {
     req.log.error({ error }, "Error creating review");
     return res.status(400).json({ error: "Bad request" });
+  }
+});
+
+/* ── 후속 후기 페이지 ─────────────────────────────── */
+
+router.get("/lives/:id/after", async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(String(req.params.id), 10);
+    if (isNaN(id)) return res.status(400).json({ error: "Invalid id" });
+
+    const [live] = await db
+      .select({
+        id: livesTable.id,
+        title: livesTable.title,
+        description: livesTable.description,
+        scheduledAt: livesTable.scheduledAt,
+        youtubeUrl: livesTable.youtubeUrl,
+        thumbnailUrl: livesTable.thumbnailUrl,
+        afterpartyKakaoUrl: livesTable.afterpartyKakaoUrl,
+        afterpartyMaterials: livesTable.afterpartyMaterials,
+      })
+      .from(livesTable)
+      .where(eq(livesTable.id, id));
+
+    if (!live) return res.status(404).json({ error: "Live not found" });
+
+    const [global] = await db.select().from(afterpartyGlobalConfigTable).limit(1);
+
+    const kakaoUrl = (live.afterpartyKakaoUrl ?? global?.defaultKakaoUrl ?? "").trim();
+    const materials = Array.isArray(live.afterpartyMaterials) ? live.afterpartyMaterials : [];
+
+    return res.json({
+      live: {
+        id: live.id,
+        title: live.title,
+        description: live.description,
+        scheduledAt: live.scheduledAt,
+        youtubeUrl: live.youtubeUrl,
+        thumbnailUrl: live.thumbnailUrl,
+      },
+      materials,
+      kakao: {
+        url: kakaoUrl,
+        headline: global?.kakaoHeadline ?? "매주 무료 AI 실무 특강 — 지금 카톡방으로 입장하세요",
+        body:
+          global?.kakaoBody ??
+          "라이브 대기방에 들어오시면 매주 각 분야의 AI 실무자들이 실제 현장에서 어떻게 AI를 활용하는지 무료 특강을 진행합니다. 톡방에 들어오기만 해도 매주 무료 자료를 받을 수 있고, 모든 라이브 특강 다시보기도 무료로 보실 수 있어요.",
+        buttonLabel: global?.buttonLabel ?? "무료 카톡방 입장하기",
+      },
+    });
+  } catch (error) {
+    req.log.error({ error }, "Error fetching afterparty page data");
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.get("/afterparty-config", async (_req: Request, res: Response) => {
+  try {
+    const [row] = await db.select().from(afterpartyGlobalConfigTable).limit(1);
+    res.json(
+      row ?? {
+        id: null,
+        defaultKakaoUrl: "",
+        kakaoHeadline: "",
+        kakaoBody: "",
+        buttonLabel: "",
+      },
+    );
+  } catch (error) {
+    _req.log.error({ error }, "Error fetching afterparty config");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.put("/afterparty-config", requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const body = req.body as Record<string, unknown>;
+    const data = {
+      defaultKakaoUrl: typeof body.defaultKakaoUrl === "string" ? body.defaultKakaoUrl.trim() || null : null,
+      kakaoHeadline: typeof body.kakaoHeadline === "string" ? body.kakaoHeadline.trim() || null : null,
+      kakaoBody: typeof body.kakaoBody === "string" ? body.kakaoBody.trim() || null : null,
+      buttonLabel: typeof body.buttonLabel === "string" ? body.buttonLabel.trim() || null : null,
+      updatedAt: new Date(),
+    };
+
+    const [existing] = await db.select({ id: afterpartyGlobalConfigTable.id }).from(afterpartyGlobalConfigTable).limit(1);
+
+    let saved;
+    if (existing) {
+      [saved] = await db
+        .update(afterpartyGlobalConfigTable)
+        .set(data)
+        .where(eq(afterpartyGlobalConfigTable.id, existing.id))
+        .returning();
+    } else {
+      [saved] = await db.insert(afterpartyGlobalConfigTable).values(data).returning();
+    }
+
+    res.json(saved);
+  } catch (error) {
+    req.log.error({ error }, "Error saving afterparty config");
+    res.status(400).json({ error: "Bad request" });
   }
 });
 

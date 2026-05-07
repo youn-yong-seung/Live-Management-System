@@ -73,9 +73,21 @@ export const techTreeConfigTable = pgTable("tech_tree_config", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+/* ── 후속 후기 페이지 글로벌 설정 (단일 row) ─────────── */
+
+export const afterpartyGlobalConfigTable = pgTable("afterparty_global_config", {
+  id: serial("id").primaryKey(),
+  defaultKakaoUrl: text("default_kakao_url"),
+  kakaoHeadline: text("kakao_headline"),
+  kakaoBody: text("kakao_body"),
+  buttonLabel: text("button_label"),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 /* ── Types ──────────────────────────────────────────── */
 
 export type ChannelSource = typeof channelSourcesTable.$inferSelect;
 export type ChannelSourceStats = typeof channelSourceStatsTable.$inferSelect;
 export type LiveFormConfig = typeof liveFormConfigTable.$inferSelect;
 export type TechTreeConfig = typeof techTreeConfigTable.$inferSelect;
+export type AfterpartyGlobalConfig = typeof afterpartyGlobalConfigTable.$inferSelect;
