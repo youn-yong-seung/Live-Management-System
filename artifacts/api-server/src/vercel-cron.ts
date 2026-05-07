@@ -4,7 +4,7 @@ import {
   livesTable,
   registrationsTable,
 } from "@workspace/db";
-import { eq, and, isNotNull, lte } from "drizzle-orm";
+import { eq, and, isNotNull, lte, inArray, sql } from "drizzle-orm";
 import { getSolapiConfig } from "./lib/solapiHelper";
 import { computeFireAt, fireRuleOnce, loadAllEnabledRules } from "./lib/firing";
 import type { IncomingMessage, ServerResponse } from "http";
@@ -25,6 +25,15 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
         eq(livesTable.status, "scheduled"),
         isNotNull(livesTable.scheduledAt),
         lte(livesTable.scheduledAt, now)
+      ));
+
+    // 라이브 시작 시각이 KST 기준 어제 이전이면 자동 종료 (= 라이브 다음날 00:00 KST 지나면 ended)
+    await db.update(livesTable)
+      .set({ status: "ended" })
+      .where(and(
+        inArray(livesTable.status, ["scheduled", "live"]),
+        isNotNull(livesTable.scheduledAt),
+        sql`${livesTable.scheduledAt} AT TIME ZONE 'Asia/Seoul' < date_trunc('day', now() AT TIME ZONE 'Asia/Seoul')`,
       ));
 
     const windowStart = new Date(now.getTime() - 2 * 60 * 1000);
