@@ -656,16 +656,17 @@ export function AdminDashboard() {
         subtitle="시간이 지날수록 충성 신청자 비중이 늘어나는지 확인 — 막대=신규/재신청 수, 선=재신청률(%)"
       >
         {trendData && trendData.trend.length > 0 ? (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 h-72">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 lg:gap-6">
+            <div className="lg:col-span-2 h-64 sm:h-72 -mx-2 sm:mx-0">
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart
                   data={trendData.trend.map((t) => ({
                     ...t,
-                    label: `#${t.liveId} · ${formatDateShort(t.scheduledAt)}`,
+                    label: `#${t.liveId}`,
+                    longLabel: `#${t.liveId} · ${formatDateShort(t.scheduledAt)}`,
                     shortTitle: truncate(t.title.replace(/\|.*$/, "").trim(), 22),
                   }))}
-                  margin={{ top: 10, right: 16, left: 0, bottom: 0 }}
+                  margin={{ top: 8, right: 8, left: -10, bottom: 0 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
                   <XAxis
@@ -673,43 +674,46 @@ export function AdminDashboard() {
                     tick={{ fontSize: 11, fill: "#6b7280" }}
                     axisLine={{ stroke: "#e5e7eb" }}
                     tickLine={false}
+                    interval="preserveStartEnd"
+                    minTickGap={8}
                   />
                   <YAxis
                     yAxisId="left"
-                    tick={{ fontSize: 11, fill: "#6b7280" }}
+                    tick={{ fontSize: 10, fill: "#6b7280" }}
                     axisLine={{ stroke: "#e5e7eb" }}
                     tickLine={false}
-                    label={{ value: "신청자 수", angle: -90, position: "insideLeft", style: { fontSize: 11, fill: "#9ca3af" } }}
+                    width={32}
                   />
                   <YAxis
                     yAxisId="right"
                     orientation="right"
-                    tick={{ fontSize: 11, fill: "#6b7280" }}
+                    tick={{ fontSize: 10, fill: "#6b7280" }}
                     axisLine={{ stroke: "#e5e7eb" }}
                     tickLine={false}
                     domain={[0, 100]}
                     tickFormatter={(v) => `${v}%`}
+                    width={36}
                   />
                   <Tooltip
-                    contentStyle={{ borderRadius: 12, border: "1px solid #e5e7eb", fontSize: 12 }}
+                    contentStyle={{ borderRadius: 12, border: "1px solid #e5e7eb", fontSize: 12, padding: "8px 10px" }}
                     formatter={(value: number, name: string) => {
                       if (name === "재신청률") return [`${value}%`, name];
                       return [`${value.toLocaleString()}명`, name];
                     }}
-                    labelFormatter={(label, payload) => {
-                      const p = payload?.[0]?.payload as { shortTitle?: string; label?: string } | undefined;
-                      return p?.shortTitle ? `${p.label} — ${p.shortTitle}` : label;
+                    labelFormatter={(_label, payload) => {
+                      const p = payload?.[0]?.payload as { shortTitle?: string; longLabel?: string } | undefined;
+                      return p?.shortTitle ? `${p.longLabel} — ${p.shortTitle}` : (p?.longLabel ?? _label);
                     }}
                   />
-                  <Legend wrapperStyle={{ fontSize: 12 }} />
-                  <Bar yAxisId="left" dataKey="newCount" stackId="a" fill="#3B82F6" name="신규" radius={[0, 0, 0, 0]} />
-                  <Bar yAxisId="left" dataKey="returningCount" stackId="a" fill="#F59E0B" name="재신청" radius={[6, 6, 0, 0]} />
-                  <Line yAxisId="right" type="monotone" dataKey="returningRate" stroke="#10B981" strokeWidth={2.5} dot={{ r: 4, fill: "#10B981" }} name="재신청률" />
+                  <Legend wrapperStyle={{ fontSize: 11, paddingTop: 4 }} iconSize={10} />
+                  <Bar yAxisId="left" dataKey="newCount" stackId="a" fill="#3B82F6" name="신규" />
+                  <Bar yAxisId="left" dataKey="returningCount" stackId="a" fill="#F59E0B" name="재신청" radius={[5, 5, 0, 0]} />
+                  <Line yAxisId="right" type="monotone" dataKey="returningRate" stroke="#10B981" strokeWidth={2.5} dot={{ r: 3, fill: "#10B981" }} name="재신청률" />
                 </ComposedChart>
               </ResponsiveContainer>
             </div>
 
-            <div>
+            <div className="lg:border-l lg:border-gray-100 lg:pl-6 pt-2 lg:pt-0">
               <div className="flex items-center gap-2 mb-3">
                 <Crown className="w-4 h-4 text-amber-500" />
                 <h4 className="text-sm font-semibold text-gray-900">최신 라이브 재신청자 출처</h4>
@@ -726,9 +730,9 @@ export function AdminDashboard() {
                     const widthPct = (s.overlapCount / max) * 100;
                     return (
                       <div key={s.liveId}>
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-xs text-gray-700 font-medium truncate pr-2" title={s.title}>
-                            #{s.liveId} · {truncate(s.title.replace(/\|.*$/, "").trim(), 18)}
+                        <div className="flex items-center justify-between mb-1 gap-2">
+                          <span className="text-xs text-gray-700 font-medium truncate flex-1 min-w-0" title={s.title}>
+                            #{s.liveId} · {truncate(s.title.replace(/\|.*$/, "").trim(), 22)}
                           </span>
                           <span className="text-xs text-gray-500 tabular-nums flex-shrink-0">{s.overlapCount}명</span>
                         </div>
