@@ -21,6 +21,7 @@ import {
   Zap, Lock, Youtube, TrendingUp, ThumbsUp, X,
   MessageCircle, PlayCircle, BarChart2, Link2, MonitorPlay,
   ExternalLink, Gift, FileText, Sparkles, ShoppingBag,
+  Menu, GitBranch,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AdminEditors } from "@/components/admin-editors";
@@ -807,6 +808,35 @@ export default function Admin() {
     setNotifRules((rules) => rules.map((r, i) => i === idx ? { ...r, ...patch } : r));
   };
 
+  /* ── Sidebar nav state ────────────────────────── */
+  const [activeTab, setActiveTab] = useState<string>("dashboard");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const navItems: Array<{ id: string; label: string; icon: typeof BarChart2; onSelect?: () => void }> = [
+    { id: "dashboard", label: "대시보드", icon: BarChart2 },
+    { id: "lives", label: "라이브 관리", icon: PlayCircle },
+    { id: "settings", label: "API 설정", icon: KeyRound },
+    { id: "schedule", label: "발송 현황", icon: Send, onSelect: loadSchedule },
+    { id: "youtube", label: "YouTube 성과", icon: Youtube, onSelect: loadYtStatsAll },
+    { id: "editors", label: "편집자 관리", icon: Users },
+    { id: "techtree", label: "테크트리", icon: GitBranch },
+  ];
+
+  const handleNavClick = (id: string, onSelect?: () => void) => {
+    setActiveTab(id);
+    setSidebarOpen(false);
+    onSelect?.();
+  };
+
+  const handleLogout = async () => {
+    try { await apiFetch("/admin/logout", { method: "POST" }); } catch { /* ignore */ }
+    sessionStorage.removeItem("crm_admin_auth");
+    sessionStorage.removeItem("crm_admin_token");
+    setIsAuthenticated(false);
+  };
+
+  const currentNavItem = navItems.find((n) => n.id === activeTab) ?? navItems[0];
+
   /* ═══════════════════════════════════════════════ */
   /* RENDER                                           */
   /* ═══════════════════════════════════════════════ */
@@ -851,37 +881,139 @@ export default function Admin() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="pt-2 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-1">관리자</h1>
-          <p className="text-gray-500 text-sm">라이브 스트리밍과 알림톡 · 문자 캠페인을 관리하세요.</p>
-        </div>
+    <div className="lg:flex lg:gap-6 lg:items-start">
+      {/* Mobile top bar — hamburger + current section + logout */}
+      <div className="lg:hidden flex items-center justify-between gap-3 mb-4 sticky top-16 z-30 bg-white/95 backdrop-blur-sm -mx-4 sm:-mx-6 px-4 sm:px-6 py-3 border-b border-gray-100">
+        <button
+          onClick={() => setSidebarOpen(true)}
+          className="p-2 rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
+          aria-label="메뉴 열기"
+        >
+          <Menu className="h-5 w-5" />
+        </button>
+        <h1 className="text-base font-bold text-gray-900 truncate flex-1">{currentNavItem.label}</h1>
         <Button
           variant="ghost"
           size="sm"
-          className="text-gray-400 hover:text-red-500 rounded-xl"
-          onClick={async () => {
-            try { await apiFetch("/admin/logout", { method: "POST" }); } catch { /* ignore */ }
-            sessionStorage.removeItem("crm_admin_auth");
-            sessionStorage.removeItem("crm_admin_token");
-            setIsAuthenticated(false);
-          }}
+          className="text-gray-400 hover:text-red-500 rounded-lg flex-shrink-0"
+          onClick={handleLogout}
         >
-          <Lock className="h-4 w-4 mr-1" />로그아웃
+          <Lock className="h-4 w-4" />
         </Button>
       </div>
 
-      <Tabs defaultValue="dashboard">
-        <TabsList className="bg-gray-100 rounded-xl p-1 flex-wrap h-auto">
-          <TabsTrigger value="dashboard" className="rounded-lg text-sm font-medium">📊 대시보드</TabsTrigger>
-          <TabsTrigger value="lives" className="rounded-lg text-sm font-medium">라이브 관리</TabsTrigger>
-          <TabsTrigger value="settings" className="rounded-lg text-sm font-medium">API 설정</TabsTrigger>
-          <TabsTrigger value="schedule" className="rounded-lg text-sm font-medium" onClick={loadSchedule}>발송 현황</TabsTrigger>
-          <TabsTrigger value="youtube" className="rounded-lg text-sm font-medium" onClick={loadYtStatsAll}>YouTube 성과</TabsTrigger>
-          <TabsTrigger value="editors" className="rounded-lg text-sm font-medium">편집자 관리</TabsTrigger>
-          <TabsTrigger value="techtree" className="rounded-lg text-sm font-medium">테크트리</TabsTrigger>
+      {/* Mobile drawer overlay */}
+      {sidebarOpen && (
+        <div
+          className="lg:hidden fixed inset-0 bg-black/40 z-40"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Mobile drawer (left slide-in) */}
+      <aside
+        className={`lg:hidden fixed inset-y-0 left-0 w-64 z-50 bg-white shadow-xl flex flex-col transition-transform duration-200 ease-out ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <div className="p-5 border-b border-gray-100 flex items-center justify-between">
+          <div>
+            <h2 className="font-bold text-gray-900">관리자</h2>
+            <p className="text-xs text-gray-500 mt-0.5">메뉴</p>
+          </div>
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="p-1.5 rounded hover:bg-gray-100 text-gray-500"
+            aria-label="메뉴 닫기"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+        <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeTab === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => handleNavClick(item.id, item.onSelect)}
+                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-left transition-colors ${
+                  isActive
+                    ? "bg-blue-50 text-blue-700"
+                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                }`}
+              >
+                <Icon className="h-4 w-4 flex-shrink-0" />
+                <span className="truncate">{item.label}</span>
+              </button>
+            );
+          })}
+        </nav>
+        <div className="p-3 border-t border-gray-100">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:bg-red-50 hover:text-red-600 transition-colors"
+          >
+            <Lock className="h-4 w-4 flex-shrink-0" />
+            <span>로그아웃</span>
+          </button>
+        </div>
+      </aside>
+
+      {/* Desktop sidebar — sticky card */}
+      <aside className="hidden lg:flex lg:flex-col lg:sticky lg:top-20 lg:w-56 lg:flex-shrink-0 lg:bg-white lg:rounded-2xl lg:border lg:border-gray-200 lg:shadow-sm lg:overflow-hidden lg:max-h-[calc(100vh-6rem)]">
+        <div className="p-5 border-b border-gray-100">
+          <h2 className="font-bold text-gray-900">관리자</h2>
+          <p className="text-xs text-gray-500 mt-0.5">라이브 · 캠페인 관리</p>
+        </div>
+        <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeTab === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => handleNavClick(item.id, item.onSelect)}
+                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-left transition-colors ${
+                  isActive
+                    ? "bg-blue-50 text-blue-700"
+                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                }`}
+              >
+                <Icon className="h-4 w-4 flex-shrink-0" />
+                <span className="truncate">{item.label}</span>
+              </button>
+            );
+          })}
+        </nav>
+        <div className="p-3 border-t border-gray-100">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:bg-red-50 hover:text-red-600 transition-colors"
+          >
+            <Lock className="h-4 w-4 flex-shrink-0" />
+            <span>로그아웃</span>
+          </button>
+        </div>
+      </aside>
+
+      {/* Main content */}
+      <main className="flex-1 min-w-0 space-y-6">
+        {/* Desktop section header */}
+        <div className="hidden lg:block pt-2">
+          <h1 className="text-2xl font-bold text-gray-900 mb-1">{currentNavItem.label}</h1>
+          <p className="text-gray-500 text-sm">라이브 스트리밍과 알림톡 · 문자 캠페인을 관리하세요.</p>
+        </div>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="hidden">
+          <TabsTrigger value="dashboard">대시보드</TabsTrigger>
+          <TabsTrigger value="lives">라이브 관리</TabsTrigger>
+          <TabsTrigger value="settings">API 설정</TabsTrigger>
+          <TabsTrigger value="schedule">발송 현황</TabsTrigger>
+          <TabsTrigger value="youtube">YouTube 성과</TabsTrigger>
+          <TabsTrigger value="editors">편집자 관리</TabsTrigger>
+          <TabsTrigger value="techtree">테크트리</TabsTrigger>
         </TabsList>
 
         {/* ── Tab: Dashboard ─────────────────────────── */}
@@ -1459,6 +1591,7 @@ export default function Admin() {
         </TabsContent>
 
       </Tabs>
+      </main>
 
       {/* ═══ Live CRUD Modal ═══════════════════════════ */}
       <Dialog open={isLiveModalOpen} onOpenChange={setIsLiveModalOpen}>
