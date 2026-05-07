@@ -251,10 +251,12 @@ export default function Admin() {
     scheduledAt: string; status: LiveStatus; thumbnailUrl: string;
     afterpartyKakaoUrl: string;
     afterpartyMaterials: { title: string; url: string }[];
+    afterpartyProducts: { title: string; url: string }[];
   }>({
     title: "", description: "", youtubeUrl: "", scheduledAt: "", status: "scheduled", thumbnailUrl: "",
     afterpartyKakaoUrl: "",
     afterpartyMaterials: [],
+    afterpartyProducts: [],
   });
 
   /* ── Immediate send state ──────────────────────── */
@@ -665,17 +667,18 @@ export default function Admin() {
     if (live) {
       const scheduledAtDate = live.scheduledAt ? new Date(live.scheduledAt) : new Date();
       const local = new Date(scheduledAtDate.getTime() - scheduledAtDate.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
-      const liveAny = live as unknown as { afterpartyKakaoUrl?: string | null; afterpartyMaterials?: { title: string; url: string }[] | null };
+      const liveAny = live as unknown as { afterpartyKakaoUrl?: string | null; afterpartyMaterials?: { title: string; url: string }[] | null; afterpartyProducts?: { title: string; url: string }[] | null };
       setLiveForm({
         id: live.id, title: live.title, description: live.description || "", youtubeUrl: live.youtubeUrl || "",
         scheduledAt: live.scheduledAt ? local : "", status: live.status, thumbnailUrl: live.thumbnailUrl || "",
         afterpartyKakaoUrl: liveAny.afterpartyKakaoUrl ?? "",
         afterpartyMaterials: Array.isArray(liveAny.afterpartyMaterials) ? liveAny.afterpartyMaterials : [],
+        afterpartyProducts: Array.isArray(liveAny.afterpartyProducts) ? liveAny.afterpartyProducts : [],
       });
     } else {
       setLiveForm({
         title: "", description: "", youtubeUrl: "", scheduledAt: "", status: "scheduled", thumbnailUrl: "",
-        afterpartyKakaoUrl: "", afterpartyMaterials: [],
+        afterpartyKakaoUrl: "", afterpartyMaterials: [], afterpartyProducts: [],
       });
     }
     setIsLiveModalOpen(true);
@@ -688,6 +691,9 @@ export default function Admin() {
       const cleanedMaterials = liveForm.afterpartyMaterials
         .map((m) => ({ title: m.title.trim(), url: m.url.trim() }))
         .filter((m) => m.title !== "" && m.url !== "");
+      const cleanedProducts = liveForm.afterpartyProducts
+        .map((m) => ({ title: m.title.trim(), url: m.url.trim() }))
+        .filter((m) => m.title !== "" && m.url !== "");
       const data = {
         title: liveForm.title,
         description: liveForm.description || null,
@@ -697,6 +703,7 @@ export default function Admin() {
         thumbnailUrl: liveForm.thumbnailUrl || null,
         afterpartyKakaoUrl: liveForm.afterpartyKakaoUrl.trim() || null,
         afterpartyMaterials: cleanedMaterials,
+        afterpartyProducts: cleanedProducts,
       };
       if (liveForm.id) { await apiFetch(`/lives/${liveForm.id}`, { method: "PUT", body: JSON.stringify(data) }); toast({ title: "수정 완료" }); }
       else { await apiFetch("/lives", { method: "POST", body: JSON.stringify(data) }); toast({ title: "생성 완료" }); }
@@ -1510,6 +1517,69 @@ export default function Admin() {
                       type="button"
                       className="h-9 w-9 rounded-lg border border-amber-200 bg-white text-amber-600 hover:text-red-600 hover:border-red-200 flex items-center justify-center flex-shrink-0"
                       onClick={() => setLiveForm({ ...liveForm, afterpartyMaterials: liveForm.afterpartyMaterials.filter((_, i) => i !== idx) })}
+                      title="삭제"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* ── 관련 상품 ────────────────────────────────────── */}
+            <div className="mt-2 rounded-2xl border border-sky-200/70 bg-sky-50/40 p-4 space-y-4">
+              <div className="flex items-start gap-2">
+                <div className="w-8 h-8 rounded-lg bg-sky-100 flex items-center justify-center flex-shrink-0">
+                  <Sparkles className="h-4 w-4 text-sky-700" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold text-sm text-sky-900">관련 상품</h3>
+                  <p className="text-xs text-sky-700/80 mt-0.5">후기첨부용 페이지에 노출될 관련 상품/강의 링크 (제목 + URL).</p>
+                </div>
+              </div>
+
+              <div className="grid gap-2">
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs font-semibold text-sky-900">상품 리스트 <span className="text-sky-600/80 font-normal">(N개)</span></Label>
+                  <button
+                    type="button"
+                    className="text-xs font-bold text-sky-700 hover:text-sky-900 inline-flex items-center gap-1 px-2 py-1 rounded-md hover:bg-sky-100"
+                    onClick={() => setLiveForm({ ...liveForm, afterpartyProducts: [...liveForm.afterpartyProducts, { title: "", url: "" }] })}
+                  >
+                    <Plus className="h-3 w-3" />상품 추가
+                  </button>
+                </div>
+                {liveForm.afterpartyProducts.length === 0 && (
+                  <p className="text-xs text-sky-700/60 px-1 py-2">아직 등록된 관련 상품이 없습니다. 위 "상품 추가" 버튼을 눌러주세요.</p>
+                )}
+                {liveForm.afterpartyProducts.map((m, idx) => (
+                  <div key={idx} className="flex items-start gap-2">
+                    <div className="flex-1 grid gap-1.5">
+                      <Input
+                        value={m.title}
+                        onChange={(e) => {
+                          const next = [...liveForm.afterpartyProducts];
+                          next[idx] = { ...next[idx], title: e.target.value };
+                          setLiveForm({ ...liveForm, afterpartyProducts: next });
+                        }}
+                        placeholder="상품 제목 (예: 윤자동 자동화 마스터 클래스)"
+                        className="rounded-lg border-sky-200 bg-white text-sm h-9"
+                      />
+                      <Input
+                        value={m.url}
+                        onChange={(e) => {
+                          const next = [...liveForm.afterpartyProducts];
+                          next[idx] = { ...next[idx], url: e.target.value };
+                          setLiveForm({ ...liveForm, afterpartyProducts: next });
+                        }}
+                        placeholder="https://..."
+                        className="rounded-lg border-sky-200 bg-white text-sm h-9"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      className="h-9 w-9 rounded-lg border border-sky-200 bg-white text-sky-600 hover:text-red-600 hover:border-red-200 flex items-center justify-center flex-shrink-0"
+                      onClick={() => setLiveForm({ ...liveForm, afterpartyProducts: liveForm.afterpartyProducts.filter((_, i) => i !== idx) })}
                       title="삭제"
                     >
                       <Trash2 className="h-3.5 w-3.5" />

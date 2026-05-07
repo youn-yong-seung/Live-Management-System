@@ -12,6 +12,7 @@ import {
   MessageCircle,
   Check,
   FileText,
+  ShoppingBag,
 } from "lucide-react";
 import { formatDate } from "@/lib/date-utils";
 
@@ -30,6 +31,7 @@ interface AfterpartyData {
     thumbnailUrl: string | null;
   };
   materials: AfterpartyMaterial[];
+  products: AfterpartyMaterial[];
   kakao: {
     url: string;
     headline: string;
@@ -88,6 +90,7 @@ export default function Afterparty() {
 
   const youtubeId = data.live.youtubeUrl ? extractYoutubeId(data.live.youtubeUrl) : null;
   const hasMaterials = data.materials.length > 0;
+  const hasProducts = (data.products ?? []).length > 0;
   const hasKakao = data.kakao.url.trim() !== "";
 
   return (
@@ -200,6 +203,40 @@ export default function Afterparty() {
                     <p className="text-xs text-white/40 mt-0.5 flex items-center gap-1">
                       <Download className="h-3 w-3" />
                       받기
+                    </p>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-white/30 group-hover:text-[#CC9965] group-hover:translate-x-0.5 transition-all flex-shrink-0" />
+                </a>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* ── Related Products ──────────────────────── */}
+        {hasProducts && (
+          <section className="space-y-3">
+            <div className="flex items-center gap-2 px-1">
+              <ShoppingBag className="h-4 w-4 text-[#CC9965]" />
+              <h3 className="text-sm font-bold text-white/90 uppercase tracking-wider">관련 상품</h3>
+              <span className="text-xs text-white/30 font-medium">({data.products.length}개)</span>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {data.products.map((p, i) => (
+                <a
+                  key={`${p.url}-${i}`}
+                  href={p.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="glass-card p-4 sm:p-5 flex items-center gap-3 group hover:-translate-y-0.5 transition-all duration-300"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0 group-hover:bg-[#CC9965]/15 group-hover:border-[#CC9965]/30 transition-colors">
+                    <ShoppingBag className="h-4.5 w-4.5 text-white/70 group-hover:text-[#CC9965] transition-colors" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-white truncate">{p.title}</p>
+                    <p className="text-xs text-white/40 mt-0.5 flex items-center gap-1">
+                      <ExternalLink className="h-3 w-3" />
+                      자세히 보기
                     </p>
                   </div>
                   <ArrowRight className="h-4 w-4 text-white/30 group-hover:text-[#CC9965] group-hover:translate-x-0.5 transition-all flex-shrink-0" />

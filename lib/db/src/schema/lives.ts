@@ -27,6 +27,7 @@ export const livesTable = pgTable("lives", {
   tags: jsonb("tags").$type<string[]>(),
   afterpartyKakaoUrl: text("afterparty_kakao_url"),
   afterpartyMaterials: jsonb("afterparty_materials").$type<{ title: string; url: string }[]>(),
+  afterpartyProducts: jsonb("afterparty_products").$type<{ title: string; url: string }[]>(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

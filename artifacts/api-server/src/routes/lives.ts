@@ -48,6 +48,7 @@ router.get("/lives", async (req: Request, res: Response) => {
         tags: livesTable.tags,
         afterpartyKakaoUrl: livesTable.afterpartyKakaoUrl,
         afterpartyMaterials: livesTable.afterpartyMaterials,
+        afterpartyProducts: livesTable.afterpartyProducts,
         createdAt: livesTable.createdAt,
         registrationCount: count(registrationsTable.id),
       })
@@ -84,6 +85,11 @@ router.post("/lives", requireAdminAuth, async (req: Request, res: Response) => {
             .map((m) => ({ title: String(m?.title ?? "").trim(), url: String(m?.url ?? "").trim() }))
             .filter((m) => m.title !== "" && m.url !== "")
         : null,
+      afterpartyProducts: Array.isArray(rawBody.afterpartyProducts)
+        ? (rawBody.afterpartyProducts as Array<{ title?: unknown; url?: unknown }>)
+            .map((m) => ({ title: String(m?.title ?? "").trim(), url: String(m?.url ?? "").trim() }))
+            .filter((m) => m.title !== "" && m.url !== "")
+        : null,
     });
 
     const [live] = await db.insert(livesTable).values(insertData).returning();
@@ -100,6 +106,7 @@ router.post("/lives", requireAdminAuth, async (req: Request, res: Response) => {
         tags: livesTable.tags,
         afterpartyKakaoUrl: livesTable.afterpartyKakaoUrl,
         afterpartyMaterials: livesTable.afterpartyMaterials,
+        afterpartyProducts: livesTable.afterpartyProducts,
         createdAt: livesTable.createdAt,
         registrationCount: count(registrationsTable.id),
       })
@@ -165,6 +172,7 @@ router.get("/lives/:id", async (req: Request, res: Response) => {
         tags: livesTable.tags,
         afterpartyKakaoUrl: livesTable.afterpartyKakaoUrl,
         afterpartyMaterials: livesTable.afterpartyMaterials,
+        afterpartyProducts: livesTable.afterpartyProducts,
         createdAt: livesTable.createdAt,
         registrationCount: count(registrationsTable.id),
       })
@@ -212,6 +220,13 @@ router.put("/lives/:id", requireAdminAuth, async (req: Request, res: Response) =
             .filter((m) => m.title !== "" && m.url !== "")
         : null;
     }
+    if (rawBody.afterpartyProducts !== undefined) {
+      updateData.afterpartyProducts = Array.isArray(rawBody.afterpartyProducts)
+        ? (rawBody.afterpartyProducts as Array<{ title?: unknown; url?: unknown }>)
+            .map((m) => ({ title: String(m?.title ?? "").trim(), url: String(m?.url ?? "").trim() }))
+            .filter((m) => m.title !== "" && m.url !== "")
+        : null;
+    }
 
     const [updated] = await db.update(livesTable).set(updateData).where(eq(livesTable.id, id)).returning();
 
@@ -232,6 +247,7 @@ router.put("/lives/:id", requireAdminAuth, async (req: Request, res: Response) =
         tags: livesTable.tags,
         afterpartyKakaoUrl: livesTable.afterpartyKakaoUrl,
         afterpartyMaterials: livesTable.afterpartyMaterials,
+        afterpartyProducts: livesTable.afterpartyProducts,
         createdAt: livesTable.createdAt,
         registrationCount: count(registrationsTable.id),
       })
@@ -772,6 +788,7 @@ router.get("/lives/:id/after", async (req: Request, res: Response) => {
         thumbnailUrl: livesTable.thumbnailUrl,
         afterpartyKakaoUrl: livesTable.afterpartyKakaoUrl,
         afterpartyMaterials: livesTable.afterpartyMaterials,
+        afterpartyProducts: livesTable.afterpartyProducts,
       })
       .from(livesTable)
       .where(eq(livesTable.id, id));
@@ -782,6 +799,7 @@ router.get("/lives/:id/after", async (req: Request, res: Response) => {
 
     const kakaoUrl = (live.afterpartyKakaoUrl ?? global?.defaultKakaoUrl ?? "").trim();
     const materials = Array.isArray(live.afterpartyMaterials) ? live.afterpartyMaterials : [];
+    const products = Array.isArray(live.afterpartyProducts) ? live.afterpartyProducts : [];
 
     return res.json({
       live: {
@@ -793,6 +811,7 @@ router.get("/lives/:id/after", async (req: Request, res: Response) => {
         thumbnailUrl: live.thumbnailUrl,
       },
       materials,
+      products,
       kakao: {
         url: kakaoUrl,
         headline: global?.kakaoHeadline ?? "매주 무료 AI 실무 특강 — 지금 카톡방으로 입장하세요",
