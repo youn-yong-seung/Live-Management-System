@@ -964,6 +964,104 @@ router.get("/lives/:id/afterparty-stats", requireAdminAuth, async (req: Request,
   }
 });
 
+/* ── 라이브별 재신청률 추이 + 출처 분포 ──────────── */
+
+router.get("/returning-attendees-trend", requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    // phone 정규화: 하이픈/공백 제거하여 같은 사람으로 묶기
+    const trendRows = await db.execute(sql`
+      WITH first_seen AS (
+        SELECT regexp_replace(r.phone, '[^0-9]', '', 'g') AS phone_norm,
+               MIN(l.scheduled_at) AS first_at
+        FROM registrations r
+        JOIN lives l ON l.id = r.live_id
+        WHERE l.scheduled_at IS NOT NULL
+        GROUP BY regexp_replace(r.phone, '[^0-9]', '', 'g')
+      )
+      SELECT
+        l.id AS live_id,
+        l.title,
+        l.scheduled_at,
+        COUNT(DISTINCT regexp_replace(r.phone, '[^0-9]', '', 'g'))::int AS total_count,
+        COUNT(DISTINCT CASE
+          WHEN fs.first_at < l.scheduled_at
+          THEN regexp_replace(r.phone, '[^0-9]', '', 'g')
+        END)::int AS returning_count
+      FROM lives l
+      JOIN registrations r ON r.live_id = l.id
+      LEFT JOIN first_seen fs ON fs.phone_norm = regexp_replace(r.phone, '[^0-9]', '', 'g')
+      WHERE l.scheduled_at IS NOT NULL
+      GROUP BY l.id, l.title, l.scheduled_at
+      ORDER BY l.scheduled_at ASC
+    `);
+
+    type Row = { live_id: number; title: string; scheduled_at: string | Date; total_count: number; returning_count: number };
+    const trend = (trendRows.rows as Row[]).map((r) => {
+      const total = Number(r.total_count) || 0;
+      const returning = Number(r.returning_count) || 0;
+      const newCount = total - returning;
+      const rate = total > 0 ? Math.round((returning / total) * 1000) / 10 : 0;
+      return {
+        liveId: r.live_id,
+        title: r.title,
+        scheduledAt: r.scheduled_at,
+        newCount,
+        returningCount: returning,
+        totalCount: total,
+        returningRate: rate,
+      };
+    });
+
+    // 최신(가장 미래에 가까운) 라이브의 재신청자가 어느 이전 라이브에서 왔는지 Top 분포
+    const sourceRows = await db.execute(sql`
+      WITH latest AS (
+        SELECT id, scheduled_at
+        FROM lives
+        WHERE scheduled_at IS NOT NULL
+        ORDER BY scheduled_at DESC
+        LIMIT 1
+      ),
+      latest_phones AS (
+        SELECT DISTINCT regexp_replace(r.phone, '[^0-9]', '', 'g') AS phone_norm
+        FROM registrations r
+        WHERE r.live_id = (SELECT id FROM latest)
+      )
+      SELECT
+        l.id AS live_id,
+        l.title,
+        l.scheduled_at,
+        COUNT(DISTINCT lp.phone_norm)::int AS overlap_count
+      FROM registrations r
+      JOIN lives l ON l.id = r.live_id
+      JOIN latest_phones lp ON lp.phone_norm = regexp_replace(r.phone, '[^0-9]', '', 'g')
+      WHERE l.id != (SELECT id FROM latest)
+        AND l.scheduled_at IS NOT NULL
+      GROUP BY l.id, l.title, l.scheduled_at
+      ORDER BY overlap_count DESC, l.scheduled_at DESC
+      LIMIT 10
+    `);
+
+    type SrcRow = { live_id: number; title: string; scheduled_at: string | Date; overlap_count: number };
+    const latestSource = (sourceRows.rows as SrcRow[]).map((r) => ({
+      liveId: r.live_id,
+      title: r.title,
+      scheduledAt: r.scheduled_at,
+      overlapCount: Number(r.overlap_count) || 0,
+    }));
+
+    const latest = trend.length > 0 ? trend[trend.length - 1] : null;
+
+    return res.json({
+      trend,
+      latestLive: latest ? { liveId: latest.liveId, title: latest.title, totalCount: latest.totalCount, returningCount: latest.returningCount } : null,
+      latestSource,
+    });
+  } catch (error) {
+    req.log.error({ error }, "Error computing returning attendees trend");
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 router.get("/dashboard-summary", async (_req: Request, res: Response) => {
   try {
     const now = new Date();

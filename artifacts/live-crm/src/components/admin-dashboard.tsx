@@ -6,7 +6,7 @@ import {
 import { Button } from "@/components/ui/button";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  Cell, LineChart, Line, Legend, AreaChart, Area,
+  Cell, LineChart, Line, Legend, AreaChart, Area, ComposedChart,
 } from "recharts";
 
 /* ── API helper ─────────────────────────────────────── */
@@ -171,13 +171,23 @@ export function AdminDashboard() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  /* ── Returning attendees trend ─────────────── */
+  type TrendPoint = { liveId: number; title: string; scheduledAt: string | null; newCount: number; returningCount: number; totalCount: number; returningRate: number };
+  type SourceRow = { liveId: number; title: string; scheduledAt: string | null; overlapCount: number };
+  type TrendResponse = { trend: TrendPoint[]; latestLive: { liveId: number; title: string; totalCount: number; returningCount: number } | null; latestSource: SourceRow[] };
+  const [trendData, setTrendData] = useState<TrendResponse | null>(null);
+
   const load = async (initial = false) => {
     if (initial) setLoading(true);
     else setRefreshing(true);
     setError(null);
     try {
-      const result = await apiFetch<DashboardData>("/admin/dashboard");
+      const [result, trend] = await Promise.all([
+        apiFetch<DashboardData>("/admin/dashboard"),
+        apiFetch<TrendResponse>("/returning-attendees-trend").catch(() => null),
+      ]);
       setData(result);
+      setTrendData(trend);
     } catch (e) {
       const msg = e instanceof Error ? e.message : "데이터 로드 실패";
       setError(msg);
@@ -639,6 +649,105 @@ export function AdminDashboard() {
           )}
         </SectionCard>
       </div>
+
+      {/* 라이브별 재신청률 추이 + 최신 라이브 출처 분포 */}
+      <SectionCard
+        title="라이브별 재신청률 추이"
+        subtitle="시간이 지날수록 충성 신청자 비중이 늘어나는지 확인 — 막대=신규/재신청 수, 선=재신청률(%)"
+      >
+        {trendData && trendData.trend.length > 0 ? (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 h-72">
+              <ResponsiveContainer width="100%" height="100%">
+                <ComposedChart
+                  data={trendData.trend.map((t) => ({
+                    ...t,
+                    label: `#${t.liveId} · ${formatDateShort(t.scheduledAt)}`,
+                    shortTitle: truncate(t.title.replace(/\|.*$/, "").trim(), 22),
+                  }))}
+                  margin={{ top: 10, right: 16, left: 0, bottom: 0 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
+                  <XAxis
+                    dataKey="label"
+                    tick={{ fontSize: 11, fill: "#6b7280" }}
+                    axisLine={{ stroke: "#e5e7eb" }}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    yAxisId="left"
+                    tick={{ fontSize: 11, fill: "#6b7280" }}
+                    axisLine={{ stroke: "#e5e7eb" }}
+                    tickLine={false}
+                    label={{ value: "신청자 수", angle: -90, position: "insideLeft", style: { fontSize: 11, fill: "#9ca3af" } }}
+                  />
+                  <YAxis
+                    yAxisId="right"
+                    orientation="right"
+                    tick={{ fontSize: 11, fill: "#6b7280" }}
+                    axisLine={{ stroke: "#e5e7eb" }}
+                    tickLine={false}
+                    domain={[0, 100]}
+                    tickFormatter={(v) => `${v}%`}
+                  />
+                  <Tooltip
+                    contentStyle={{ borderRadius: 12, border: "1px solid #e5e7eb", fontSize: 12 }}
+                    formatter={(value: number, name: string) => {
+                      if (name === "재신청률") return [`${value}%`, name];
+                      return [`${value.toLocaleString()}명`, name];
+                    }}
+                    labelFormatter={(label, payload) => {
+                      const p = payload?.[0]?.payload as { shortTitle?: string; label?: string } | undefined;
+                      return p?.shortTitle ? `${p.label} — ${p.shortTitle}` : label;
+                    }}
+                  />
+                  <Legend wrapperStyle={{ fontSize: 12 }} />
+                  <Bar yAxisId="left" dataKey="newCount" stackId="a" fill="#3B82F6" name="신규" radius={[0, 0, 0, 0]} />
+                  <Bar yAxisId="left" dataKey="returningCount" stackId="a" fill="#F59E0B" name="재신청" radius={[6, 6, 0, 0]} />
+                  <Line yAxisId="right" type="monotone" dataKey="returningRate" stroke="#10B981" strokeWidth={2.5} dot={{ r: 4, fill: "#10B981" }} name="재신청률" />
+                </ComposedChart>
+              </ResponsiveContainer>
+            </div>
+
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <Crown className="w-4 h-4 text-amber-500" />
+                <h4 className="text-sm font-semibold text-gray-900">최신 라이브 재신청자 출처</h4>
+              </div>
+              {trendData.latestLive ? (
+                <p className="text-xs text-gray-500 mb-3 leading-relaxed">
+                  <span className="font-semibold text-gray-700">#{trendData.latestLive.liveId}</span> 신청자 <span className="font-semibold tabular-nums">{trendData.latestLive.totalCount}</span>명 중 재신청 <span className="font-semibold text-amber-600 tabular-nums">{trendData.latestLive.returningCount}</span>명이 어디서 왔는지:
+                </p>
+              ) : null}
+              {trendData.latestSource.length > 0 ? (
+                <div className="space-y-2">
+                  {trendData.latestSource.map((s) => {
+                    const max = trendData.latestSource[0]?.overlapCount || 1;
+                    const widthPct = (s.overlapCount / max) * 100;
+                    return (
+                      <div key={s.liveId}>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs text-gray-700 font-medium truncate pr-2" title={s.title}>
+                            #{s.liveId} · {truncate(s.title.replace(/\|.*$/, "").trim(), 18)}
+                          </span>
+                          <span className="text-xs text-gray-500 tabular-nums flex-shrink-0">{s.overlapCount}명</span>
+                        </div>
+                        <div className="h-1.5 bg-gray-50 rounded-full overflow-hidden">
+                          <div className="h-full rounded-full bg-amber-400/80" style={{ width: `${widthPct}%` }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-xs text-gray-400 py-4 text-center">출처 데이터 없음</p>
+              )}
+            </div>
+          </div>
+        ) : (
+          <p className="text-gray-400 text-sm py-12 text-center">데이터 없음 (라이브 1개 이상 + 신청자 필요)</p>
+        )}
+      </SectionCard>
 
       {/* Footer note */}
       <div className="bg-gradient-to-br from-blue-50 via-violet-50 to-pink-50 rounded-2xl p-5 border border-blue-100">
