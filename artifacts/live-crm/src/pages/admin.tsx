@@ -20,7 +20,7 @@ import {
   Bell, Send, Eye, CheckCircle, Clock, AlertCircle, KeyRound,
   Zap, Lock, Youtube, TrendingUp, ThumbsUp, X,
   MessageCircle, PlayCircle, BarChart2, Link2, MonitorPlay,
-  ExternalLink, Gift, FileText, Sparkles,
+  ExternalLink, Gift, FileText, Sparkles, ShoppingBag,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AdminEditors } from "@/components/admin-editors";
