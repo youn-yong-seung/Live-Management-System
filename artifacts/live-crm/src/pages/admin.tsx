@@ -242,6 +242,35 @@ export default function Admin() {
   });
   const [isSavingAfterparty, setIsSavingAfterparty] = useState(false);
 
+  /* ── Afterparty stats modal state ──────────────── */
+  type AfterpartyStat = { total: number; unique: number };
+  type AfterpartyStats = {
+    pageView: AfterpartyStat;
+    replayClick: AfterpartyStat;
+    materialClick: AfterpartyStat;
+    kakaoClick: AfterpartyStat;
+    productClick: AfterpartyStat;
+    rates: { replay: number; material: number; kakao: number; product: number };
+  };
+  const [statsModal, setStatsModal] = useState<{ liveId: number | null; liveTitle: string; data: AfterpartyStats | null; loading: boolean; open: boolean }>({
+    liveId: null,
+    liveTitle: "",
+    data: null,
+    loading: false,
+    open: false,
+  });
+
+  const openStatsModal = async (live: Live) => {
+    setStatsModal({ liveId: live.id, liveTitle: live.title, data: null, loading: true, open: true });
+    try {
+      const data = await apiFetch<AfterpartyStats>(`/lives/${live.id}/afterparty-stats`);
+      setStatsModal((s) => ({ ...s, data, loading: false }));
+    } catch {
+      setStatsModal((s) => ({ ...s, loading: false }));
+      toast({ variant: "destructive", title: "성과 통계 로드 실패" });
+    }
+  };
+
   /* ── Live management state ─────────────────────── */
   const [isLiveModalOpen, setIsLiveModalOpen] = useState(false);
   const [isRegistrationsModalOpen, setIsRegistrationsModalOpen] = useState(false);
@@ -969,6 +998,15 @@ export default function Admin() {
                             >
                               <Link2 className="h-3.5 w-3.5" />
                             </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-8 rounded-lg border-emerald-200 bg-emerald-50/40 text-emerald-700 hover:bg-emerald-100/60 hover:text-emerald-800 hover:border-emerald-300 text-xs gap-1 font-semibold"
+                              title="후기페이지 성과 보기"
+                              onClick={() => openStatsModal(live)}
+                            >
+                              <TrendingUp className="h-3.5 w-3.5" />성과
+                            </Button>
                             <Button variant="outline" size="icon" className="h-8 w-8 rounded-lg border-gray-200 text-gray-500 hover:text-blue-600 hover:border-blue-200" onClick={() => handleOpenLiveModal(live)}><Edit className="h-3.5 w-3.5" /></Button>
                             <Button variant="outline" size="icon" className="h-8 w-8 rounded-lg border-gray-200 text-gray-500 hover:text-red-600 hover:border-red-200" onClick={() => handleDeleteLive(live.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
                           </div>
@@ -1594,6 +1632,98 @@ export default function Admin() {
             <Button className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold" onClick={handleSaveLive} disabled={isSavingLive}>
               {isSavingLive && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}저장
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ═══ Afterparty Stats Modal ═══════════════════ */}
+      <Dialog open={statsModal.open} onOpenChange={(open) => setStatsModal((s) => ({ ...s, open }))}>
+        <DialogContent className="sm:max-w-[680px] bg-white rounded-2xl border border-gray-100 shadow-xl">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-bold text-gray-900 flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-emerald-600" />
+              후기첨부용 페이지 성과
+            </DialogTitle>
+            <DialogDescription className="text-sm text-gray-500 truncate">
+              {statsModal.liveTitle}
+            </DialogDescription>
+          </DialogHeader>
+
+          {statsModal.loading || !statsModal.data ? (
+            <div className="py-16 flex justify-center">
+              <Loader2 className="h-6 w-6 animate-spin text-emerald-500" />
+            </div>
+          ) : (() => {
+            const d = statsModal.data;
+            const cards = [
+              { label: "페이지 방문", icon: Eye, total: d.pageView.total, unique: d.pageView.unique, color: "blue", rate: null as number | null, primary: true },
+              { label: "다시보기 재생", icon: PlayCircle, total: d.replayClick.total, unique: d.replayClick.unique, color: "purple", rate: d.rates.replay },
+              { label: "무료 자료 클릭", icon: Gift, total: d.materialClick.total, unique: d.materialClick.unique, color: "amber", rate: d.rates.material },
+              { label: "관련 상품 클릭", icon: ShoppingBag, total: d.productClick.total, unique: d.productClick.unique, color: "sky", rate: d.rates.product },
+              { label: "카톡방 입장", icon: MessageCircle, total: d.kakaoClick.total, unique: d.kakaoClick.unique, color: "emerald", rate: d.rates.kakao, primary: true },
+            ];
+            const colorMap: Record<string, string> = {
+              blue: "bg-blue-50 text-blue-700 border-blue-200",
+              purple: "bg-purple-50 text-purple-700 border-purple-200",
+              amber: "bg-amber-50 text-amber-700 border-amber-200",
+              sky: "bg-sky-50 text-sky-700 border-sky-200",
+              emerald: "bg-emerald-50 text-emerald-700 border-emerald-200",
+            };
+            const iconColorMap: Record<string, string> = {
+              blue: "text-blue-500",
+              purple: "text-purple-500",
+              amber: "text-amber-500",
+              sky: "text-sky-500",
+              emerald: "text-emerald-500",
+            };
+            return (
+              <div className="py-2 grid gap-3">
+                {cards.map((c) => (
+                  <div
+                    key={c.label}
+                    className={`rounded-2xl border p-4 flex items-center gap-4 ${c.primary ? colorMap[c.color] : "bg-gray-50/50 border-gray-100"}`}
+                  >
+                    <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${c.primary ? "bg-white shadow-sm" : "bg-white border border-gray-100"}`}>
+                      <c.icon className={`h-5 w-5 ${iconColorMap[c.color]}`} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-xs font-semibold ${c.primary ? "" : "text-gray-500"}`}>{c.label}</p>
+                      <div className="flex items-baseline gap-2 mt-0.5">
+                        <span className={`text-2xl font-black ${c.primary ? "" : "text-gray-900"}`}>{c.unique.toLocaleString()}</span>
+                        <span className={`text-xs ${c.primary ? "opacity-70" : "text-gray-400"}`}>고유</span>
+                        <span className={`text-xs ${c.primary ? "opacity-50" : "text-gray-300"}`}>· {c.total.toLocaleString()} 총</span>
+                      </div>
+                    </div>
+                    {c.rate !== null && (
+                      <div className="text-right flex-shrink-0">
+                        <p className={`text-2xl font-black ${c.primary ? "" : "text-gray-900"}`}>{c.rate}%</p>
+                        <p className={`text-xs ${c.primary ? "opacity-70" : "text-gray-400"}`}>방문 대비</p>
+                      </div>
+                    )}
+                  </div>
+                ))}
+                {d.pageView.total === 0 && (
+                  <p className="text-center text-sm text-gray-400 py-3">아직 방문 데이터가 없습니다.</p>
+                )}
+                <p className="text-xs text-gray-400 mt-1 px-1">
+                  · 고유 방문자는 브라우저 단위(localStorage 토큰) 기준입니다. 같은 사람이 다른 기기/브라우저로 들어오면 별도 카운트.<br />
+                  · 클릭률은 고유 방문자 대비 해당 액션을 한 고유 방문자 비율입니다.
+                </p>
+              </div>
+            );
+          })()}
+
+          <DialogFooter>
+            <Button variant="outline" className="rounded-xl border-gray-200" onClick={() => setStatsModal((s) => ({ ...s, open: false }))}>닫기</Button>
+            {statsModal.liveId && (
+              <Button
+                variant="outline"
+                className="rounded-xl border-gray-200"
+                onClick={() => statsModal.liveId && openStatsModal({ id: statsModal.liveId, title: statsModal.liveTitle } as Live)}
+              >
+                <RefreshCw className="mr-2 h-4 w-4" />새로고침
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>

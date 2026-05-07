@@ -6,6 +6,7 @@ import {
   pgEnum,
   integer,
   jsonb,
+  index,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
@@ -84,6 +85,30 @@ export const reviewsTable = pgTable("reviews", {
   content: text("content").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
+
+/* ── 후기첨부용 페이지 이벤트 트래킹 ─────────────────── */
+
+export const afterpartyEventsTable = pgTable(
+  "afterparty_events",
+  {
+    id: serial("id").primaryKey(),
+    liveId: integer("live_id")
+      .notNull()
+      .references(() => livesTable.id, { onDelete: "cascade" }),
+    eventType: text("event_type").notNull(),
+    visitorId: text("visitor_id").notNull(),
+    meta: jsonb("meta").$type<Record<string, unknown>>(),
+    userAgent: text("user_agent"),
+    referrer: text("referrer"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => ({
+    byLiveAndType: index("afterparty_events_live_type_idx").on(t.liveId, t.eventType),
+    byLiveAndVisitor: index("afterparty_events_live_visitor_idx").on(t.liveId, t.visitorId),
+  }),
+);
+
+export type AfterpartyEvent = typeof afterpartyEventsTable.$inferSelect;
 
 export const insertReviewSchema = createInsertSchema(reviewsTable, {
   name: (s) => s.min(1, "이름을 입력해주세요.").max(50, "이름은 50자 이하여야 합니다."),

@@ -7,6 +7,7 @@ import {
   liveFormConfigTable,
   reviewsTable,
   afterpartyGlobalConfigTable,
+  afterpartyEventsTable,
   insertLiveSchema,
   insertRegistrationSchema,
   insertReviewSchema,
@@ -873,6 +874,93 @@ router.put("/afterparty-config", requireAdminAuth, async (req: Request, res: Res
   } catch (error) {
     req.log.error({ error }, "Error saving afterparty config");
     res.status(400).json({ error: "Bad request" });
+  }
+});
+
+/* ── 후기첨부용 페이지 이벤트 트래킹 ───────────────── */
+
+const VALID_EVENT_TYPES = new Set(["page_view", "replay_click", "material_click", "kakao_click", "product_click"]);
+
+router.post("/lives/:id/track", async (req: Request, res: Response) => {
+  try {
+    const liveId = parseInt(String(req.params.id), 10);
+    if (isNaN(liveId)) return res.status(400).json({ error: "Invalid id" });
+
+    const body = req.body as Record<string, unknown>;
+    const eventType = typeof body.eventType === "string" ? body.eventType : "";
+    const visitorId = typeof body.visitorId === "string" ? body.visitorId.slice(0, 64) : "";
+    if (!VALID_EVENT_TYPES.has(eventType)) return res.status(400).json({ error: "Invalid eventType" });
+    if (!visitorId) return res.status(400).json({ error: "Missing visitorId" });
+
+    await db.insert(afterpartyEventsTable).values({
+      liveId,
+      eventType,
+      visitorId,
+      meta: typeof body.meta === "object" && body.meta !== null ? (body.meta as Record<string, unknown>) : null,
+      userAgent: (req.headers["user-agent"] ?? "").toString().slice(0, 500) || null,
+      referrer: (req.headers["referer"] ?? "").toString().slice(0, 500) || null,
+    });
+
+    return res.status(204).send();
+  } catch (error) {
+    req.log.error({ error }, "Error inserting afterparty event");
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.get("/lives/:id/afterparty-stats", requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const liveId = parseInt(String(req.params.id), 10);
+    if (isNaN(liveId)) return res.status(400).json({ error: "Invalid id" });
+
+    const rows = await db.execute(sql`
+      SELECT event_type, COUNT(*)::int AS total, COUNT(DISTINCT visitor_id)::int AS unique_count
+      FROM afterparty_events
+      WHERE live_id = ${liveId}
+      GROUP BY event_type
+    `);
+
+    const dailyRows = await db.execute(sql`
+      SELECT DATE(created_at AT TIME ZONE 'Asia/Seoul') AS date,
+             event_type,
+             COUNT(*)::int AS total,
+             COUNT(DISTINCT visitor_id)::int AS unique_count
+      FROM afterparty_events
+      WHERE live_id = ${liveId}
+      GROUP BY DATE(created_at AT TIME ZONE 'Asia/Seoul'), event_type
+      ORDER BY date ASC
+    `);
+
+    const byType: Record<string, { total: number; unique: number }> = {};
+    for (const r of rows.rows as Array<{ event_type: string; total: number; unique_count: number }>) {
+      byType[r.event_type] = { total: r.total, unique: r.unique_count };
+    }
+
+    const get = (k: string) => byType[k] ?? { total: 0, unique: 0 };
+    const pv = get("page_view");
+    const replay = get("replay_click");
+    const material = get("material_click");
+    const kakao = get("kakao_click");
+    const product = get("product_click");
+    const safeRate = (n: number, d: number) => (d > 0 ? Math.round((n / d) * 1000) / 10 : 0);
+
+    return res.json({
+      pageView: pv,
+      replayClick: replay,
+      materialClick: material,
+      kakaoClick: kakao,
+      productClick: product,
+      rates: {
+        replay: safeRate(replay.unique, pv.unique),
+        material: safeRate(material.unique, pv.unique),
+        kakao: safeRate(kakao.unique, pv.unique),
+        product: safeRate(product.unique, pv.unique),
+      },
+      daily: dailyRows.rows,
+    });
+  } catch (error) {
+    req.log.error({ error }, "Error fetching afterparty stats");
+    return res.status(500).json({ error: "Internal server error" });
   }
 });
 

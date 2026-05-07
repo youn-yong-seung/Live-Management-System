@@ -41,10 +41,49 @@ interface AfterpartyData {
 }
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+const VISITOR_KEY = "afterparty_visitor_id";
 
 function extractYoutubeId(url: string) {
   const m = url.match(/(?:youtu\.be\/|v=|\/embed\/|\/live\/)([^#&?]{11})/);
   return m ? m[1] : null;
+}
+
+function getVisitorId(): string {
+  try {
+    let id = localStorage.getItem(VISITOR_KEY);
+    if (!id) {
+      id =
+        (typeof crypto !== "undefined" && "randomUUID" in crypto && typeof crypto.randomUUID === "function")
+          ? crypto.randomUUID()
+          : `v-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+      localStorage.setItem(VISITOR_KEY, id);
+    }
+    return id;
+  } catch {
+    return `anon-${Date.now().toString(36)}`;
+  }
+}
+
+function track(liveId: number, eventType: string, meta?: Record<string, unknown>) {
+  if (!liveId) return;
+  const visitorId = getVisitorId();
+  const payload = JSON.stringify({ eventType, visitorId, meta });
+  const url = `${BASE}/api/lives/${liveId}/track`;
+  try {
+    if (typeof navigator !== "undefined" && "sendBeacon" in navigator) {
+      const blob = new Blob([payload], { type: "application/json" });
+      const ok = navigator.sendBeacon(url, blob);
+      if (ok) return;
+    }
+    fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: payload,
+      keepalive: true,
+    }).catch(() => {});
+  } catch {
+    /* swallow */
+  }
 }
 
 export default function Afterparty() {
@@ -53,6 +92,7 @@ export default function Afterparty() {
   const [data, setData] = useState<AfterpartyData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [replayPlaying, setReplayPlaying] = useState(false);
 
   useEffect(() => {
     if (!liveId) {
@@ -66,7 +106,10 @@ export default function Afterparty() {
         if (!r.ok) throw new Error("페이지를 불러오지 못했습니다.");
         return r.json();
       })
-      .then((d: AfterpartyData) => setData(d))
+      .then((d: AfterpartyData) => {
+        setData(d);
+        track(liveId, "page_view");
+      })
       .catch((e) => setError((e as Error).message))
       .finally(() => setLoading(false));
   }, [liveId]);
@@ -147,16 +190,47 @@ export default function Afterparty() {
             <h3 className="text-sm font-bold text-white/90 uppercase tracking-wider">다시보기</h3>
           </div>
           <div className="glass-card overflow-hidden p-0">
-            <div className="aspect-video w-full bg-black">
+            <div className="aspect-video w-full bg-black relative">
               {youtubeId ? (
-                <iframe
-                  src={`https://www.youtube.com/embed/${youtubeId}`}
-                  title={data.live.title}
-                  className="w-full h-full"
-                  frameBorder={0}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
+                replayPlaying ? (
+                  <iframe
+                    src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1`}
+                    title={data.live.title}
+                    className="w-full h-full"
+                    frameBorder={0}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      track(liveId, "replay_click");
+                      setReplayPlaying(true);
+                    }}
+                    className="group absolute inset-0 w-full h-full focus:outline-none"
+                    aria-label="다시보기 재생"
+                  >
+                    <img
+                      src={`https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`}
+                      alt={data.live.title}
+                      onError={(e) => {
+                        const img = e.currentTarget;
+                        if (!img.dataset.fallback) {
+                          img.dataset.fallback = "1";
+                          img.src = `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`;
+                        }
+                      }}
+                      className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                    />
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 group-hover:bg-black/30 transition-colors">
+                      <div className="w-20 h-20 rounded-full bg-[#CC9965] flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform gold-glow">
+                        <PlayCircle className="h-10 w-10 text-black fill-black" />
+                      </div>
+                      <p className="mt-3 text-white font-bold text-sm sm:text-base drop-shadow-lg">▶ 다시보기 재생</p>
+                    </div>
+                  </button>
+                )
               ) : (
                 <div className="w-full h-full flex flex-col items-center justify-center text-white/30 gap-2">
                   <PlayCircle className="h-12 w-12" />
@@ -193,6 +267,7 @@ export default function Afterparty() {
                   href={m.url}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => track(liveId, "material_click", { title: m.title, url: m.url, index: i })}
                   className="glass-card p-4 sm:p-5 flex items-center gap-3 group hover:-translate-y-0.5 transition-all duration-300"
                 >
                   <div className="w-10 h-10 rounded-xl bg-[#CC9965]/15 border border-[#CC9965]/30 flex items-center justify-center flex-shrink-0 group-hover:bg-[#CC9965]/25 transition-colors">
@@ -227,6 +302,7 @@ export default function Afterparty() {
                   href={p.url}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => track(liveId, "product_click", { title: p.title, url: p.url, index: i })}
                   className="glass-card p-4 sm:p-5 flex items-center gap-3 group hover:-translate-y-0.5 transition-all duration-300"
                 >
                   <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0 group-hover:bg-[#CC9965]/15 group-hover:border-[#CC9965]/30 transition-colors">
@@ -281,6 +357,7 @@ export default function Afterparty() {
                 href={data.kakao.url}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => track(liveId, "kakao_click", { url: data.kakao.url })}
                 className="gold-glow flex items-center justify-center gap-2 w-full bg-[#CC9965] hover:bg-[#d4a570] text-black font-black text-base sm:text-lg py-4 rounded-2xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.99]"
               >
                 <MessageCircle className="h-5 w-5" />
