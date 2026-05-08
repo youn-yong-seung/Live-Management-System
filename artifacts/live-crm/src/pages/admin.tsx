@@ -815,15 +815,34 @@ export default function Admin() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const showPII = usePIIVisible();
 
-  const navItems: Array<{ id: string; label: string; icon: typeof BarChart2; onSelect?: () => void }> = [
-    { id: "dashboard", label: "대시보드", icon: BarChart2 },
-    { id: "lives", label: "라이브 관리", icon: PlayCircle },
-    { id: "settings", label: "API 설정", icon: KeyRound },
-    { id: "schedule", label: "발송 현황", icon: Send, onSelect: loadSchedule },
-    { id: "youtube", label: "YouTube 성과", icon: Youtube, onSelect: loadYtStatsAll },
-    { id: "editors", label: "편집자 관리", icon: Users },
-    { id: "techtree", label: "테크트리", icon: GitBranch },
+  type NavItem = { id: string; label: string; icon: typeof BarChart2; onSelect?: () => void };
+  type NavSection = { title?: string; items: NavItem[] };
+
+  const navSections: NavSection[] = [
+    {
+      items: [
+        { id: "dashboard", label: "대시보드", icon: BarChart2 },
+        { id: "lives", label: "라이브 관리", icon: PlayCircle },
+      ],
+    },
+    {
+      title: "캠페인",
+      items: [
+        { id: "settings", label: "API 설정", icon: KeyRound },
+        { id: "schedule", label: "발송 현황", icon: Send, onSelect: loadSchedule },
+      ],
+    },
+    {
+      title: "콘텐츠",
+      items: [
+        { id: "youtube", label: "YouTube 성과", icon: Youtube, onSelect: loadYtStatsAll },
+        { id: "editors", label: "편집자 관리", icon: Users },
+        { id: "techtree", label: "테크트리", icon: GitBranch },
+      ],
+    },
   ];
+
+  const navItems: NavItem[] = navSections.flatMap((s) => s.items);
 
   const handleNavClick = (id: string, onSelect?: () => void) => {
     setActiveTab(id);
@@ -913,120 +932,194 @@ export default function Admin() {
         />
       )}
 
-      {/* Mobile drawer (left slide-in) */}
+      {/* Mobile drawer (left slide-in, floating card) */}
       <aside
-        className={`lg:hidden fixed inset-y-0 left-0 w-64 z-50 bg-white shadow-xl flex flex-col transition-transform duration-200 ease-out ${
+        className={`lg:hidden fixed inset-y-0 left-0 z-50 w-72 transition-transform duration-200 ease-out ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="p-5 border-b border-gray-100 flex items-center justify-between">
-          <div>
-            <h2 className="font-bold text-gray-900">관리자</h2>
-            <p className="text-xs text-gray-500 mt-0.5">메뉴</p>
+        <div className="m-3 flex h-[calc(100vh-1.5rem)] flex-col rounded-[2rem] border border-white/80 bg-white/95 shadow-[0_28px_70px_-38px_rgba(204,153,101,0.45)] backdrop-blur-md">
+          {/* Brand header */}
+          <div className="flex items-center gap-3 border-b border-gray-100 px-4 py-4">
+            <div className="overflow-hidden rounded-2xl border border-amber-200/40 bg-gradient-to-br from-amber-100 to-amber-50 p-1 shadow-[0_18px_36px_-24px_rgba(204,153,101,0.55)]">
+              <div className="h-10 w-10 rounded-xl bg-white flex items-center justify-center">
+                <Settings className="h-5 w-5 text-amber-700" />
+              </div>
+            </div>
+            <div className="min-w-0 flex-1">
+              <span className="block truncate text-sm font-semibold text-gray-900">윤자동 관리자</span>
+              <span className="block text-xs text-gray-500 mt-0.5">라이브 · 캠페인</span>
+            </div>
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="ml-auto inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl text-gray-500 hover:bg-gray-100"
+              aria-label="메뉴 닫기"
+            >
+              <X className="h-4 w-4" />
+            </button>
           </div>
-          <button
-            onClick={() => setSidebarOpen(false)}
-            className="p-1.5 rounded hover:bg-gray-100 text-gray-500"
-            aria-label="메뉴 닫기"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-        <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = activeTab === item.id;
-            return (
+
+          {/* Nav with sections */}
+          <nav className="flex flex-1 flex-col overflow-y-auto px-3 pb-3">
+            {navSections.map((section, si) => (
+              <div key={si} className={si === 0 ? "pt-3" : "mt-3"}>
+                {section.title && (
+                  <div className="px-3 pb-2 pt-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-gray-400">
+                    {section.title}
+                  </div>
+                )}
+                <div className="space-y-1">
+                  {section.items.map((item) => {
+                    const Icon = item.icon;
+                    const isActive = activeTab === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => handleNavClick(item.id, item.onSelect)}
+                        className={`group w-full flex items-center gap-3 rounded-2xl border px-3 py-2.5 text-sm transition-all text-left ${
+                          isActive
+                            ? "border-amber-500/20 bg-amber-500 text-white shadow-[0_16px_32px_-22px_rgba(204,153,101,0.7)] font-semibold"
+                            : "border-transparent text-gray-500 hover:border-amber-200/50 hover:bg-amber-50/60 hover:text-gray-900"
+                        }`}
+                      >
+                        <span className={`shrink-0 ${isActive ? "text-white" : "text-amber-600/90 group-hover:text-amber-700"}`}>
+                          <Icon className="h-5 w-5" />
+                        </span>
+                        <span className="truncate">{item.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+
+            {/* PII toggle pinned to bottom of nav */}
+            <div className="mt-auto space-y-1 pt-4">
               <button
-                key={item.id}
-                onClick={() => handleNavClick(item.id, item.onSelect)}
-                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-left transition-colors ${
-                  isActive
-                    ? "bg-blue-50 text-blue-700"
-                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                onClick={() => setShowPII(!showPII)}
+                className={`group w-full flex items-center gap-3 rounded-2xl border px-3 py-2.5 text-sm transition-all text-left ${
+                  showPII
+                    ? "border-amber-300/40 bg-amber-50 text-amber-900"
+                    : "border-transparent text-gray-500 hover:border-gray-200 hover:bg-white/70 hover:text-gray-900"
                 }`}
+                title="신청자 이름·전화·이메일을 임시로 표시"
               >
-                <Icon className="h-4 w-4 flex-shrink-0" />
-                <span className="truncate">{item.label}</span>
+                <span className="shrink-0 text-amber-600/90 group-hover:text-amber-700">
+                  {showPII ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
+                </span>
+                <span className="truncate flex-1">{showPII ? "개인정보 표시 중" : "개인정보 가림"}</span>
+                <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${showPII ? "bg-amber-200/70 text-amber-900" : "bg-gray-200 text-gray-600"}`}>
+                  {showPII ? "ON" : "OFF"}
+                </span>
               </button>
-            );
-          })}
-        </nav>
-        <div className="p-3 border-t border-gray-100 space-y-1">
-          <button
-            onClick={() => setShowPII(!showPII)}
-            className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-              showPII
-                ? "bg-amber-50 text-amber-800 hover:bg-amber-100"
-                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-            }`}
-            title="신청자 이름·전화·이메일을 임시로 표시"
-          >
-            {showPII ? <Eye className="h-4 w-4 flex-shrink-0" /> : <EyeOff className="h-4 w-4 flex-shrink-0" />}
-            <span className="truncate">{showPII ? "개인정보 표시 중" : "개인정보 가림"}</span>
-            <span className={`ml-auto text-[10px] px-1.5 py-0.5 rounded font-bold ${showPII ? "bg-amber-200/60 text-amber-900" : "bg-gray-200 text-gray-600"}`}>
-              {showPII ? "ON" : "OFF"}
-            </span>
-          </button>
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:bg-red-50 hover:text-red-600 transition-colors"
-          >
-            <Lock className="h-4 w-4 flex-shrink-0" />
-            <span>로그아웃</span>
-          </button>
+            </div>
+          </nav>
+
+          {/* Footer / user card → logout */}
+          <div className="border-t border-gray-100 p-3">
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-3 rounded-2xl border border-white/60 bg-white/70 px-3 py-3 text-sm w-full text-left text-gray-600 hover:border-red-200/60 hover:bg-red-50/60 hover:text-red-700 transition-all"
+            >
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-medium bg-red-100 text-red-600">
+                <Lock className="h-4 w-4" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium text-gray-900">로그아웃</p>
+                <p className="truncate text-xs text-gray-500">세션 종료</p>
+              </div>
+            </button>
+          </div>
         </div>
       </aside>
 
-      {/* Desktop sidebar — sticky card */}
-      <aside className="hidden lg:flex lg:flex-col lg:sticky lg:top-20 lg:w-56 lg:flex-shrink-0 lg:bg-white lg:rounded-2xl lg:border lg:border-gray-200 lg:shadow-sm lg:overflow-hidden lg:max-h-[calc(100vh-6rem)]">
-        <div className="p-5 border-b border-gray-100">
-          <h2 className="font-bold text-gray-900">관리자</h2>
-          <p className="text-xs text-gray-500 mt-0.5">라이브 · 캠페인 관리</p>
-        </div>
-        <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = activeTab === item.id;
-            return (
+      {/* Desktop sidebar — floating sticky card */}
+      <aside className="hidden lg:flex lg:sticky lg:top-4 lg:h-[calc(100vh-2rem)] lg:w-72 lg:flex-shrink-0 lg:flex-col">
+        <div className="m-3 flex h-full flex-col rounded-[2rem] border border-white/80 bg-white/85 shadow-[0_28px_70px_-38px_rgba(204,153,101,0.4)] backdrop-blur-md">
+          {/* Brand header */}
+          <div className="flex items-center gap-3 border-b border-gray-100 px-4 py-4">
+            <div className="overflow-hidden rounded-2xl border border-amber-200/40 bg-gradient-to-br from-amber-100 to-amber-50 p-1 shadow-[0_18px_36px_-24px_rgba(204,153,101,0.55)]">
+              <div className="h-10 w-10 rounded-xl bg-white flex items-center justify-center">
+                <Settings className="h-5 w-5 text-amber-700" />
+              </div>
+            </div>
+            <div className="min-w-0 flex-1">
+              <span className="block truncate text-sm font-semibold text-gray-900">윤자동 관리자</span>
+              <span className="block text-xs text-gray-500 mt-0.5">라이브 · 캠페인</span>
+            </div>
+          </div>
+
+          {/* Nav with sections */}
+          <nav className="flex flex-1 flex-col overflow-y-auto px-3 pb-3">
+            {navSections.map((section, si) => (
+              <div key={si} className={si === 0 ? "pt-3" : "mt-3"}>
+                {section.title && (
+                  <div className="px-3 pb-2 pt-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-gray-400">
+                    {section.title}
+                  </div>
+                )}
+                <div className="space-y-1">
+                  {section.items.map((item) => {
+                    const Icon = item.icon;
+                    const isActive = activeTab === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => handleNavClick(item.id, item.onSelect)}
+                        className={`group w-full flex items-center gap-3 rounded-2xl border px-3 py-2.5 text-sm transition-all text-left ${
+                          isActive
+                            ? "border-amber-500/20 bg-amber-500 text-white shadow-[0_16px_32px_-22px_rgba(204,153,101,0.7)] font-semibold"
+                            : "border-transparent text-gray-500 hover:border-amber-200/50 hover:bg-amber-50/60 hover:text-gray-900"
+                        }`}
+                      >
+                        <span className={`shrink-0 ${isActive ? "text-white" : "text-amber-600/90 group-hover:text-amber-700"}`}>
+                          <Icon className="h-5 w-5" />
+                        </span>
+                        <span className="truncate">{item.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+
+            {/* PII toggle pinned to bottom of nav */}
+            <div className="mt-auto space-y-1 pt-4">
               <button
-                key={item.id}
-                onClick={() => handleNavClick(item.id, item.onSelect)}
-                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-left transition-colors ${
-                  isActive
-                    ? "bg-blue-50 text-blue-700"
-                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                onClick={() => setShowPII(!showPII)}
+                className={`group w-full flex items-center gap-3 rounded-2xl border px-3 py-2.5 text-sm transition-all text-left ${
+                  showPII
+                    ? "border-amber-300/40 bg-amber-50 text-amber-900"
+                    : "border-transparent text-gray-500 hover:border-gray-200 hover:bg-white/70 hover:text-gray-900"
                 }`}
+                title="신청자 이름·전화·이메일을 임시로 표시"
               >
-                <Icon className="h-4 w-4 flex-shrink-0" />
-                <span className="truncate">{item.label}</span>
+                <span className="shrink-0 text-amber-600/90 group-hover:text-amber-700">
+                  {showPII ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
+                </span>
+                <span className="truncate flex-1">{showPII ? "개인정보 표시 중" : "개인정보 가림"}</span>
+                <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${showPII ? "bg-amber-200/70 text-amber-900" : "bg-gray-200 text-gray-600"}`}>
+                  {showPII ? "ON" : "OFF"}
+                </span>
               </button>
-            );
-          })}
-        </nav>
-        <div className="p-3 border-t border-gray-100 space-y-1">
-          <button
-            onClick={() => setShowPII(!showPII)}
-            className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-              showPII
-                ? "bg-amber-50 text-amber-800 hover:bg-amber-100"
-                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-            }`}
-            title="신청자 이름·전화·이메일을 임시로 표시"
-          >
-            {showPII ? <Eye className="h-4 w-4 flex-shrink-0" /> : <EyeOff className="h-4 w-4 flex-shrink-0" />}
-            <span className="truncate">{showPII ? "개인정보 표시 중" : "개인정보 가림"}</span>
-            <span className={`ml-auto text-[10px] px-1.5 py-0.5 rounded font-bold ${showPII ? "bg-amber-200/60 text-amber-900" : "bg-gray-200 text-gray-600"}`}>
-              {showPII ? "ON" : "OFF"}
-            </span>
-          </button>
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:bg-red-50 hover:text-red-600 transition-colors"
-          >
-            <Lock className="h-4 w-4 flex-shrink-0" />
-            <span>로그아웃</span>
-          </button>
+            </div>
+          </nav>
+
+          {/* Footer / user card → logout */}
+          <div className="border-t border-gray-100 p-3">
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-3 rounded-2xl border border-white/60 bg-white/70 px-3 py-3 text-sm w-full text-left text-gray-600 hover:border-red-200/60 hover:bg-red-50/60 hover:text-red-700 transition-all"
+            >
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-medium bg-red-100 text-red-600">
+                <Lock className="h-4 w-4" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium text-gray-900">로그아웃</p>
+                <p className="truncate text-xs text-gray-500">세션 종료</p>
+              </div>
+            </button>
+          </div>
         </div>
       </aside>
 
