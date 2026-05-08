@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { formatDate } from "@/lib/date-utils";
@@ -21,7 +22,7 @@ import {
   Zap, Lock, Youtube, TrendingUp, ThumbsUp, X,
   MessageCircle, PlayCircle, BarChart2, Link2, MonitorPlay,
   ExternalLink, Gift, FileText, Sparkles, ShoppingBag,
-  Menu, GitBranch,
+  Menu, GitBranch, MoreHorizontal, Calendar,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AdminEditors } from "@/components/admin-editors";
@@ -1053,101 +1054,99 @@ export default function Admin() {
               <h2 className="font-bold text-gray-900">라이브 목록</h2>
             </div>
             {isLivesLoading ? (
-              <div className="p-6 space-y-3">{[1, 2, 3].map(i => <Skeleton key={i} className="h-14 w-full rounded-xl" />)}</div>
+              <div className="p-4 sm:p-6 space-y-3">{[1, 2, 3].map(i => <Skeleton key={i} className="h-28 w-full rounded-2xl" />)}</div>
             ) : lives && lives.length > 0 ? (
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-gray-50 hover:bg-gray-50">
-                    <TableHead className="text-gray-500 font-medium text-xs w-12">ID</TableHead>
-                    <TableHead className="text-gray-500 font-medium text-xs">상태</TableHead>
-                    <TableHead className="text-gray-500 font-medium text-xs">제목</TableHead>
-                    <TableHead className="text-gray-500 font-medium text-xs">예정 일시</TableHead>
-                    <TableHead className="text-center text-gray-500 font-medium text-xs">신청자</TableHead>
-                    <TableHead className="text-right text-gray-500 font-medium text-xs">관리</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {lives.map((live) => {
-                    const s = statusConfig[live.status] ?? { label: live.status, className: "bg-gray-100 text-gray-500" };
-                    return (
-                      <TableRow key={live.id} className="hover:bg-gray-50/50">
-                        <TableCell className="text-xs font-mono text-gray-400 tabular-nums">#{live.id}</TableCell>
-                        <TableCell><span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${s.className}`}>{s.label}</span></TableCell>
-                        <TableCell className="font-medium text-gray-900">{live.title}</TableCell>
-                        <TableCell className="text-gray-500 text-sm">{formatDate(live.scheduledAt)}</TableCell>
-                        <TableCell className="text-center">
-                          <button className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-blue-600" onClick={() => { setSelectedLiveForRegs(live.id); setIsRegistrationsModalOpen(true); loadRegistrations(live.id); }}>
-                            <Users className="h-4 w-4" />{live.registrationCount}
+              <ul className="divide-y divide-gray-100">
+                {lives.map((live) => {
+                  const s = statusConfig[live.status] ?? { label: live.status, className: "bg-gray-100 text-gray-500" };
+                  return (
+                    <li key={live.id} className="px-4 sm:px-6 py-4 hover:bg-gray-50/50 transition-colors">
+                      {/* Row 1: meta + title */}
+                      <div className="flex items-start gap-3 mb-3">
+                        <div className="flex items-center gap-2 flex-shrink-0 pt-0.5">
+                          <span className="text-xs font-mono text-gray-400 tabular-nums whitespace-nowrap">#{live.id}</span>
+                          <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full whitespace-nowrap ${s.className}`}>{s.label}</span>
+                        </div>
+                        <h3 className="text-sm sm:text-base font-semibold text-gray-900 leading-snug flex-1 min-w-0 line-clamp-2">{live.title}</h3>
+                      </div>
+
+                      {/* Row 2: date + 신청자 + actions */}
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pl-0 sm:pl-1">
+                        <div className="flex items-center gap-3 text-xs text-gray-500 flex-shrink-0">
+                          <span className="inline-flex items-center gap-1 whitespace-nowrap">
+                            <Calendar className="h-3.5 w-3.5" />{formatDate(live.scheduledAt)}
+                          </span>
+                          <button
+                            className="inline-flex items-center gap-1 hover:text-blue-600 whitespace-nowrap"
+                            onClick={() => { setSelectedLiveForRegs(live.id); setIsRegistrationsModalOpen(true); loadRegistrations(live.id); }}
+                          >
+                            <Users className="h-3.5 w-3.5" />{live.registrationCount}명
                           </button>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-1.5 flex-wrap">
-                            <Button variant="outline" size="sm" className="h-8 rounded-lg border-gray-200 text-gray-500 hover:text-purple-600 hover:border-purple-200 text-xs gap-1" onClick={() => openAnalyticsModal(live)}>
-                              <BarChart2 className="h-3.5 w-3.5" />신청 현황
-                            </Button>
-                            <Button variant="outline" size="sm" className="h-8 rounded-lg border-gray-200 text-gray-500 hover:text-[#CC9965] hover:border-[#CC9965]/30 text-xs gap-1" onClick={() => window.open(`/lives/${live.id}/dashboard`, "_blank")} title="라이브 중 화면에 띄울 공개 대시보드">
-                              <MonitorPlay className="h-3.5 w-3.5" />공개 대시보드
-                            </Button>
-                            <Button variant="outline" size="sm" className="h-8 rounded-lg border-gray-200 text-gray-500 hover:text-blue-600 hover:border-blue-200 text-xs gap-1" onClick={() => openRulesModal(live)}>
-                              <Bell className="h-3.5 w-3.5" />캠페인 설정
-                            </Button>
-                            <Button variant="outline" size="sm" className="h-8 rounded-lg border-gray-200 text-gray-500 hover:text-purple-600 hover:border-purple-200 text-xs gap-1" onClick={() => setFormModal({ live, open: true })}>
-                              <Edit className="h-3.5 w-3.5" />신청서 수정
-                            </Button>
-                            <Button variant="outline" size="sm" className="h-8 rounded-lg border-gray-200 text-gray-500 hover:text-green-600 hover:border-green-200 text-xs gap-1" onClick={() => openSendModal(live)}>
-                              <Zap className="h-3.5 w-3.5" />즉시 발송
-                            </Button>
-                            <Button variant="outline" size="icon" className="h-8 w-8 rounded-lg border-gray-200 text-gray-400 hover:text-[#CC9965] hover:border-[#CC9965]/30" title="공유 링크 복사" onClick={() => {
-                              navigator.clipboard.writeText(`https://yunjadong-live-class.vercel.app/api/og/lives/${live.id}`);
-                              toast({ title: "공유 링크 복사됨!" });
-                            }}>
-                              <Link2 className="h-3.5 w-3.5" />
-                            </Button>
-                            {live.status === "ended" && (
-                              <Button variant="outline" size="sm" className="h-8 rounded-lg border-gray-200 text-gray-500 hover:text-purple-600 hover:border-purple-200 text-xs gap-1" onClick={() => navigate(`/lives/${live.id}/review`)}>
-                                <MessageCircle className="h-3.5 w-3.5" />후기 보기
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-1.5 sm:ml-auto">
+                          <Button variant="outline" size="sm" className="h-8 rounded-lg border-gray-200 text-gray-500 hover:text-purple-600 hover:border-purple-200 text-xs gap-1" onClick={() => openAnalyticsModal(live)}>
+                            <BarChart2 className="h-3.5 w-3.5" />신청 현황
+                          </Button>
+                          <Button variant="outline" size="sm" className="h-8 rounded-lg border-gray-200 text-gray-500 hover:text-[#CC9965] hover:border-[#CC9965]/30 text-xs gap-1" onClick={() => window.open(`/lives/${live.id}/dashboard`, "_blank")} title="라이브 중 화면에 띄울 공개 대시보드">
+                            <MonitorPlay className="h-3.5 w-3.5" />공개 대시보드
+                          </Button>
+                          <Button variant="outline" size="sm" className="h-8 rounded-lg border-gray-200 text-gray-500 hover:text-blue-600 hover:border-blue-200 text-xs gap-1" onClick={() => openRulesModal(live)}>
+                            <Bell className="h-3.5 w-3.5" />캠페인 설정
+                          </Button>
+                          <Button variant="outline" size="sm" className="h-8 rounded-lg border-amber-200 bg-amber-50/40 text-amber-700 hover:bg-amber-100/60 hover:text-amber-800 hover:border-amber-300 text-xs gap-1 font-semibold" title="후기첨부용 페이지 열기" onClick={() => window.open(`/lives/${live.id}/after`, "_blank")}>
+                            <Gift className="h-3.5 w-3.5" />후기첨부용
+                          </Button>
+                          <Button variant="outline" size="sm" className="h-8 rounded-lg border-emerald-200 bg-emerald-50/40 text-emerald-700 hover:bg-emerald-100/60 hover:text-emerald-800 hover:border-emerald-300 text-xs gap-1 font-semibold" title="후기페이지 성과 보기" onClick={() => openStatsModal(live)}>
+                            <TrendingUp className="h-3.5 w-3.5" />성과
+                          </Button>
+
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="outline" size="icon" className="h-8 w-8 rounded-lg border-gray-200 text-gray-500 hover:text-gray-900 hover:border-gray-300" title="더보기">
+                                <MoreHorizontal className="h-4 w-4" />
                               </Button>
-                            )}
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-8 rounded-lg border-amber-200 bg-amber-50/40 text-amber-700 hover:bg-amber-100/60 hover:text-amber-800 hover:border-amber-300 text-xs gap-1 font-semibold"
-                              title="후기첨부용 페이지 열기"
-                              onClick={() => window.open(`/lives/${live.id}/after`, "_blank")}
-                            >
-                              <Gift className="h-3.5 w-3.5" />후기첨부용
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              className="h-8 w-8 rounded-lg border-amber-200 bg-amber-50/40 text-amber-700 hover:bg-amber-100/60 hover:text-amber-800 hover:border-amber-300"
-                              title="후기첨부용 링크 복사"
-                              onClick={() => {
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-52">
+                              <DropdownMenuItem onClick={() => setFormModal({ live, open: true })}>
+                                <Edit className="h-3.5 w-3.5 mr-2 text-gray-500" />신청서 수정
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => openSendModal(live)}>
+                                <Zap className="h-3.5 w-3.5 mr-2 text-green-600" />즉시 발송
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => {
+                                navigator.clipboard.writeText(`https://yunjadong-live-class.vercel.app/api/og/lives/${live.id}`);
+                                toast({ title: "공유 링크 복사됨!" });
+                              }}>
+                                <Link2 className="h-3.5 w-3.5 mr-2 text-gray-500" />공유 링크 복사
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => {
                                 const link = `${window.location.origin}/lives/${live.id}/after`;
                                 navigator.clipboard.writeText(link);
                                 toast({ title: "후기첨부용 링크 복사됨!", description: link });
-                              }}
-                            >
-                              <Link2 className="h-3.5 w-3.5" />
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-8 rounded-lg border-emerald-200 bg-emerald-50/40 text-emerald-700 hover:bg-emerald-100/60 hover:text-emerald-800 hover:border-emerald-300 text-xs gap-1 font-semibold"
-                              title="후기페이지 성과 보기"
-                              onClick={() => openStatsModal(live)}
-                            >
-                              <TrendingUp className="h-3.5 w-3.5" />성과
-                            </Button>
-                            <Button variant="outline" size="icon" className="h-8 w-8 rounded-lg border-gray-200 text-gray-500 hover:text-blue-600 hover:border-blue-200" onClick={() => handleOpenLiveModal(live)}><Edit className="h-3.5 w-3.5" /></Button>
-                            <Button variant="outline" size="icon" className="h-8 w-8 rounded-lg border-gray-200 text-gray-500 hover:text-red-600 hover:border-red-200" onClick={() => handleDeleteLive(live.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
+                              }}>
+                                <Link2 className="h-3.5 w-3.5 mr-2 text-amber-600" />후기첨부용 링크 복사
+                              </DropdownMenuItem>
+                              {live.status === "ended" && (
+                                <DropdownMenuItem onClick={() => navigate(`/lives/${live.id}/review`)}>
+                                  <MessageCircle className="h-3.5 w-3.5 mr-2 text-purple-600" />후기 보기
+                                </DropdownMenuItem>
+                              )}
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem onClick={() => handleOpenLiveModal(live)}>
+                                <Edit className="h-3.5 w-3.5 mr-2 text-blue-600" />라이브 정보 수정
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleDeleteLive(live.id)} className="text-red-600 focus:text-red-700 focus:bg-red-50">
+                                <Trash2 className="h-3.5 w-3.5 mr-2" />삭제
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
             ) : (
               <div className="py-16 text-center">
                 <Settings className="h-6 w-6 text-gray-300 mx-auto mb-3" />
