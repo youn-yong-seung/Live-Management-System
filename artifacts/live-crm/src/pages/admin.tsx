@@ -24,7 +24,7 @@ import {
   ExternalLink, Gift, FileText, Sparkles, ShoppingBag,
   Menu, GitBranch, MoreHorizontal, Calendar, EyeOff, Shield,
 } from "lucide-react";
-import { usePIIVisible, setShowPII, maskName, maskPhone, maskEmail } from "@/lib/pii";
+import { usePIIVisible, setShowPII, maskName, maskPhone, maskEmail, maskFreeText } from "@/lib/pii";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AdminEditors } from "@/components/admin-editors";
 import { AdminFormBuilder } from "@/components/admin-form-builder";
@@ -1953,17 +1953,25 @@ export default function Admin() {
                           <td className={`${cellCls} px-3 py-2`}>{fmt(reg.industry)}</td>
                           <td className={`${cellCls} px-3 py-2`}>{fmt(reg.channelSource)}</td>
                           <td className={`${cellCls} px-3 py-2`}>{skillLabel(reg.skillLevel)}</td>
-                          <td className={`${cellCls} px-3 py-2`}>{fmt(reg.message)}</td>
-                          {customQs.map((q) => (
-                            <td key={`cq-${q.id}`} className={`${cellCls} px-3 py-2`}>
-                              {fmt(reg.customAnswers?.[String(q.id)])}
-                            </td>
-                          ))}
-                          {aiQs.map((_, qi) => (
-                            <td key={`ai-${qi}`} className={`${cellCls} px-3 py-2`}>
-                              {fmt(reg.customAnswers?.[`ai_${qi}`])}
-                            </td>
-                          ))}
+                          <td className={`${cellCls} px-3 py-2`}>{reg.message ? maskFreeText(reg.message, showPII) : fmt(reg.message)}</td>
+                          {customQs.map((q) => {
+                            const ans = reg.customAnswers?.[String(q.id)];
+                            const isFreeText = q.questionType === "text" || q.questionType === "textarea";
+                            return (
+                              <td key={`cq-${q.id}`} className={`${cellCls} px-3 py-2`}>
+                                {isFreeText && typeof ans === "string" && ans ? maskFreeText(ans, showPII) : fmt(ans)}
+                              </td>
+                            );
+                          })}
+                          {aiQs.map((q, qi) => {
+                            const ans = reg.customAnswers?.[`ai_${qi}`];
+                            const isFreeText = (q as { questionType?: string }).questionType === "text" || (q as { questionType?: string }).questionType === "textarea";
+                            return (
+                              <td key={`ai-${qi}`} className={`${cellCls} px-3 py-2`}>
+                                {isFreeText && typeof ans === "string" && ans ? maskFreeText(ans, showPII) : fmt(ans)}
+                              </td>
+                            );
+                          })}
                           {hasMarketing && (
                             <td className={`${cellCls} px-3 py-2`}>{fmt(reg.customAnswers?.["marketing_consent"])}</td>
                           )}

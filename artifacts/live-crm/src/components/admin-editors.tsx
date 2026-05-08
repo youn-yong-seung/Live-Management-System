@@ -13,6 +13,7 @@ import {
   DollarSign, UserPlus, FilmIcon, CalendarDays, Zap, Upload, Youtube,
 } from "lucide-react";
 import { AdminTodoCalendar } from "@/components/admin-todo-calendar";
+import { usePIIVisible, maskName, maskPhone } from "@/lib/pii";
 
 /* ── Types ──────────────────────────────────────────── */
 
@@ -84,6 +85,7 @@ function shortDate(d: string | null) {
 
 export function AdminEditors() {
   const { toast } = useToast();
+  const showPII = usePIIVisible();
 
   // State
   const [editors, setEditors] = useState<Editor[]>([]);
@@ -402,8 +404,8 @@ export function AdminEditors() {
                   <TableRow><TableCell colSpan={6} className="text-center text-gray-400 py-8">편집자가 없습니다</TableCell></TableRow>
                 ) : editors.map((e) => (
                   <TableRow key={e.id}>
-                    <TableCell className="font-medium">{e.name}</TableCell>
-                    <TableCell className="text-sm">{e.phone}</TableCell>
+                    <TableCell className="font-medium">{maskName(e.name, showPII)}</TableCell>
+                    <TableCell className="text-sm">{maskPhone(e.phone, showPII)}</TableCell>
                     <TableCell className="text-sm">{PAY_LABELS[e.payType] || e.payType} {formatKRW(e.payAmount)}</TableCell>
                     <TableCell className="text-xs text-gray-500 max-w-[150px] truncate">{e.bankInfo || "-"}</TableCell>
                     <TableCell>
@@ -483,7 +485,7 @@ export function AdminEditors() {
                   <SelectTrigger><SelectValue placeholder="선택" /></SelectTrigger>
                   <SelectContent>
                     {editors.filter(e => e.isActive).map((e) => (
-                      <SelectItem key={e.id} value={String(e.id)}>{e.name}</SelectItem>
+                      <SelectItem key={e.id} value={String(e.id)}>{maskName(e.name, showPII)}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>

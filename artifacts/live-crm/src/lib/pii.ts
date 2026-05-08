@@ -87,3 +87,12 @@ export function maskEmail(email: string | null | undefined, show: boolean): stri
   const head = user.charAt(0);
   return `${head}${"*".repeat(Math.min(4, Math.max(2, user.length - 1)))}${domain}`;
 }
+
+// 자유 입력 텍스트(메시지·자유답변)는 통째로 가림. 길이 힌트만 노출.
+export function maskFreeText(text: string | null | undefined, show: boolean): string {
+  if (text === null || text === undefined) return "";
+  if (show) return String(text);
+  const s = String(text).trim();
+  if (s.length === 0) return "";
+  return `(가림 · ${s.length}자)`;
+}
