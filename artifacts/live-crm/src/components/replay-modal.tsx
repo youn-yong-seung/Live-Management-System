@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PlaySquare, MessageSquare, Star, Send, ExternalLink } from "lucide-react";
+import { usePIIVisible, maskName } from "@/lib/pii";
 
 interface Review {
   id: number;
@@ -50,6 +51,7 @@ export function ReplayModal({
   replay: ReplayLive | null;
   onClose: () => void;
 }) {
+  const showPII = usePIIVisible();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoadingReviews, setIsLoadingReviews] = useState(false);
   const [reviewForm, setReviewForm] = useState({ name: "", rating: 0, content: "" });
@@ -161,7 +163,7 @@ export function ReplayModal({
                   reviews.map((review) => (
                     <div key={review.id} className="bg-white/5 rounded-xl p-3.5 border border-white/5">
                       <div className="flex items-center justify-between mb-1.5">
-                        <span className="text-sm font-semibold text-white">{review.name}</span>
+                        <span className="text-sm font-semibold text-white">{maskName(review.name, showPII)}</span>
                         <StarRating value={review.rating} />
                       </div>
                       <p className="text-sm text-white/60 leading-relaxed">{review.content}</p>

@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { formatDate } from "@/lib/date-utils";
 import { Star, ChevronLeft, MessageSquare, Loader2 } from "lucide-react";
+import { usePIIVisible, maskName } from "@/lib/pii";
 
 /* ── Types ──────────────────────────────────────────── */
 
@@ -86,17 +87,18 @@ function StarRating({ value, onChange, readOnly = false }: { value: number; onCh
 
 /* ── Review Card Component ──────────────────────────── */
 
-function ReviewCard({ review }: { review: Review }) {
+function ReviewCard({ review, showPII }: { review: Review; showPII: boolean }) {
   const color = avatarColor(review.name);
+  const displayName = maskName(review.name, showPII);
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-3">
       <div className="flex items-start gap-3">
         <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 ${color}`}>
-          {getInitials(review.name)}
+          {getInitials(displayName)}
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between gap-2">
-            <p className="font-semibold text-gray-900 text-sm truncate">{review.name}</p>
+            <p className="font-semibold text-gray-900 text-sm truncate">{displayName}</p>
             <span className="text-xs text-gray-400 flex-shrink-0">{formatDate(review.createdAt)}</span>
           </div>
           <div className="flex gap-0.5 mt-1">
@@ -121,6 +123,7 @@ export default function ReviewPage() {
   const liveId = parseInt(params.id ?? "", 10);
   const [, navigate] = useLocation();
   const { toast } = useToast();
+  const showPII = usePIIVisible();
 
   const [live, setLive] = useState<LiveInfo | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -274,7 +277,7 @@ export default function ReviewPage() {
           ) : (
             <div className="max-h-[600px] overflow-y-auto pr-1 space-y-4">
               {reviews.map((review) => (
-                <ReviewCard key={review.id} review={review} />
+                <ReviewCard key={review.id} review={review} showPII={showPII} />
               ))}
             </div>
           )}
