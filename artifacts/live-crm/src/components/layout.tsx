@@ -91,9 +91,11 @@ export function Layout({ children }: { children: ReactNode }) {
 
       {/* Main Content */}
       <main className="flex-1">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
-          {children}
-        </div>
+        {location.startsWith("/admin") ? (
+          <div className="w-full">{children}</div>
+        ) : (
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">{children}</div>
+        )}
       </main>
 
       {/* Footer */}

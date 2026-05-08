@@ -905,7 +905,7 @@ export default function Admin() {
   return (
     <div className="lg:flex lg:gap-6 lg:items-start">
       {/* Mobile top bar — hamburger + current section + logout */}
-      <div className="lg:hidden flex items-center justify-between gap-3 mb-4 sticky top-16 z-30 bg-white/95 backdrop-blur-sm -mx-4 sm:-mx-6 px-4 sm:px-6 py-3 border-b border-gray-100">
+      <div className="lg:hidden flex items-center justify-between gap-3 sticky top-16 z-30 bg-white/95 backdrop-blur-sm px-4 sm:px-6 py-3 border-b border-gray-100">
         <button
           onClick={() => setSidebarOpen(true)}
           className="p-2 rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
@@ -1124,7 +1124,7 @@ export default function Admin() {
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 min-w-0 space-y-6">
+      <main className="flex-1 min-w-0 space-y-6 px-4 sm:px-6 lg:pl-0 lg:pr-6 py-4 lg:py-6">
         {/* Desktop section header */}
         <div className="hidden lg:block pt-2">
           <h1 className="text-2xl font-bold text-gray-900 mb-1">{currentNavItem.label}</h1>
