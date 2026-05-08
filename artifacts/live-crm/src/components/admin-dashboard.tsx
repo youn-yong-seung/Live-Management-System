@@ -3,6 +3,7 @@ import {
   Users, UserCheck, Star, TrendingUp, RefreshCw, Loader2,
   Sparkles, Radio, Briefcase, Clock, Crown, ArrowUpRight, Calendar,
 } from "lucide-react";
+import { usePIIVisible, maskName, maskPhone, maskEmail } from "@/lib/pii";
 import { Button } from "@/components/ui/button";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -170,6 +171,7 @@ export function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const showPII = usePIIVisible();
 
   /* ── Returning attendees trend ─────────────── */
   type TrendPoint = { liveId: number; title: string; scheduledAt: string | null; newCount: number; returningCount: number; totalCount: number; returningRate: number };
@@ -617,15 +619,15 @@ export function AdminDashboard() {
                   {data.superFans.map((f) => (
                     <tr key={f.phone_n} className="border-b border-gray-50 hover:bg-amber-50/30">
                       <td className="py-2.5 px-2">
-                        <div className="text-sm text-gray-900 font-medium">{f.name}</div>
+                        <div className="text-sm text-gray-900 font-medium">{maskName(f.name, showPII)}</div>
                         {f.email && (
-                          <div className="text-[11px] text-gray-400 truncate max-w-[180px]" title={f.email}>
-                            {f.email}
+                          <div className="text-[11px] text-gray-400 truncate max-w-[180px]" title={showPII ? f.email : undefined}>
+                            {maskEmail(f.email, showPII)}
                           </div>
                         )}
                       </td>
                       <td className="py-2.5 px-2 text-xs text-gray-500 tabular-nums hidden md:table-cell whitespace-nowrap">
-                        {f.phone}
+                        {maskPhone(f.phone, showPII)}
                       </td>
                       <td className="py-2.5 px-2 text-xs text-gray-600 hidden lg:table-cell">
                         {f.industry || "-"}

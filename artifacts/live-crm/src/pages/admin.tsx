@@ -22,8 +22,9 @@ import {
   Zap, Lock, Youtube, TrendingUp, ThumbsUp, X,
   MessageCircle, PlayCircle, BarChart2, Link2, MonitorPlay,
   ExternalLink, Gift, FileText, Sparkles, ShoppingBag,
-  Menu, GitBranch, MoreHorizontal, Calendar,
+  Menu, GitBranch, MoreHorizontal, Calendar, EyeOff, Shield,
 } from "lucide-react";
+import { usePIIVisible, setShowPII, maskName, maskPhone, maskEmail } from "@/lib/pii";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AdminEditors } from "@/components/admin-editors";
 import { AdminFormBuilder } from "@/components/admin-form-builder";
@@ -812,6 +813,7 @@ export default function Admin() {
   /* ── Sidebar nav state ────────────────────────── */
   const [activeTab, setActiveTab] = useState<string>("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const showPII = usePIIVisible();
 
   const navItems: Array<{ id: string; label: string; icon: typeof BarChart2; onSelect?: () => void }> = [
     { id: "dashboard", label: "대시보드", icon: BarChart2 },
@@ -950,7 +952,22 @@ export default function Admin() {
             );
           })}
         </nav>
-        <div className="p-3 border-t border-gray-100">
+        <div className="p-3 border-t border-gray-100 space-y-1">
+          <button
+            onClick={() => setShowPII(!showPII)}
+            className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+              showPII
+                ? "bg-amber-50 text-amber-800 hover:bg-amber-100"
+                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+            }`}
+            title="신청자 이름·전화·이메일을 임시로 표시"
+          >
+            {showPII ? <Eye className="h-4 w-4 flex-shrink-0" /> : <EyeOff className="h-4 w-4 flex-shrink-0" />}
+            <span className="truncate">{showPII ? "개인정보 표시 중" : "개인정보 가림"}</span>
+            <span className={`ml-auto text-[10px] px-1.5 py-0.5 rounded font-bold ${showPII ? "bg-amber-200/60 text-amber-900" : "bg-gray-200 text-gray-600"}`}>
+              {showPII ? "ON" : "OFF"}
+            </span>
+          </button>
           <button
             onClick={handleLogout}
             className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:bg-red-50 hover:text-red-600 transition-colors"
@@ -987,7 +1004,22 @@ export default function Admin() {
             );
           })}
         </nav>
-        <div className="p-3 border-t border-gray-100">
+        <div className="p-3 border-t border-gray-100 space-y-1">
+          <button
+            onClick={() => setShowPII(!showPII)}
+            className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+              showPII
+                ? "bg-amber-50 text-amber-800 hover:bg-amber-100"
+                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+            }`}
+            title="신청자 이름·전화·이메일을 임시로 표시"
+          >
+            {showPII ? <Eye className="h-4 w-4 flex-shrink-0" /> : <EyeOff className="h-4 w-4 flex-shrink-0" />}
+            <span className="truncate">{showPII ? "개인정보 표시 중" : "개인정보 가림"}</span>
+            <span className={`ml-auto text-[10px] px-1.5 py-0.5 rounded font-bold ${showPII ? "bg-amber-200/60 text-amber-900" : "bg-gray-200 text-gray-600"}`}>
+              {showPII ? "ON" : "OFF"}
+            </span>
+          </button>
           <button
             onClick={handleLogout}
             className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:bg-red-50 hover:text-red-600 transition-colors"
@@ -1915,9 +1947,9 @@ export default function Admin() {
                     <tbody>
                       {registrations.map((reg, ri) => (
                         <tr key={reg.id} className={ri % 2 === 0 ? "bg-white" : "bg-gray-50/40"}>
-                          <td className={`${cellCls} font-medium text-gray-900 px-3 py-2 sticky left-0 z-10 ${ri % 2 === 0 ? "bg-white" : "bg-gray-50/40"}`}>{reg.name}</td>
-                          <td className={`${cellCls} px-3 py-2`}>{reg.phone}</td>
-                          <td className={`${cellCls} px-3 py-2`}>{fmt(reg.email)}</td>
+                          <td className={`${cellCls} font-medium text-gray-900 px-3 py-2 sticky left-0 z-10 ${ri % 2 === 0 ? "bg-white" : "bg-gray-50/40"}`}>{maskName(reg.name, showPII)}</td>
+                          <td className={`${cellCls} px-3 py-2`}>{maskPhone(reg.phone, showPII)}</td>
+                          <td className={`${cellCls} px-3 py-2`}>{reg.email ? maskEmail(reg.email, showPII) : fmt(reg.email)}</td>
                           <td className={`${cellCls} px-3 py-2`}>{fmt(reg.industry)}</td>
                           <td className={`${cellCls} px-3 py-2`}>{fmt(reg.channelSource)}</td>
                           <td className={`${cellCls} px-3 py-2`}>{skillLabel(reg.skillLevel)}</td>
