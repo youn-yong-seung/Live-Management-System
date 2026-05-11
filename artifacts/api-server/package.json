@@ -21,7 +21,8 @@
     "googleapis": "^171.4.0",
     "pino": "^9",
     "pino-http": "^10",
-    "solapi": "^5.5.4"
+    "solapi": "^5.5.4",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@types/bcryptjs": "^3.0.0",

@@ -1,6 +1,6 @@
 import { ReactNode, useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "wouter";
-import { Home, Video, PlaySquare, GraduationCap, Download, GitBranch, Settings, Menu, X, Clapperboard, LogIn, LogOut, User as UserIcon } from "lucide-react";
+import { Home, Video, PlaySquare, GraduationCap, Download, GitBranch, Settings, Menu, X, Clapperboard, LogIn, LogOut, User as UserIcon, MessageSquare } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 
 const navItems = [
@@ -8,6 +8,7 @@ const navItems = [
   { href: "/techtree", label: "테크트리" },
   { href: "/lives", label: "라이브 신청" },
   { href: "/replays", label: "다시보기" },
+  { href: "/community", label: "커뮤니티" },
   { href: "/resources", label: "무료 자료" },
   { href: "/courses", label: "유료 강의" },
 ];
@@ -17,6 +18,7 @@ const navIcons: Record<string, typeof Home> = {
   "/techtree": GitBranch,
   "/lives": Video,
   "/replays": PlaySquare,
+  "/community": MessageSquare,
   "/resources": Download,
   "/courses": GraduationCap,
   "/video-factory": Clapperboard,

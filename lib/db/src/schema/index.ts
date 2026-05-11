@@ -3,3 +3,4 @@ export * from "./notifications";
 export * from "./editors";
 export * from "./marketing";
 export * from "./users";
+export * from "./community";

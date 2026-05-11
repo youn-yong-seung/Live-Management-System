@@ -8,6 +8,7 @@ import youtubeUploadRouter from "./youtube-upload";
 import marketingRouter from "./marketing";
 import techTreeRouter from "./tech-tree";
 import authRouter from "./auth";
+import communityRouter from "./community";
 
 const router: IRouter = Router();
 
@@ -20,5 +21,6 @@ router.use(youtubeUploadRouter);
 router.use(marketingRouter);
 router.use(techTreeRouter);
 router.use(authRouter);
+router.use(communityRouter);
 
 export default router;

@@ -11,6 +11,9 @@ import Replays from "@/pages/replays";
 import Courses from "@/pages/courses";
 import Resources from "@/pages/resources";
 import FreeGuideNanoBanana from "@/pages/free-guide-nano-banana";
+import Community from "@/pages/community";
+import CommunityNew from "@/pages/community-new";
+import CommunityDetail from "@/pages/community-detail";
 import TechTree from "@/pages/techtree";
 import Admin from "@/pages/admin";
 import VideoFactory from "@/pages/video-factory";
@@ -37,6 +40,9 @@ function MainRouter() {
         <Route path="/courses" component={Courses} />
         <Route path="/resources" component={Resources} />
         <Route path="/resources/nano-banana-vs-duct-tape" component={FreeGuideNanoBanana} />
+        <Route path="/community" component={Community} />
+        <Route path="/community/new" component={CommunityNew} />
+        <Route path="/community/:id" component={CommunityDetail} />
         <Route path="/techtree" component={TechTree} />
         <Route path="/video-factory" component={VideoFactory} />
         <Route path="/video-factory/:id" component={VideoFactoryDetail} />
