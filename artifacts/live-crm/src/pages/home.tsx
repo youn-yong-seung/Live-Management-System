@@ -111,29 +111,24 @@ export default function Home() {
     replays.filter((r) => ((r as any).tags as string[] | null)?.includes(tag)).slice(0, 4);
 
   return (
-    <div className="space-y-16">
-
-      {/* ── Hero Section ──────────────────────────────── */}
-      <div className="relative overflow-hidden rounded-3xl p-8 sm:p-12 glass-card-gold">
-        <div className="absolute inset-0 hero-bg" /><div className="absolute inset-0 hero-mesh" />
-        <div className="absolute top-0 right-0 w-96 h-96 bg-[#6366F1]/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3" />
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#005051]/50 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/4" />
-
-        <div className="relative">
-          <div className="inline-flex items-center gap-2 bg-[#6366F1]/15 backdrop-blur-sm rounded-full px-4 py-1.5 text-sm font-medium mb-6 text-[#6366F1] border border-[#6366F1]/20">
-            <Sparkles className="h-4 w-4" />
+    <>
+      {/* ── Hero ─────────────────────────────────────── */}
+      <section className="section-band">
+        <div className="section-band-inner text-center" style={{ paddingTop: "120px", paddingBottom: "120px" }}>
+          <div className="inline-flex items-center gap-2 bg-[#eef2ff] rounded-full px-3 py-1 text-xs font-semibold mb-6 text-[#6366F1]">
+            <Sparkles className="h-3.5 w-3.5" />
             무료 라이브 특강
           </div>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#111318] leading-tight mb-4" style={{ textShadow: "0 2px 20px rgba(0,0,0,0.3)" }}>
-            AI와 자동화로<br />일하는 방식을 바꾸세요
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-[#111318] leading-[1.2] tracking-tight mb-5">
+            AI와 자동화로<br />
+            일하는 방식을 바꾸세요
           </h1>
-          <p className="text-[#484d57] text-sm sm:text-base mb-8 max-w-lg leading-relaxed">
+          <p className="text-[#484d57] text-base sm:text-lg leading-relaxed max-w-xl mx-auto mb-10">
             클로드코드, 노션, Make 등 실전 툴을 활용한 무료 라이브 강의를 제공합니다.
-            지금 바로 시작하세요.
           </p>
-          <div className="flex flex-wrap gap-4">
+          <div className="flex flex-wrap gap-3 justify-center">
             <Link href="/lives">
-              <span className="inline-flex items-center gap-2 bg-[#6366F1] text-black font-bold text-sm px-6 py-3 rounded-xl hover:bg-[#818CF8] transition-all cursor-pointer gold-glow">
+              <span className="inline-flex items-center gap-2 bg-[#111318] text-white font-semibold text-sm px-6 py-3.5 rounded-md hover:bg-[#1f2127] transition-all cursor-pointer">
                 <Video className="h-4 w-4" />
                 라이브 신청하기
               </span>
@@ -142,16 +137,16 @@ export default function Home() {
               href="https://open.kakao.com/o/gCM9Aehi"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 border border-[#d1d5db] text-[#111318] font-semibold text-sm px-6 py-3 rounded-xl hover:bg-[#f7f8fa] hover:border-white/30 transition-all"
+              className="inline-flex items-center gap-2 border border-[#e5e7eb] text-[#111318] font-semibold text-sm px-6 py-3.5 rounded-md hover:bg-[#f7f8fa] transition-all"
             >
               <MessageCircle className="h-4 w-4" />
-              무료 특강 대기방 참여하기
+              무료 특강 대기방
             </a>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* ── DECLARATION (yun-platform declare-v2) ─────── */}
+      {/* ── DECLARATION (다크 풀폭) ──────────────────── */}
       <div className="declare-v2" ref={declare.ref}>
         <div className={`declare-v2-inner ${declare.visible ? "revealed" : ""}`}>
           <div className="declare-v2-icon">💡</div>
@@ -171,7 +166,7 @@ export default function Home() {
 
       {/* ── Live Now ─────────────────────────────────── */}
       {activeLives && activeLives.length > 0 && (
-        <div>
+        <section className="section-band section-band-alt"><div className="section-band-inner">
           <h2 className="text-lg font-bold text-[#111318] mb-4 flex items-center gap-2">
             <span className="h-2.5 w-2.5 rounded-full bg-red-500 animate-pulse" />
             지금 라이브 중
@@ -205,12 +200,12 @@ export default function Home() {
               </div>
             ))}
           </div>
-        </div>
+        </div></section>
       )}
 
       {/* ── Upcoming Live ─────────────────────────────── */}
       {scheduledLives && scheduledLives.length > 0 && (
-        <div>
+        <section className="section-band"><div className="section-band-inner">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-bold text-[#111318]">예정된 라이브</h2>
             <Link href="/lives">
@@ -236,11 +231,11 @@ export default function Home() {
               </div>
             ))}
           </div>
-        </div>
+        </div></section>
       )}
 
       {/* ── Free Resources ────────────────────────────── */}
-      <div>
+      <section className="section-band section-band-alt"><div className="section-band-inner">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-bold text-[#111318]">무료 자료 나눔</h2>
           <Link href="/resources">
@@ -275,11 +270,11 @@ export default function Home() {
             );
           })}
         </div>
-      </div>
+      </div></section>
 
       {/* ── Recommended Replays ───────────────────────── */}
       {!isLoading && recommended.length > 0 && (
-        <div>
+        <section className="section-band"><div className="section-band-inner">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
               <Star className="h-5 w-5 text-[#6366F1]" />
@@ -328,10 +323,11 @@ export default function Home() {
               );
             })}
           </div>
-        </div>
+        </div></section>
       )}
 
       {/* ── Charity Live Feature ─────────────────────── */}
+      <section className="section-band section-band-alt"><div className="section-band-inner">
       <div className="glass-card-gold overflow-hidden">
         <div className="flex flex-col sm:flex-row">
           <div className="sm:w-[45%] aspect-video sm:aspect-auto bg-black/30 overflow-hidden relative group cursor-pointer"
@@ -370,13 +366,14 @@ export default function Home() {
           </div>
         </div>
       </div>
+      </div></section>
 
       {/* ── Category Sections ─────────────────────────── */}
-      {!isLoading && CATEGORY_SECTIONS.map((section) => {
+      {!isLoading && CATEGORY_SECTIONS.map((section, idx) => {
         const items = getByTag(section.tag);
         if (items.length === 0) return null;
         return (
-          <div key={section.tag}>
+          <section key={section.tag} className={`section-band${idx % 2 === 0 ? "" : " section-band-alt"}`}><div className="section-band-inner">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2">
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center bg-[#f7f8fa] border border-[#e5e7eb]`}>
@@ -415,26 +412,28 @@ export default function Home() {
                 );
               })}
             </div>
-          </div>
+          </div></section>
         );
       })}
 
       {/* ── Loading ─────────────────────────────────────── */}
       {isLoading && (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className={`${gc} overflow-hidden`}>
-              <Skeleton className="aspect-video w-full bg-[#f7f8fa]" />
-              <div className="p-4 space-y-2">
-                <Skeleton className="h-4 w-3/4 bg-[#f7f8fa]" />
-                <Skeleton className="h-3 w-1/2 bg-[#f7f8fa]" />
+        <section className="section-band"><div className="section-band-inner">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className={`${gc} overflow-hidden`}>
+                <Skeleton className="aspect-video w-full bg-[#f7f8fa]" />
+                <div className="p-4 space-y-2">
+                  <Skeleton className="h-4 w-3/4 bg-[#f7f8fa]" />
+                  <Skeleton className="h-3 w-1/2 bg-[#f7f8fa]" />
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        </div></section>
       )}
 
       <ReplayModal replay={modalReplay} onClose={() => setModalReplay(null)} />
-    </div>
+    </>
   );
 }

@@ -155,7 +155,7 @@ export function Layout({ children }: { children: ReactNode }) {
       </header>
 
       <main className="flex-1">
-        {location.startsWith("/admin") ? (
+        {location.startsWith("/admin") || location === "/" ? (
           <div className="w-full">{children}</div>
         ) : (
           <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">{children}</div>

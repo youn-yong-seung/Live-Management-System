@@ -90,14 +90,14 @@
   --gold: #6366F1;
   --gold-soft: #f7f1e8;
 
-  /* ── Card shared tokens ── */
+  /* ── Card shared tokens (yunaisolution 심플 패턴) ── */
   --card-bg: #ffffff;
   --card-border-color: var(--line);
-  --card-radius: 16px;
-  --card-radius-sm: 12px;
-  --card-shadow-subtle: 0 8px 32px rgba(0, 0, 0, 0.08);
-  --card-shadow-hover: 0 16px 40px -16px rgba(0, 0, 0, 0.12);
-  --card-transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  --card-radius: 8px;
+  --card-radius-sm: 6px;
+  --card-shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.04);
+  --card-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --card-transition: all 0.2s ease;
 
   --button-outline: rgba(0, 0, 0, 0.08);
   --badge-outline: rgba(0, 0, 0, 0.04);
@@ -198,7 +198,7 @@
   }
 }
 
-/* ── Cards (라이트 톤, yun-platform 패턴) ─────────────── */
+/* ── Cards (심플, yunaisolution 패턴) ───────────────────── */
 
 .glass-card {
   position: relative;
@@ -209,60 +209,65 @@
 }
 
 .glass-card:hover {
+  border-color: #d1d5db;
   box-shadow: var(--card-shadow-subtle);
-  transform: translateY(-2px);
 }
 
 .glass-card-gold {
   position: relative;
   background: var(--card-bg);
-  border: 1px solid rgba(99, 102, 241, 0.4);
+  border: 1px solid var(--card-border-color);
   border-radius: var(--card-radius);
-  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.08);
   transition: var(--card-transition);
 }
 
 .glass-card-gold:hover {
-  box-shadow: 0 16px 40px -16px rgba(99, 102, 241, 0.25);
-  border-color: rgba(99, 102, 241, 0.6);
-  transform: translateY(-2px);
+  border-color: #6366F1;
+  box-shadow: var(--card-shadow-subtle);
 }
 
 .gold-glow {
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
-  transition: box-shadow 0.3s ease;
+  transition: background-color 0.2s ease;
 }
 
 .gold-glow:hover {
-  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+  /* 그림자 제거, hover bg 변화만 */
 }
 
-/* ── Hero backgrounds (yun-platform 패턴) ─────────────── */
+/* ── Hero (심플 단색) ───────────────────────────────────── */
 
-/* 베이스 라이트 그라데이션 — 부드러운 페이스텔 톤 */
 .hero-bg {
-  background: linear-gradient(170deg, #fafbfc 0%, #eef2ff 25%, #f0f4ff 45%, #fff8f0 70%, #fafbfc 100%);
+  background: var(--bg);
 }
 
-/* 컬러 mesh — radial gradients (파랑/보라/골드/빨강 옅은 점) */
 .hero-mesh {
-  opacity: 0.45;
-  background:
-    radial-gradient(circle at 20% 30%, rgba(27, 100, 242, 0.14) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(124, 58, 237, 0.10) 0%, transparent 50%),
-    radial-gradient(circle at 50% 80%, rgba(99, 102, 241, 0.10) 0%, transparent 50%),
-    radial-gradient(circle at 70% 60%, rgba(255, 59, 48, 0.05) 0%, transparent 40%);
+  display: none;
 }
 
-/* 추가 glow (정적) */
 .hero-glow {
-  position: absolute;
-  width: 520px;
-  height: 520px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(27, 100, 242, 0.10) 0%, transparent 70%);
-  pointer-events: none;
-  z-index: 1;
+  display: none;
+}
+
+/* ── Section alternation (yunaisolution 패턴) ─────────── */
+
+.section-band {
+  width: 100%;
+}
+
+.section-band-alt {
+  background: var(--bg-2);
+}
+
+.section-band-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 80px 24px;
+}
+
+@media (max-width: 640px) {
+  .section-band-inner {
+    padding: 56px 20px;
+  }
 }
 
 /* ─── yun-platform Declare V2 ─── */
@@ -271,11 +276,10 @@
   background-size: 200% 200%;
   animation: gradientBg 8s ease infinite;
   color: #fff;
-  padding: 64px 32px;
+  padding: 96px 32px;
   text-align: center;
   position: relative;
   overflow: hidden;
-  border-radius: 24px;
 }
 .declare-v2::before {
   content: "";
