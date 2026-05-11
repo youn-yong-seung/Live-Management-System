@@ -1,7 +1,7 @@
 import { ExternalLink, BookOpen, Download, GraduationCap, FileText, Crown, Zap, MessageCircle, ArrowRight } from "lucide-react";
 import { Link } from "wouter";
 
-const gcHover = "glass-card hover:bg-white/[0.06] hover:-translate-y-1 transition-all duration-300";
+const gcHover = "glass-card hover:bg-[#eef0f3] hover:-translate-y-1 transition-all duration-300";
 
 interface Resource {
   title: string;
@@ -131,18 +131,18 @@ export default function Resources() {
     <div className="space-y-12">
       <div className="pt-2">
         <h1 className="text-2xl font-bold text-white mb-1">무료 자료</h1>
-        <p className="text-white/50 text-sm">템플릿, 전자책, 가이드 등 무료 자료를 다운받으세요.</p>
+        <p className="text-[#8b8f98] text-sm">템플릿, 전자책, 가이드 등 무료 자료를 다운받으세요.</p>
       </div>
 
       {SECTIONS.map((section) => (
         <div key={section.title}>
           <div className="flex items-center gap-3 mb-5">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-white/5 border border-white/10">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-[#f7f8fa] border border-[#e5e7eb]">
               <section.icon className={`h-4.5 w-4.5 ${section.iconColor}`} />
             </div>
             <div>
               <h2 className="text-lg font-bold text-white">{section.title}</h2>
-              <p className="text-xs text-white/40">{section.description}</p>
+              <p className="text-xs text-[#8b8f98]">{section.description}</p>
             </div>
           </div>
 
@@ -163,7 +163,7 @@ export default function Resources() {
                     )}
                   </div>
                   <h3 className="font-bold text-white text-sm mb-1 group-hover:text-[#CC9965] transition-colors">{item.title}</h3>
-                  <p className="text-xs text-white/40 leading-relaxed">{item.description}</p>
+                  <p className="text-xs text-[#8b8f98] leading-relaxed">{item.description}</p>
                 </div>
               );
               return item.internal ? (

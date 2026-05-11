@@ -129,11 +129,11 @@ export function ReplayModal({
               </div>
               <div className="p-5 flex-shrink-0">
                 <h2 className="text-lg font-bold text-white mb-1">{replay.title}</h2>
-                <p className="text-sm text-white/50 line-clamp-2">{replay.description}</p>
+                <p className="text-sm text-[#8b8f98] line-clamp-2">{replay.description}</p>
                 {tags?.length ? (
                   <div className="flex flex-wrap gap-1.5 mt-3">
                     {tags.map((tag) => (
-                      <span key={tag} className="text-xs bg-white/5 text-white/40 px-2.5 py-1 rounded-full border border-white/5">{tag}</span>
+                      <span key={tag} className="text-xs bg-[#f7f8fa] text-[#8b8f98] px-2.5 py-1 rounded-full border border-white/5">{tag}</span>
                     ))}
                   </div>
                 ) : null}
@@ -147,11 +147,11 @@ export function ReplayModal({
             </div>
 
             {/* Right: Reviews */}
-            <div className="w-full lg:w-[360px] border-t lg:border-t-0 lg:border-l border-white/10 flex flex-col min-h-0 max-h-[40vh] lg:max-h-none">
-              <div className="flex items-center gap-2 px-5 py-4 border-b border-white/10 flex-shrink-0">
+            <div className="w-full lg:w-[360px] border-t lg:border-t-0 lg:border-l border-[#e5e7eb] flex flex-col min-h-0 max-h-[40vh] lg:max-h-none">
+              <div className="flex items-center gap-2 px-5 py-4 border-b border-[#e5e7eb] flex-shrink-0">
                 <MessageSquare className="h-4 w-4 text-[#CC9965]" />
                 <span className="font-bold text-white text-sm">후기</span>
-                <span className="text-xs text-white/40">({reviews.length})</span>
+                <span className="text-xs text-[#8b8f98]">({reviews.length})</span>
               </div>
 
               <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
@@ -161,28 +161,28 @@ export function ReplayModal({
                   </div>
                 ) : reviews.length > 0 ? (
                   reviews.map((review) => (
-                    <div key={review.id} className="bg-white/5 rounded-xl p-3.5 border border-white/5">
+                    <div key={review.id} className="bg-[#f7f8fa] rounded-xl p-3.5 border border-white/5">
                       <div className="flex items-center justify-between mb-1.5">
                         <span className="text-sm font-semibold text-white">{maskName(review.name, showPII)}</span>
                         <StarRating value={review.rating} />
                       </div>
-                      <p className="text-sm text-white/60 leading-relaxed">{review.content}</p>
+                      <p className="text-sm text-[#484d57] leading-relaxed">{review.content}</p>
                     </div>
                   ))
                 ) : (
-                  <div className="text-center py-8 text-white/30 text-sm">
+                  <div className="text-center py-8 text-[#a0a4ab] text-sm">
                     아직 후기가 없습니다.<br />첫 후기를 남겨보세요!
                   </div>
                 )}
               </div>
 
-              <div className="border-t border-white/10 p-4 flex-shrink-0 space-y-3 bg-white/[0.03]">
+              <div className="border-t border-[#e5e7eb] p-4 flex-shrink-0 space-y-3 bg-white/[0.03]">
                 <div className="flex items-center gap-3">
                   <Input
                     placeholder="이름"
                     value={reviewForm.name}
                     onChange={(e) => setReviewForm((f) => ({ ...f, name: e.target.value }))}
-                    className="flex-1 h-9 text-sm rounded-lg border-white/10 bg-white/5 text-white placeholder:text-white/30"
+                    className="flex-1 h-9 text-sm rounded-lg border-[#e5e7eb] bg-[#f7f8fa] text-white placeholder:text-[#a0a4ab]"
                   />
                   <StarRating value={reviewForm.rating} onChange={(v) => setReviewForm((f) => ({ ...f, rating: v }))} />
                 </div>
@@ -191,7 +191,7 @@ export function ReplayModal({
                     placeholder="후기를 남겨주세요..."
                     value={reviewForm.content}
                     onChange={(e) => setReviewForm((f) => ({ ...f, content: e.target.value }))}
-                    className="flex-1 resize-none text-sm rounded-lg border-white/10 bg-white/5 text-white placeholder:text-white/30 min-h-[60px]"
+                    className="flex-1 resize-none text-sm rounded-lg border-[#e5e7eb] bg-[#f7f8fa] text-white placeholder:text-[#a0a4ab] min-h-[60px]"
                     rows={2}
                   />
                   <Button

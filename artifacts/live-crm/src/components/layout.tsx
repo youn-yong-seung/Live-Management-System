@@ -44,13 +44,12 @@ export function Layout({ children }: { children: ReactNode }) {
   }, [profileOpen]);
 
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* Top Navigation — Glass Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-2xl bg-[rgba(5,10,10,0.85)] border-b border-white/[0.06]">
+    <div className="min-h-screen flex flex-col" style={{ background: "var(--bg)" }}>
+      <header className="sticky top-0 z-50 backdrop-blur-xl bg-white/90 border-b border-[#e5e7eb]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5" data-testid="nav-home">
             <span className="text-xl font-black text-[#CC9965] tracking-tight">윤자동</span>
-            <span className="hidden sm:inline-block text-xs font-semibold text-white/50 border border-white/15 rounded px-1.5 py-0.5">클래스</span>
+            <span className="hidden sm:inline-block text-xs font-semibold text-[#8b8f98] border border-[#e5e7eb] rounded px-1.5 py-0.5">클래스</span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-1">
@@ -61,8 +60,8 @@ export function Layout({ children }: { children: ReactNode }) {
                   <span
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                       isActive
-                        ? "bg-[#CC9965]/15 text-[#CC9965]"
-                        : "text-white/60 hover:text-white hover:bg-white/5"
+                        ? "bg-[#CC9965]/12 text-[#CC9965]"
+                        : "text-[#484d57] hover:text-[#111318] hover:bg-[#f7f8fa]"
                     }`}
                     data-testid={`nav-${item.href.replace("/", "") || "home"}`}
                   >
@@ -78,24 +77,24 @@ export function Layout({ children }: { children: ReactNode }) {
               <div className="relative" ref={profileRef}>
                 <button
                   onClick={() => setProfileOpen(!profileOpen)}
-                  className="flex items-center gap-2 p-1 rounded-full hover:bg-white/5 transition-colors"
+                  className="flex items-center gap-2 p-1 rounded-full hover:bg-[#f7f8fa] transition-colors"
                   data-testid="nav-profile"
                   aria-label="프로필 메뉴"
                 >
                   {user.avatarUrl ? (
                     <img src={user.avatarUrl} alt={user.name ?? user.email} className="w-8 h-8 rounded-full" />
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-[#CC9965]/20 border border-[#CC9965]/30 flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-full bg-[#CC9965]/15 border border-[#CC9965]/30 flex items-center justify-center">
                       <UserIcon className="h-4 w-4 text-[#CC9965]" />
                     </div>
                   )}
                 </button>
 
                 {profileOpen && (
-                  <div className="absolute right-0 mt-2 w-56 glass-card-gold rounded-xl overflow-hidden shadow-xl z-50">
-                    <div className="px-4 py-3 border-b border-white/[0.06]">
-                      <div className="text-sm font-semibold text-white truncate">{user.name ?? "회원"}</div>
-                      <div className="text-xs text-white/40 truncate">{user.email}</div>
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl overflow-hidden shadow-lg border border-[#e5e7eb] z-50">
+                    <div className="px-4 py-3 border-b border-[#eef0f3]">
+                      <div className="text-sm font-semibold text-[#111318] truncate">{user.name ?? "회원"}</div>
+                      <div className="text-xs text-[#8b8f98] truncate">{user.email}</div>
                       {user.role === "admin" && (
                         <span className="inline-block mt-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#CC9965]/15 text-[#CC9965] border border-[#CC9965]/30">ADMIN</span>
                       )}
@@ -105,7 +104,7 @@ export function Layout({ children }: { children: ReactNode }) {
                         setProfileOpen(false);
                         await signOut();
                       }}
-                      className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-white/70 hover:bg-white/5 transition-colors"
+                      className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-[#484d57] hover:bg-[#f7f8fa] transition-colors"
                       data-testid="btn-logout"
                     >
                       <LogOut className="h-4 w-4" /> 로그아웃
@@ -115,14 +114,14 @@ export function Layout({ children }: { children: ReactNode }) {
               </div>
             ) : (
               <Link href="/login">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-white/80 hover:bg-white/5 border border-white/15 cursor-pointer transition-all" data-testid="nav-login">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-[#484d57] hover:bg-[#f7f8fa] border border-[#e5e7eb] cursor-pointer transition-all" data-testid="nav-login">
                   <LogIn className="h-3.5 w-3.5" /> <span className="hidden sm:inline">로그인</span>
                 </span>
               </Link>
             ))}
 
             <button
-              className="md:hidden p-2 rounded-lg text-white/60 hover:bg-white/5"
+              className="md:hidden p-2 rounded-lg text-[#484d57] hover:bg-[#f7f8fa]"
               onClick={() => setMobileOpen(!mobileOpen)}
               data-testid="mobile-menu"
             >
@@ -132,7 +131,7 @@ export function Layout({ children }: { children: ReactNode }) {
         </div>
 
         {mobileOpen && (
-          <div className="md:hidden border-t border-white/[0.06] bg-[rgba(5,10,10,0.95)] backdrop-blur-2xl">
+          <div className="md:hidden border-t border-[#e5e7eb] bg-white">
             <nav className="max-w-6xl mx-auto px-4 py-2 flex flex-col gap-1">
               {navItems.map((item) => {
                 const Icon = navIcons[item.href];
@@ -141,7 +140,7 @@ export function Layout({ children }: { children: ReactNode }) {
                   <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)}>
                     <span
                       className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium ${
-                        isActive ? "bg-[#CC9965]/15 text-[#CC9965]" : "text-white/70 hover:bg-white/5"
+                        isActive ? "bg-[#CC9965]/12 text-[#CC9965]" : "text-[#484d57] hover:bg-[#f7f8fa]"
                       }`}
                     >
                       {Icon && <Icon className="h-4 w-4" />}
@@ -155,7 +154,6 @@ export function Layout({ children }: { children: ReactNode }) {
         )}
       </header>
 
-      {/* Main Content */}
       <main className="flex-1">
         {location.startsWith("/admin") ? (
           <div className="w-full">{children}</div>
@@ -164,9 +162,8 @@ export function Layout({ children }: { children: ReactNode }) {
         )}
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-white/[0.06] py-8">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center text-sm text-white/30">
+      <footer className="border-t border-[#e5e7eb] py-8 bg-[#f7f8fa]">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center text-sm text-[#8b8f98]">
           © 2026 윤자동 클래스. All rights reserved.
         </div>
       </footer>

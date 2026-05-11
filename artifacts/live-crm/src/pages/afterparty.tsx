@@ -116,7 +116,7 @@ export default function Afterparty() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#050A0A] flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-[#CC9965]" />
       </div>
     );
@@ -124,9 +124,9 @@ export default function Afterparty() {
 
   if (error || !data) {
     return (
-      <div className="min-h-screen bg-[#050A0A] flex flex-col items-center justify-center p-8 text-center">
-        <p className="text-white/70 text-lg font-medium mb-2">{error ?? "라이브를 찾을 수 없습니다."}</p>
-        <p className="text-white/40 text-sm">URL을 다시 확인해주세요.</p>
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center p-8 text-center">
+        <p className="text-[#484d57] text-lg font-medium mb-2">{error ?? "라이브를 찾을 수 없습니다."}</p>
+        <p className="text-[#8b8f98] text-sm">URL을 다시 확인해주세요.</p>
       </div>
     );
   }
@@ -137,7 +137,7 @@ export default function Afterparty() {
   const hasKakao = data.kakao.url.trim() !== "";
 
   return (
-    <div className="min-h-screen bg-[#050A0A] text-white">
+    <div className="min-h-screen bg-white text-white">
       {/* ── Decorative ambient blobs ──────────────────── */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
         <div className="absolute top-[-10%] left-[-10%] w-[40rem] h-[40rem] rounded-full bg-[#005051]/20 blur-[120px]" />
@@ -155,7 +155,7 @@ export default function Afterparty() {
             오늘 함께해주셔서<br className="sm:hidden" />
             <span className="text-[#CC9965]"> 정말 고맙습니다 🙏</span>
           </h1>
-          <p className="text-white/60 text-sm sm:text-base leading-relaxed max-w-xl mx-auto">
+          <p className="text-[#484d57] text-sm sm:text-base leading-relaxed max-w-xl mx-auto">
             아래에서 <span className="text-white font-semibold">오늘 라이브 다시보기</span>와{" "}
             <span className="text-white font-semibold">무료 자료</span>를 받아가시고,<br className="hidden sm:block" />
             매주 무료 특강이 열리는 카톡방에도 꼭 입장해보세요.
@@ -169,7 +169,7 @@ export default function Afterparty() {
               <PlayCircle className="h-4.5 w-4.5 text-[#CC9965]" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs text-white/40 font-medium mb-1 flex items-center gap-1.5">
+              <p className="text-xs text-[#8b8f98] font-medium mb-1 flex items-center gap-1.5">
                 <Calendar className="h-3 w-3" />
                 {data.live.scheduledAt ? formatDate(data.live.scheduledAt) : "오늘의 라이브"}
               </p>
@@ -177,7 +177,7 @@ export default function Afterparty() {
             </div>
           </div>
           {data.live.description && (
-            <p className="text-sm text-white/50 leading-relaxed mt-3 whitespace-pre-line">
+            <p className="text-sm text-[#8b8f98] leading-relaxed mt-3 whitespace-pre-line">
               {data.live.description}
             </p>
           )}
@@ -187,7 +187,7 @@ export default function Afterparty() {
         <section className="space-y-3">
           <div className="flex items-center gap-2 px-1">
             <PlayCircle className="h-4 w-4 text-[#CC9965]" />
-            <h3 className="text-sm font-bold text-white/90 uppercase tracking-wider">다시보기</h3>
+            <h3 className="text-sm font-bold text-[#111318] uppercase tracking-wider">다시보기</h3>
           </div>
           <div className="glass-card overflow-hidden p-0">
             <div className="aspect-video w-full bg-black relative">
@@ -232,7 +232,7 @@ export default function Afterparty() {
                   </button>
                 )
               ) : (
-                <div className="w-full h-full flex flex-col items-center justify-center text-white/30 gap-2">
+                <div className="w-full h-full flex flex-col items-center justify-center text-[#a0a4ab] gap-2">
                   <PlayCircle className="h-12 w-12" />
                   <p className="text-sm">아직 다시보기 영상이 등록되지 않았습니다</p>
                 </div>
@@ -244,7 +244,7 @@ export default function Afterparty() {
               href={data.live.youtubeUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-xs text-white/40 hover:text-[#CC9965] transition-colors px-1"
+              className="inline-flex items-center gap-1.5 text-xs text-[#8b8f98] hover:text-[#CC9965] transition-colors px-1"
             >
               <ExternalLink className="h-3 w-3" />
               YouTube에서 보기
@@ -257,8 +257,8 @@ export default function Afterparty() {
           <section className="space-y-3">
             <div className="flex items-center gap-2 px-1">
               <Gift className="h-4 w-4 text-[#CC9965]" />
-              <h3 className="text-sm font-bold text-white/90 uppercase tracking-wider">오늘의 무료 자료</h3>
-              <span className="text-xs text-white/30 font-medium">({data.materials.length}개)</span>
+              <h3 className="text-sm font-bold text-[#111318] uppercase tracking-wider">오늘의 무료 자료</h3>
+              <span className="text-xs text-[#a0a4ab] font-medium">({data.materials.length}개)</span>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               {data.materials.map((m, i) => (
@@ -275,12 +275,12 @@ export default function Afterparty() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-white truncate">{m.title}</p>
-                    <p className="text-xs text-white/40 mt-0.5 flex items-center gap-1">
+                    <p className="text-xs text-[#8b8f98] mt-0.5 flex items-center gap-1">
                       <Download className="h-3 w-3" />
                       받기
                     </p>
                   </div>
-                  <ArrowRight className="h-4 w-4 text-white/30 group-hover:text-[#CC9965] group-hover:translate-x-0.5 transition-all flex-shrink-0" />
+                  <ArrowRight className="h-4 w-4 text-[#a0a4ab] group-hover:text-[#CC9965] group-hover:translate-x-0.5 transition-all flex-shrink-0" />
                 </a>
               ))}
             </div>
@@ -292,8 +292,8 @@ export default function Afterparty() {
           <section className="space-y-3">
             <div className="flex items-center gap-2 px-1">
               <ShoppingBag className="h-4 w-4 text-[#CC9965]" />
-              <h3 className="text-sm font-bold text-white/90 uppercase tracking-wider">관련 상품</h3>
-              <span className="text-xs text-white/30 font-medium">({data.products.length}개)</span>
+              <h3 className="text-sm font-bold text-[#111318] uppercase tracking-wider">관련 상품</h3>
+              <span className="text-xs text-[#a0a4ab] font-medium">({data.products.length}개)</span>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               {data.products.map((p, i) => (
@@ -305,17 +305,17 @@ export default function Afterparty() {
                   onClick={() => track(liveId, "product_click", { title: p.title, url: p.url, index: i })}
                   className="glass-card p-4 sm:p-5 flex items-center gap-3 group hover:-translate-y-0.5 transition-all duration-300"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0 group-hover:bg-[#CC9965]/15 group-hover:border-[#CC9965]/30 transition-colors">
-                    <ShoppingBag className="h-4.5 w-4.5 text-white/70 group-hover:text-[#CC9965] transition-colors" />
+                  <div className="w-10 h-10 rounded-xl bg-[#f7f8fa] border border-[#e5e7eb] flex items-center justify-center flex-shrink-0 group-hover:bg-[#CC9965]/15 group-hover:border-[#CC9965]/30 transition-colors">
+                    <ShoppingBag className="h-4.5 w-4.5 text-[#484d57] group-hover:text-[#CC9965] transition-colors" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-white truncate">{p.title}</p>
-                    <p className="text-xs text-white/40 mt-0.5 flex items-center gap-1">
+                    <p className="text-xs text-[#8b8f98] mt-0.5 flex items-center gap-1">
                       <ExternalLink className="h-3 w-3" />
                       자세히 보기
                     </p>
                   </div>
-                  <ArrowRight className="h-4 w-4 text-white/30 group-hover:text-[#CC9965] group-hover:translate-x-0.5 transition-all flex-shrink-0" />
+                  <ArrowRight className="h-4 w-4 text-[#a0a4ab] group-hover:text-[#CC9965] group-hover:translate-x-0.5 transition-all flex-shrink-0" />
                 </a>
               ))}
             </div>
@@ -327,7 +327,7 @@ export default function Afterparty() {
           <section className="space-y-3">
             <div className="flex items-center gap-2 px-1">
               <MessageCircle className="h-4 w-4 text-[#CC9965]" />
-              <h3 className="text-sm font-bold text-white/90 uppercase tracking-wider">매주 무료 특강 카톡방</h3>
+              <h3 className="text-sm font-bold text-[#111318] uppercase tracking-wider">매주 무료 특강 카톡방</h3>
             </div>
 
             <div className="glass-card-gold p-6 sm:p-8 space-y-5">
@@ -346,7 +346,7 @@ export default function Afterparty() {
                   "톡방에 들어오기만 해도 매주 무료 자료 발송",
                   "지나간 모든 라이브 다시보기 무료 제공",
                 ].map((item) => (
-                  <li key={item} className="flex items-start gap-2 text-sm text-white/80">
+                  <li key={item} className="flex items-start gap-2 text-sm text-[#111318]">
                     <Check className="h-4 w-4 text-[#CC9965] mt-0.5 flex-shrink-0" />
                     <span>{item}</span>
                   </li>
@@ -370,7 +370,7 @@ export default function Afterparty() {
 
         {/* ── Footer ────────────────────────────────── */}
         <footer className="pt-6 text-center">
-          <p className="text-xs text-white/30">
+          <p className="text-xs text-[#a0a4ab]">
             자동화가 필요하면 <span className="text-[#CC9965] font-semibold">윤자동</span> · 구독
           </p>
         </footer>

@@ -64,7 +64,7 @@ export default function CommunityNew() {
   if (loading || !user) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-6 w-6 text-white/40 animate-spin" />
+        <Loader2 className="h-6 w-6 text-[#8b8f98] animate-spin" />
       </div>
     );
   }
@@ -72,14 +72,14 @@ export default function CommunityNew() {
   return (
     <div className="space-y-6">
       <Link href="/community">
-        <span className="inline-flex items-center gap-1.5 text-sm text-white/50 hover:text-[#CC9965] transition-colors cursor-pointer">
+        <span className="inline-flex items-center gap-1.5 text-sm text-[#8b8f98] hover:text-[#CC9965] transition-colors cursor-pointer">
           <ArrowLeft className="h-3.5 w-3.5" /> 커뮤니티 목록
         </span>
       </Link>
 
       <div>
         <h1 className="text-2xl font-bold text-white mb-1">글쓰기</h1>
-        <p className="text-white/50 text-sm">윤자동 클래스 커뮤니티에 글을 남겨주세요.</p>
+        <p className="text-[#8b8f98] text-sm">윤자동 클래스 커뮤니티에 글을 남겨주세요.</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -90,7 +90,7 @@ export default function CommunityNew() {
           placeholder="제목을 입력하세요"
           maxLength={200}
           disabled={submitting}
-          className="w-full px-5 py-3.5 rounded-xl bg-white/[0.04] border border-white/10 text-white text-lg font-semibold placeholder:text-white/30 focus:outline-none focus:border-[#CC9965]/50 focus:bg-white/[0.06] transition-colors disabled:opacity-50"
+          className="w-full px-5 py-3.5 rounded-xl bg-[#f7f8fa] border border-[#e5e7eb] text-white text-lg font-semibold placeholder:text-[#a0a4ab] focus:outline-none focus:border-[#CC9965]/50 focus:bg-[#eef0f3] transition-colors disabled:opacity-50"
           data-testid="input-post-title"
         />
 
@@ -111,7 +111,7 @@ export default function CommunityNew() {
 
         <div className="flex justify-end gap-2 pt-2">
           <Link href="/community">
-            <span className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl border border-white/15 text-sm font-medium text-white/70 hover:bg-white/5 cursor-pointer transition-colors">
+            <span className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl border border-[#e5e7eb] text-sm font-medium text-[#484d57] hover:bg-[#f7f8fa] cursor-pointer transition-colors">
               취소
             </span>
           </Link>

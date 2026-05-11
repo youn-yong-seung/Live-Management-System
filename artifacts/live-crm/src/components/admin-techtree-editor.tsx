@@ -671,7 +671,7 @@ function ModuleCard({
             </span>
           )}
           {/* live id */}
-          <span className="absolute bottom-1.5 right-1.5 text-[9px] font-mono px-1 py-0.5 rounded bg-black/60 text-white/80">#{node.liveId}</span>
+          <span className="absolute bottom-1.5 right-1.5 text-[9px] font-mono px-1 py-0.5 rounded bg-black/60 text-[#111318]">#{node.liveId}</span>
         </div>
 
         {/* Body */}

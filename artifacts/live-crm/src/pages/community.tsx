@@ -46,7 +46,7 @@ export default function Community() {
       <div className="flex flex-wrap items-end justify-between gap-3 pt-2">
         <div>
           <h1 className="text-2xl font-bold text-white mb-1">커뮤니티</h1>
-          <p className="text-white/50 text-sm">윤자동 클래스 회원들의 이야기와 질문을 나누세요.</p>
+          <p className="text-[#8b8f98] text-sm">윤자동 클래스 회원들의 이야기와 질문을 나누세요.</p>
         </div>
         {user ? (
           <Link href="/community/new">
@@ -56,7 +56,7 @@ export default function Community() {
           </Link>
         ) : (
           <Link href="/login">
-            <span className="inline-flex items-center gap-2 border border-white/20 text-white/80 font-semibold text-sm px-5 py-2.5 rounded-xl hover:bg-white/5 cursor-pointer transition-all">
+            <span className="inline-flex items-center gap-2 border border-[#d1d5db] text-[#111318] font-semibold text-sm px-5 py-2.5 rounded-xl hover:bg-[#f7f8fa] cursor-pointer transition-all">
               로그인 후 글쓰기
             </span>
           </Link>
@@ -67,8 +67,8 @@ export default function Community() {
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
             <div key={i} className="glass-card p-5 animate-pulse">
-              <div className="h-4 w-2/3 bg-white/5 rounded mb-2" />
-              <div className="h-3 w-1/3 bg-white/5 rounded" />
+              <div className="h-4 w-2/3 bg-[#f7f8fa] rounded mb-2" />
+              <div className="h-3 w-1/3 bg-[#f7f8fa] rounded" />
             </div>
           ))}
         </div>
@@ -77,8 +77,8 @@ export default function Community() {
       {posts !== null && posts.length === 0 && (
         <div className="glass-card p-12 text-center">
           <MessageSquare className="h-10 w-10 text-white/20 mx-auto mb-4" />
-          <p className="text-white/50 text-sm mb-1">아직 글이 없어요.</p>
-          <p className="text-white/30 text-xs">첫 번째 글을 작성해보세요.</p>
+          <p className="text-[#8b8f98] text-sm mb-1">아직 글이 없어요.</p>
+          <p className="text-[#a0a4ab] text-xs">첫 번째 글을 작성해보세요.</p>
         </div>
       )}
 
@@ -86,15 +86,15 @@ export default function Community() {
         <div className="space-y-3">
           {posts.map((p) => (
             <Link key={p.id} href={`/community/${p.id}`}>
-              <div className="glass-card hover:bg-white/[0.06] hover:-translate-y-0.5 transition-all p-5 cursor-pointer group" data-testid={`post-${p.id}`}>
+              <div className="glass-card hover:bg-[#eef0f3] hover:-translate-y-0.5 transition-all p-5 cursor-pointer group" data-testid={`post-${p.id}`}>
                 <div className="flex items-start justify-between gap-3 mb-2">
                   <h2 className="font-bold text-white text-base leading-snug line-clamp-1 group-hover:text-[#CC9965] transition-colors">
                     {p.title}
                   </h2>
                   <ChevronRight className="h-4 w-4 text-white/20 group-hover:text-[#CC9965] flex-shrink-0 mt-1 transition-colors" />
                 </div>
-                <p className="text-sm text-white/50 line-clamp-2 mb-3 whitespace-pre-line">{p.body}</p>
-                <div className="flex flex-wrap items-center gap-3 text-xs text-white/40">
+                <p className="text-sm text-[#8b8f98] line-clamp-2 mb-3 whitespace-pre-line">{p.body}</p>
+                <div className="flex flex-wrap items-center gap-3 text-xs text-[#8b8f98]">
                   <div className="flex items-center gap-1.5">
                     {p.authorAvatarUrl ? (
                       <img src={p.authorAvatarUrl} alt={p.authorName ?? ""} className="w-5 h-5 rounded-full" />

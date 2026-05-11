@@ -111,14 +111,14 @@ export function ChannelSourceField({
 
   const isDark = theme === "dark";
   const cardBase = isDark
-    ? "border-white/10 bg-white/5 hover:bg-white/10 text-white/70"
+    ? "border-[#e5e7eb] bg-[#f7f8fa] hover:bg-white/10 text-[#484d57]"
     : "border-gray-200 bg-white hover:bg-gray-50 text-gray-700";
   const cardActive = isDark
     ? "border-[#CC9965] bg-[#CC9965]/10 text-[#CC9965]"
     : "border-blue-500 bg-blue-50 text-blue-700";
-  const channelLabel = isDark ? "text-white/70" : "text-gray-700";
+  const channelLabel = isDark ? "text-[#484d57]" : "text-gray-700";
   const inputCls = isDark
-    ? "rounded-xl border-white/10 bg-white/5 !text-white placeholder:text-white/30"
+    ? "rounded-xl border-[#e5e7eb] bg-[#f7f8fa] !text-white placeholder:text-[#a0a4ab]"
     : "!rounded-xl !border-gray-200 !text-black";
 
   const showCustomInput =
@@ -174,12 +174,12 @@ export function ChannelSourceField({
       {platform && channelsForPlatform.length > 0 && (
         <div
           className={`rounded-xl border px-3 py-3 ${
-            isDark ? "border-white/10 bg-white/[0.03]" : "border-gray-200 bg-gray-50"
+            isDark ? "border-[#e5e7eb] bg-white/[0.03]" : "border-gray-200 bg-gray-50"
           }`}
         >
           <p
             className={`text-[11px] font-medium mb-2 ${
-              isDark ? "text-white/50" : "text-gray-500"
+              isDark ? "text-[#8b8f98]" : "text-gray-500"
             }`}
           >
             {platform === CUSTOM_PLATFORM

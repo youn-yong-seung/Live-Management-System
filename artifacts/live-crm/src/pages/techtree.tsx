@@ -144,7 +144,7 @@ function NodeTooltip({ node, color }: { node: TreeNode; color: string }) {
   const ytId = extractYoutubeId(node.youtubeUrl);
   return (
     <div className="absolute z-50 w-[320px] left-1/2 -translate-x-1/2 bottom-full mb-3 pointer-events-none">
-      <div className="bg-[rgba(5,10,10,0.97)] backdrop-blur-2xl border border-white/10 rounded-2xl overflow-hidden shadow-[0_16px_48px_rgba(0,0,0,0.7)]">
+      <div className="bg-[rgba(5,10,10,0.97)] backdrop-blur-2xl border border-[#e5e7eb] rounded-2xl overflow-hidden shadow-[0_16px_48px_rgba(0,0,0,0.7)]">
         {/* Thumbnail */}
         {ytId && (
           <div className="aspect-video bg-black/50">
@@ -162,13 +162,13 @@ function NodeTooltip({ node, color }: { node: TreeNode; color: string }) {
             {node.level}
           </span>
           <h4 className="text-sm font-bold text-white mt-1.5 mb-1 leading-snug">{node.title}</h4>
-          <p className="text-xs text-white/40 mb-3">{node.description}</p>
+          <p className="text-xs text-[#8b8f98] mb-3">{node.description}</p>
 
           {/* Gains */}
           <div className="space-y-1.5 mb-3">
             <p className="text-[10px] font-semibold text-[#CC9965] uppercase tracking-wider">습득 스킬</p>
             {node.gains.map((g) => (
-              <div key={g} className="flex items-center gap-2 text-xs text-white/60">
+              <div key={g} className="flex items-center gap-2 text-xs text-[#484d57]">
                 <span className="w-1 h-1 rounded-full flex-shrink-0" style={{ background: color }} />
                 {g}
               </div>
@@ -178,13 +178,13 @@ function NodeTooltip({ node, color }: { node: TreeNode; color: string }) {
           {/* Tags */}
           <div className="flex flex-wrap gap-1">
             {node.tags.map((t) => (
-              <span key={t} className="text-[10px] bg-white/5 text-white/40 px-2 py-0.5 rounded-full border border-white/5">{t}</span>
+              <span key={t} className="text-[10px] bg-[#f7f8fa] text-[#8b8f98] px-2 py-0.5 rounded-full border border-white/5">{t}</span>
             ))}
           </div>
         </div>
       </div>
       {/* Arrow */}
-      <div className="w-3 h-3 bg-[rgba(5,10,10,0.97)] border-b border-r border-white/10 rotate-45 absolute left-1/2 -translate-x-1/2 -bottom-1.5" />
+      <div className="w-3 h-3 bg-[rgba(5,10,10,0.97)] border-b border-r border-[#e5e7eb] rotate-45 absolute left-1/2 -translate-x-1/2 -bottom-1.5" />
     </div>
   );
 }
@@ -226,7 +226,7 @@ function SkillInfoPanel({
 
           {/* Title & desc */}
           <h4 className="text-sm font-bold text-white leading-snug mb-1">{node.title}</h4>
-          <p className="text-[11px] text-white/40 mb-3 leading-relaxed">{node.description}</p>
+          <p className="text-[11px] text-[#8b8f98] mb-3 leading-relaxed">{node.description}</p>
 
           {/* Gains */}
           <div className="mb-4">
@@ -235,7 +235,7 @@ function SkillInfoPanel({
               {node.gains.map((g) => (
                 <div key={g} className="flex items-start gap-2">
                   <span className="w-1 h-1 rounded-full mt-1.5 flex-shrink-0" style={{ background: color }} />
-                  <span className="text-[11px] text-white/60 leading-snug">{g}</span>
+                  <span className="text-[11px] text-[#484d57] leading-snug">{g}</span>
                 </div>
               ))}
             </div>
@@ -251,7 +251,7 @@ function SkillInfoPanel({
               100% 무료로 시청하기
             </button>
           ) : (
-            <p className="text-[11px] text-white/40 text-center py-2">아래 분기점에서 학습 경로를 선택하세요</p>
+            <p className="text-[11px] text-[#8b8f98] text-center py-2">아래 분기점에서 학습 경로를 선택하세요</p>
           )}
         </div>
       </div>
@@ -464,7 +464,7 @@ export default function TechTree() {
       <div className="pt-4 text-center">
         <p className="text-[#00E5E5]/60 text-xs font-semibold uppercase tracking-[0.2em] mb-3">SKILL TREE</p>
         <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-3" style={{ textShadow: "0 0 40px rgba(0,229,229,0.15)" }}>테크트리</h1>
-        <p className="text-white/40 text-sm max-w-md mx-auto">시작 지점을 선택하고 나만의 성장 루트를 따라가세요</p>
+        <p className="text-[#8b8f98] text-sm max-w-md mx-auto">시작 지점을 선택하고 나만의 성장 루트를 따라가세요</p>
       </div>
 
       {/* ── Arc Path Selector ────────────────────────── */}
@@ -545,7 +545,7 @@ export default function TechTree() {
 
                 {/* Label */}
                 <span className={`mt-3 text-xs font-semibold transition-colors duration-300 ${
-                  isSelected ? "text-[#00E5E5]" : "text-white/40 group-hover:text-white/70"
+                  isSelected ? "text-[#00E5E5]" : "text-[#8b8f98] group-hover:text-[#484d57]"
                 }`}>
                   {path.name}
                 </span>
@@ -562,7 +562,7 @@ export default function TechTree() {
                       boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
                     }}>
                     <p className="text-[10px] text-[#00E5E5]/70 font-medium">{path.nodes.length}개 강의</p>
-                    <p className="text-[11px] text-white/50 mt-0.5">{path.description}</p>
+                    <p className="text-[11px] text-[#8b8f98] mt-0.5">{path.description}</p>
                   </div>
                 </div>
               </div>
@@ -578,7 +578,7 @@ export default function TechTree() {
           <div className="text-center mb-10">
             <span className="text-3xl mb-3 block">{currentPath.emoji}</span>
             <h2 className="text-xl font-bold text-white mb-1" style={{ textShadow: `0 0 30px ${currentPath.glowColor}` }}>{currentPath.name} 테크트리</h2>
-            <p className="text-xs text-white/40">{currentPath.description}</p>
+            <p className="text-xs text-[#8b8f98]">{currentPath.description}</p>
             <div className="mt-4 mx-auto w-24 h-px" style={{ background: `linear-gradient(to right, transparent, ${currentPath.color}60, transparent)` }} />
           </div>
 
@@ -642,13 +642,13 @@ export default function TechTree() {
           </div>
 
           {/* Completion */}
-          <div className="text-center mt-12 pt-8 border-t border-white/[0.06]">
+          <div className="text-center mt-12 pt-8 border-t border-[#eef0f3]">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold"
               style={{ background: `${currentPath.color}15`, color: currentPath.color, border: `1px solid ${currentPath.color}30` }}>
               <Star className="h-3.5 w-3.5" />
               {activeNodes.size}/{currentPath.nodes.length} 완료
             </div>
-            <p className="text-xs text-white/30 mt-3">
+            <p className="text-xs text-[#a0a4ab] mt-3">
               노드를 클릭하면 영상이 열립니다. 마우스를 올려 강의 정보를 미리 확인하세요.
             </p>
           </div>
@@ -659,7 +659,7 @@ export default function TechTree() {
       {!selectedPath && (
         <div className="text-center py-10">
           <ChevronDown className="h-6 w-6 text-white/20 mx-auto animate-bounce" />
-          <p className="text-sm text-white/30 mt-2">위에서 시작할 테크트리를 선택하세요</p>
+          <p className="text-sm text-[#a0a4ab] mt-2">위에서 시작할 테크트리를 선택하세요</p>
         </div>
       )}
 

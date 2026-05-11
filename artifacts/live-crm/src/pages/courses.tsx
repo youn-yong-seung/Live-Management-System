@@ -1,6 +1,6 @@
 import { ExternalLink, GraduationCap, Star } from "lucide-react";
 
-const gcHover = "glass-card hover:bg-white/[0.06] hover:-translate-y-1 transition-all duration-300";
+const gcHover = "glass-card hover:bg-[#eef0f3] hover:-translate-y-1 transition-all duration-300";
 
 const COURSES = [
   {
@@ -47,7 +47,7 @@ export default function Courses() {
     <div className="space-y-10">
       <div className="pt-2">
         <h1 className="text-2xl font-bold text-white mb-1">유료 강의</h1>
-        <p className="text-white/50 text-sm">더 깊이 배우고 싶다면, 체계적인 커리큘럼의 유료 강의를 확인하세요.</p>
+        <p className="text-[#8b8f98] text-sm">더 깊이 배우고 싶다면, 체계적인 커리큘럼의 유료 강의를 확인하세요.</p>
       </div>
 
       {/* Banner */}
@@ -58,7 +58,7 @@ export default function Courses() {
           </div>
           <div>
             <h2 className="text-lg font-bold text-white mb-1">무료 특강으로 부족하셨나요?</h2>
-            <p className="text-white/50 text-sm">무료 라이브에서 맛본 내용을 유료 강의에서 깊이 있게 배워보세요. 실전 프로젝트와 1:1 코칭까지 포함된 프리미엄 과정입니다.</p>
+            <p className="text-[#8b8f98] text-sm">무료 라이브에서 맛본 내용을 유료 강의에서 깊이 있게 배워보세요. 실전 프로젝트와 1:1 코칭까지 포함된 프리미엄 과정입니다.</p>
           </div>
         </div>
       </div>
@@ -79,29 +79,29 @@ export default function Courses() {
                   <span className={`${course.badgeColor} text-white text-xs font-bold px-3 py-1 rounded-full`}>
                     {course.badge}
                   </span>
-                  <span className="text-xs text-white/30 font-medium">{course.platform}</span>
+                  <span className="text-xs text-[#a0a4ab] font-medium">{course.platform}</span>
                 </div>
 
                 <h3 className="text-xl font-bold text-white mb-2 group-hover:text-[#CC9965] transition-colors">
                   {course.title}
                 </h3>
-                <p className="text-sm text-white/50 mb-4 leading-relaxed">{course.description}</p>
+                <p className="text-sm text-[#8b8f98] mb-4 leading-relaxed">{course.description}</p>
 
                 <div className="flex flex-wrap gap-1.5 mb-5">
                   {course.tags.map((tag) => (
-                    <span key={tag} className="bg-white/5 text-white/50 text-xs font-medium px-2.5 py-1 rounded-full border border-white/5">
+                    <span key={tag} className="bg-[#f7f8fa] text-[#8b8f98] text-xs font-medium px-2.5 py-1 rounded-full border border-white/5">
                       {tag}
                     </span>
                   ))}
                 </div>
 
-                <div className="flex items-end justify-between pt-5 border-t border-white/10">
+                <div className="flex items-end justify-between pt-5 border-t border-[#e5e7eb]">
                   <div>
                     {course.rating && (
                       <div className="flex items-center gap-1 mb-2">
                         <Star className="h-4 w-4 fill-[#CC9965] text-[#CC9965]" />
                         <span className="text-sm font-semibold text-white">{course.rating}</span>
-                        <span className="text-xs text-white/30">({course.reviewCount})</span>
+                        <span className="text-xs text-[#a0a4ab]">({course.reviewCount})</span>
                       </div>
                     )}
                     {course.discountRate && (
@@ -111,7 +111,7 @@ export default function Courses() {
                       <span className="text-xl font-bold text-white">{course.originalPrice}</span>
                     )}
                     {course.installment && (
-                      <p className="text-xs text-white/30 mt-1">{course.installment}</p>
+                      <p className="text-xs text-[#a0a4ab] mt-1">{course.installment}</p>
                     )}
                   </div>
 

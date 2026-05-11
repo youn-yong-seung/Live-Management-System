@@ -232,7 +232,7 @@ export default function Lives() {
       {/* Page Header */}
       <div className="pt-2">
         <h1 className="text-2xl font-bold text-white mb-1">라이브 신청</h1>
-        <p className="text-white/50 text-sm">예정된 라이브 일정을 확인하고 참가 신청하세요. 신청 시 카카오 알림톡이 발송됩니다.</p>
+        <p className="text-[#8b8f98] text-sm">예정된 라이브 일정을 확인하고 참가 신청하세요. 신청 시 카카오 알림톡이 발송됩니다.</p>
       </div>
 
       {/* ── Monthly Calendar ──────────────────── */}
@@ -241,7 +241,7 @@ export default function Lives() {
         <div className="flex items-center justify-between mb-5">
           <button
             onClick={() => setCalMonth(subMonths(calMonth, 1))}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-white/50 hover:text-[#CC9965] hover:bg-white/5 transition-colors"
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-[#8b8f98] hover:text-[#CC9965] hover:bg-[#f7f8fa] transition-colors"
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
@@ -250,7 +250,7 @@ export default function Lives() {
           </h3>
           <button
             onClick={() => setCalMonth(addMonths(calMonth, 1))}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-white/50 hover:text-[#CC9965] hover:bg-white/5 transition-colors"
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-[#8b8f98] hover:text-[#CC9965] hover:bg-[#f7f8fa] transition-colors"
           >
             <ChevronRight className="h-5 w-5" />
           </button>
@@ -259,7 +259,7 @@ export default function Lives() {
         {/* Weekday headers */}
         <div className="grid grid-cols-7 mb-2">
           {["일", "월", "화", "수", "목", "금", "토"].map((d) => (
-            <div key={d} className="text-center text-xs font-medium text-white/30 py-1">{d}</div>
+            <div key={d} className="text-center text-xs font-medium text-[#a0a4ab] py-1">{d}</div>
           ))}
         </div>
 
@@ -282,7 +282,7 @@ export default function Lives() {
                       ? "bg-[#CC9965]/20 text-[#CC9965] font-bold border border-[#CC9965]/30"
                       : dayLives
                         ? "text-white font-semibold"
-                        : "text-white/50"
+                        : "text-[#8b8f98]"
                   }`}
                 >
                   {format(day, "d")}
@@ -301,11 +301,11 @@ export default function Lives() {
 
         {/* Upcoming list under calendar */}
         {lives && lives.length > 0 && (
-          <div className="mt-5 pt-5 border-t border-white/[0.06] space-y-3">
+          <div className="mt-5 pt-5 border-t border-[#eef0f3] space-y-3">
             {lives.slice(0, 5).map((live) => (
               <div
                 key={live.id}
-                className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] transition-colors cursor-pointer"
+                className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] hover:bg-[#eef0f3] transition-colors cursor-pointer"
                 onClick={() => { setSelectedLiveId(live.id); setIsDialogOpen(true); }}
               >
                 <div className="w-10 h-10 rounded-lg bg-[#CC9965]/15 border border-[#CC9965]/20 flex flex-col items-center justify-center flex-shrink-0">
@@ -318,7 +318,7 @@ export default function Lives() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-white truncate">{live.title}</p>
-                  <p className="text-xs text-white/40">
+                  <p className="text-xs text-[#8b8f98]">
                     {live.scheduledAt ? format(new Date(live.scheduledAt), "a h:mm", { locale: ko }) : "시간 미정"}
                     {" · "}신청자 {live.registrationCount}명
                   </p>
@@ -349,12 +349,12 @@ export default function Lives() {
                 <div className="flex items-center gap-2 mb-2">
                   <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
                   <span className="text-xs font-bold text-red-400 uppercase tracking-wide">LIVE NOW</span>
-                  <span className="text-xs text-white/30">{live.registrationCount}명 참석</span>
+                  <span className="text-xs text-[#a0a4ab]">{live.registrationCount}명 참석</span>
                 </div>
                 <h3 className="font-bold text-white hover:text-[#CC9965] transition-colors mb-1">{live.title}</h3>
-                <p className="text-sm text-white/50 line-clamp-2 mb-3">{live.description}</p>
+                <p className="text-sm text-[#8b8f98] line-clamp-2 mb-3">{live.description}</p>
               </div>
-              <div className="flex gap-2 pt-3 border-t border-white/[0.06]">
+              <div className="flex gap-2 pt-3 border-t border-[#eef0f3]">
                 {live.youtubeUrl && (
                   <a href={live.youtubeUrl} target="_blank" rel="noopener noreferrer"
                     className="flex-1 flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white text-xs font-bold py-2.5 rounded-lg transition-colors">
@@ -362,7 +362,7 @@ export default function Lives() {
                   </a>
                 )}
                 <button
-                  className="flex-1 flex items-center justify-center gap-2 border border-white/10 text-white/60 hover:text-[#CC9965] hover:border-[#CC9965]/30 text-xs font-bold py-2.5 rounded-lg transition-colors"
+                  className="flex-1 flex items-center justify-center gap-2 border border-[#e5e7eb] text-[#484d57] hover:text-[#CC9965] hover:border-[#CC9965]/30 text-xs font-bold py-2.5 rounded-lg transition-colors"
                   onClick={() => setModalReplay(live)}>
                   <Star className="h-3.5 w-3.5" /> 후기 작성하기
                 </button>
@@ -376,11 +376,11 @@ export default function Lives() {
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3].map(i => (
             <div key={i} className="glass-card overflow-hidden">
-              <Skeleton className="h-44 w-full bg-white/5" />
+              <Skeleton className="h-44 w-full bg-[#f7f8fa]" />
               <div className="p-5 space-y-3">
-                <Skeleton className="h-5 w-3/4 bg-white/5" />
-                <Skeleton className="h-4 w-1/2 bg-white/5" />
-                <Skeleton className="h-10 w-full rounded-xl bg-white/5" />
+                <Skeleton className="h-5 w-3/4 bg-[#f7f8fa]" />
+                <Skeleton className="h-4 w-1/2 bg-[#f7f8fa]" />
+                <Skeleton className="h-10 w-full rounded-xl bg-[#f7f8fa]" />
               </div>
             </div>
           ))}
@@ -388,7 +388,7 @@ export default function Lives() {
       ) : lives && lives.length > 0 ? (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {lives.map((live) => (
-            <div key={live.id} className="glass-card hover:bg-white/[0.06] hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col">
+            <div key={live.id} className="glass-card hover:bg-[#eef0f3] hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col">
               {live.thumbnailUrl ? (
                 <div className="h-44 w-full bg-black/30 overflow-hidden">
                   <img src={live.thumbnailUrl} alt={live.title} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
@@ -404,9 +404,9 @@ export default function Lives() {
                   <span>{formatDate(live.scheduledAt)}</span>
                 </div>
                 <h3 className="font-bold text-white leading-snug line-clamp-2 mb-2">{live.title}</h3>
-                <p className="text-sm text-white/50 line-clamp-3 flex-1 mb-4">{live.description || "설명이 없습니다."}</p>
+                <p className="text-sm text-[#8b8f98] line-clamp-3 flex-1 mb-4">{live.description || "설명이 없습니다."}</p>
                 <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-1.5 text-xs text-white/30">
+                  <div className="flex items-center gap-1.5 text-xs text-[#a0a4ab]">
                     <Users className="h-3.5 w-3.5" />
                     <span>신청자 {live.registrationCount}명</span>
                   </div>
@@ -425,11 +425,11 @@ export default function Lives() {
         </div>
       ) : (
         <div className="glass-card py-20 text-center">
-          <div className="w-14 h-14 bg-white/5 rounded-2xl border border-white/10 flex items-center justify-center mx-auto mb-4">
+          <div className="w-14 h-14 bg-[#f7f8fa] rounded-2xl border border-[#e5e7eb] flex items-center justify-center mx-auto mb-4">
             <Calendar className="h-6 w-6 text-white/20" />
           </div>
-          <p className="font-semibold text-white/60 mb-1">예정된 라이브가 없습니다</p>
-          <p className="text-sm text-white/30">새 라이브 일정이 등록되면 이 곳에 표시됩니다.</p>
+          <p className="font-semibold text-[#484d57] mb-1">예정된 라이브가 없습니다</p>
+          <p className="text-sm text-[#a0a4ab]">새 라이브 일정이 등록되면 이 곳에 표시됩니다.</p>
         </div>
       )}
 

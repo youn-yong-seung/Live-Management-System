@@ -5,7 +5,7 @@ import { formatDate } from "@/lib/date-utils";
 import { ReplayModal } from "@/components/replay-modal";
 import { PlaySquare, Calendar, Users, PlayCircle } from "lucide-react";
 
-const gcHover = "glass-card hover:bg-white/[0.06] hover:-translate-y-1 transition-all duration-300";
+const gcHover = "glass-card hover:bg-[#eef0f3] hover:-translate-y-1 transition-all duration-300";
 
 function extractYoutubeId(url: string) {
   const m = url.match(/(?:youtu\.be\/|v=|\/embed\/|\/live\/)([^#&?]{11})/);
@@ -38,7 +38,7 @@ export default function Replays() {
     <div className="space-y-10">
       <div className="pt-2">
         <h1 className="text-2xl font-bold text-white mb-1">다시보기</h1>
-        <p className="text-white/50 text-sm">종료된 라이브를 언제든지 다시 시청하세요.</p>
+        <p className="text-[#8b8f98] text-sm">종료된 라이브를 언제든지 다시 시청하세요.</p>
       </div>
 
       {!isLoading && allCategories.length > 0 && (
@@ -48,7 +48,7 @@ export default function Replays() {
             className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
               selectedCategory === null
                 ? "bg-[#CC9965] text-black"
-                : "bg-white/5 text-white/60 border border-white/10 hover:bg-white/10"
+                : "bg-[#f7f8fa] text-[#484d57] border border-[#e5e7eb] hover:bg-white/10"
             }`}
           >
             전체
@@ -60,7 +60,7 @@ export default function Replays() {
               className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
                 selectedCategory === cat
                   ? "bg-[#CC9965] text-black"
-                  : "bg-white/5 text-white/60 border border-white/10 hover:bg-white/10"
+                  : "bg-[#f7f8fa] text-[#484d57] border border-[#e5e7eb] hover:bg-white/10"
               }`}
             >
               {cat}
@@ -73,10 +73,10 @@ export default function Replays() {
         <div className="grid gap-6 sm:grid-cols-2">
           {[1, 2, 3, 4].map(i => (
             <div key={i} className={`glass-card overflow-hidden`}>
-              <Skeleton className="aspect-video w-full bg-white/5" />
+              <Skeleton className="aspect-video w-full bg-[#f7f8fa]" />
               <div className="p-5 space-y-3">
-                <Skeleton className="h-5 w-3/4 bg-white/5" />
-                <Skeleton className="h-4 w-1/2 bg-white/5" />
+                <Skeleton className="h-5 w-3/4 bg-[#f7f8fa]" />
+                <Skeleton className="h-4 w-1/2 bg-[#f7f8fa]" />
               </div>
             </div>
           ))}
@@ -106,7 +106,7 @@ export default function Replays() {
                   </div>
                 </div>
                 <div className="p-5 flex flex-col flex-1">
-                  <div className="flex items-center justify-between text-xs text-white/30 mb-2">
+                  <div className="flex items-center justify-between text-xs text-[#a0a4ab] mb-2">
                     <span className="flex items-center gap-1.5">
                       <Calendar className="h-3.5 w-3.5" />
                       {formatDate(replay.scheduledAt)}
@@ -123,14 +123,14 @@ export default function Replays() {
                         <span
                           key={tag}
                           onClick={(e) => { e.stopPropagation(); setSelectedCategory(selectedCategory === tag ? null : tag); }}
-                          className="inline-block bg-white/5 text-white/50 text-xs font-medium px-2.5 py-1 rounded-full border border-white/5 cursor-pointer hover:bg-[#CC9965]/10 hover:text-[#CC9965] hover:border-[#CC9965]/20 transition-all"
+                          className="inline-block bg-[#f7f8fa] text-[#8b8f98] text-xs font-medium px-2.5 py-1 rounded-full border border-white/5 cursor-pointer hover:bg-[#CC9965]/10 hover:text-[#CC9965] hover:border-[#CC9965]/20 transition-all"
                         >
                           {tag}
                         </span>
                       ))}
                     </div>
                   ) : null}
-                  <p className="text-sm text-white/40 line-clamp-2 flex-1">{replay.description || "설명이 없습니다."}</p>
+                  <p className="text-sm text-[#8b8f98] line-clamp-2 flex-1">{replay.description || "설명이 없습니다."}</p>
                 </div>
               </div>
             );
@@ -138,11 +138,11 @@ export default function Replays() {
         </div>
       ) : (
         <div className={`glass-card py-20 text-center`}>
-          <div className="w-14 h-14 bg-white/5 rounded-2xl border border-white/10 flex items-center justify-center mx-auto mb-4">
+          <div className="w-14 h-14 bg-[#f7f8fa] rounded-2xl border border-[#e5e7eb] flex items-center justify-center mx-auto mb-4">
             <PlaySquare className="h-6 w-6 text-white/20" />
           </div>
-          <p className="font-semibold text-white/60 mb-1">다시보기 영상이 없습니다</p>
-          <p className="text-sm text-white/30">아직 종료된 라이브 스트리밍이 없습니다.</p>
+          <p className="font-semibold text-[#484d57] mb-1">다시보기 영상이 없습니다</p>
+          <p className="text-sm text-[#a0a4ab]">아직 종료된 라이브 스트리밍이 없습니다.</p>
         </div>
       )}
 

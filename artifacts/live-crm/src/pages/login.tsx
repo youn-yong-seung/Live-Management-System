@@ -18,11 +18,11 @@ export default function Login() {
       <div className="relative glass-card-gold w-full max-w-md p-8 sm:p-10 rounded-3xl">
         <div className="text-center mb-8">
           <div className="text-3xl font-black text-[#CC9965] tracking-tight mb-1">윤자동</div>
-          <div className="text-xs font-semibold text-white/50 border border-white/15 rounded px-2 py-0.5 inline-block">클래스</div>
+          <div className="text-xs font-semibold text-[#8b8f98] border border-[#e5e7eb] rounded px-2 py-0.5 inline-block">클래스</div>
         </div>
 
         <h1 className="text-xl sm:text-2xl font-bold text-white text-center mb-2">로그인 / 회원가입</h1>
-        <p className="text-sm text-white/50 text-center mb-8 leading-relaxed">
+        <p className="text-sm text-[#8b8f98] text-center mb-8 leading-relaxed">
           한 번의 로그인으로 라이브, 자료실, 커뮤니티까지 모두 이용하세요.
         </p>
 
@@ -36,7 +36,7 @@ export default function Login() {
           Google 계정으로 시작하기
         </button>
 
-        <p className="mt-8 text-[11px] text-white/30 text-center leading-relaxed">
+        <p className="mt-8 text-[11px] text-[#a0a4ab] text-center leading-relaxed">
           로그인 시 윤자동 클래스의 이용약관과 개인정보처리방침에 동의하는 것으로 간주합니다.
         </p>
       </div>

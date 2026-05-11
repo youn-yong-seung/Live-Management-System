@@ -142,7 +142,7 @@ export default function CommunityDetail() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-6 w-6 text-white/40 animate-spin" />
+        <Loader2 className="h-6 w-6 text-[#8b8f98] animate-spin" />
       </div>
     );
   }
@@ -150,7 +150,7 @@ export default function CommunityDetail() {
   if (notFound || !post) {
     return (
       <div className="glass-card p-12 text-center">
-        <p className="text-white/50 mb-4">게시글을 찾을 수 없습니다.</p>
+        <p className="text-[#8b8f98] mb-4">게시글을 찾을 수 없습니다.</p>
         <Link href="/community">
           <span className="text-sm text-[#CC9965] hover:underline cursor-pointer">커뮤니티 목록으로</span>
         </Link>
@@ -163,7 +163,7 @@ export default function CommunityDetail() {
   return (
     <div className="space-y-6">
       <Link href="/community">
-        <span className="inline-flex items-center gap-1.5 text-sm text-white/50 hover:text-[#CC9965] transition-colors cursor-pointer">
+        <span className="inline-flex items-center gap-1.5 text-sm text-[#8b8f98] hover:text-[#CC9965] transition-colors cursor-pointer">
           <ArrowLeft className="h-3.5 w-3.5" /> 커뮤니티 목록
         </span>
       </Link>
@@ -171,7 +171,7 @@ export default function CommunityDetail() {
       <article className="glass-card p-6 sm:p-8">
         <h1 className="text-2xl font-bold text-white mb-4 leading-snug">{post.title}</h1>
 
-        <div className="flex flex-wrap items-center justify-between gap-3 pb-4 mb-6 border-b border-white/[0.06]">
+        <div className="flex flex-wrap items-center justify-between gap-3 pb-4 mb-6 border-b border-[#eef0f3]">
           <div className="flex items-center gap-2 text-sm">
             {post.authorAvatarUrl ? (
               <img src={post.authorAvatarUrl} alt={post.authorName ?? ""} className="w-8 h-8 rounded-full" />
@@ -180,14 +180,14 @@ export default function CommunityDetail() {
             )}
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-white/85 font-medium">{post.authorName ?? "회원"}</span>
+                <span className="text-[#111318] font-medium">{post.authorName ?? "회원"}</span>
                 {post.authorRole === "admin" && (
                   <span className="inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#CC9965]/15 text-[#CC9965] border border-[#CC9965]/30">
                     <Shield className="h-3 w-3" /> ADMIN
                   </span>
                 )}
               </div>
-              <div className="flex items-center gap-2 text-xs text-white/40">
+              <div className="flex items-center gap-2 text-xs text-[#8b8f98]">
                 <span>{formatRelative(post.createdAt)}</span>
                 <span className="flex items-center gap-1"><Eye className="h-3 w-3" /> {post.viewCount}</span>
               </div>
@@ -208,29 +208,29 @@ export default function CommunityDetail() {
 
         {post.bodyHtml ? (
           <div
-            className="prose prose-invert max-w-none text-white/85 prose-headings:text-white prose-strong:text-white prose-a:text-[#CC9965]"
+            className="prose prose-invert max-w-none text-[#111318] prose-headings:text-white prose-strong:text-white prose-a:text-[#CC9965]"
             dangerouslySetInnerHTML={{ __html: post.bodyHtml }}
           />
         ) : (
-          <p className="text-white/80 whitespace-pre-line leading-relaxed">{post.body}</p>
+          <p className="text-[#111318] whitespace-pre-line leading-relaxed">{post.body}</p>
         )}
       </article>
 
       {/* Comments */}
       <section className="glass-card p-6 sm:p-8">
-        <h2 className="flex items-center gap-2 text-sm font-bold text-white/80 mb-5">
+        <h2 className="flex items-center gap-2 text-sm font-bold text-[#111318] mb-5">
           <MessageSquare className="h-4 w-4 text-[#CC9965]" />
           댓글 {comments.length}
         </h2>
 
         {comments.length === 0 ? (
-          <p className="text-sm text-white/40 mb-5">아직 댓글이 없어요. 첫 댓글을 남겨보세요.</p>
+          <p className="text-sm text-[#8b8f98] mb-5">아직 댓글이 없어요. 첫 댓글을 남겨보세요.</p>
         ) : (
           <ul className="space-y-4 mb-6">
             {comments.map((c) => {
               const canDelete = user && (user.id === c.authorId || user.role === "admin");
               return (
-                <li key={c.id} className="border-l-2 border-white/10 pl-4" data-testid={`comment-${c.id}`}>
+                <li key={c.id} className="border-l-2 border-[#e5e7eb] pl-4" data-testid={`comment-${c.id}`}>
                   <div className="flex items-center justify-between gap-2 mb-1">
                     <div className="flex items-center gap-2 text-xs">
                       {c.authorAvatarUrl ? (
@@ -238,13 +238,13 @@ export default function CommunityDetail() {
                       ) : (
                         <div className="w-5 h-5 rounded-full bg-[#CC9965]/15 border border-[#CC9965]/30" />
                       )}
-                      <span className="text-white/80 font-medium">{c.authorName ?? "회원"}</span>
+                      <span className="text-[#111318] font-medium">{c.authorName ?? "회원"}</span>
                       {c.authorRole === "admin" && (
                         <span className="inline-flex items-center gap-0.5 text-[9px] font-bold px-1 py-0.5 rounded bg-[#CC9965]/15 text-[#CC9965] border border-[#CC9965]/30">
                           <Shield className="h-2.5 w-2.5" /> ADMIN
                         </span>
                       )}
-                      <span className="text-white/30">{formatRelative(c.createdAt)}</span>
+                      <span className="text-[#a0a4ab]">{formatRelative(c.createdAt)}</span>
                     </div>
                     {canDelete && (
                       <button
@@ -271,7 +271,7 @@ export default function CommunityDetail() {
               placeholder="댓글을 입력하세요"
               rows={3}
               maxLength={5000}
-              className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/10 text-white text-sm placeholder:text-white/30 focus:outline-none focus:border-[#CC9965]/50 focus:bg-white/[0.06] transition-colors resize-none"
+              className="w-full px-4 py-3 rounded-xl bg-[#f7f8fa] border border-[#e5e7eb] text-white text-sm placeholder:text-[#a0a4ab] focus:outline-none focus:border-[#CC9965]/50 focus:bg-[#eef0f3] transition-colors resize-none"
               data-testid="input-comment-body"
             />
             <div className="flex justify-end">
@@ -292,7 +292,7 @@ export default function CommunityDetail() {
             </div>
           </form>
         ) : (
-          <div className="text-center py-4 border-t border-white/[0.06]">
+          <div className="text-center py-4 border-t border-[#eef0f3]">
             <Link href="/login">
               <span className="text-sm text-[#CC9965] hover:underline cursor-pointer">로그인하고 댓글 작성하기</span>
             </Link>

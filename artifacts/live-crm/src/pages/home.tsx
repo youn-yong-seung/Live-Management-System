@@ -63,7 +63,7 @@ function youtubeThumbnail(url: string) {
 /* ── Glass Card ──────────────────────────────────────── */
 
 const gc = "glass-card";
-const gcHover = "glass-card hover:bg-white/[0.06] hover:-translate-y-1 transition-all duration-300";
+const gcHover = "glass-card hover:bg-[#eef0f3] hover:-translate-y-1 transition-all duration-300";
 
 /* ── Component ──────────────────────────────────────── */
 
@@ -108,7 +108,7 @@ export default function Home() {
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white leading-tight mb-4" style={{ textShadow: "0 2px 20px rgba(0,0,0,0.3)" }}>
             AI와 자동화로<br />일하는 방식을 바꾸세요
           </h1>
-          <p className="text-white/60 text-sm sm:text-base mb-8 max-w-lg leading-relaxed">
+          <p className="text-[#484d57] text-sm sm:text-base mb-8 max-w-lg leading-relaxed">
             클로드코드, 노션, Make 등 실전 툴을 활용한 무료 라이브 강의를 제공합니다.
             지금 바로 시작하세요.
           </p>
@@ -123,7 +123,7 @@ export default function Home() {
               href="https://open.kakao.com/o/gCM9Aehi"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 border border-white/20 text-white/80 font-semibold text-sm px-6 py-3 rounded-xl hover:bg-white/5 hover:border-white/30 transition-all"
+              className="inline-flex items-center gap-2 border border-[#d1d5db] text-[#111318] font-semibold text-sm px-6 py-3 rounded-xl hover:bg-[#f7f8fa] hover:border-white/30 transition-all"
             >
               <MessageCircle className="h-4 w-4" />
               무료 특강 대기방 참여하기
@@ -146,12 +146,12 @@ export default function Home() {
                   <div className="flex items-center gap-2 mb-3">
                     <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
                     <span className="text-xs font-bold text-red-400 uppercase tracking-wide">LIVE NOW</span>
-                    <span className="text-xs text-white/30">{live.registrationCount}명 참석</span>
+                    <span className="text-xs text-[#a0a4ab]">{live.registrationCount}명 참석</span>
                   </div>
                   <h3 className="font-bold text-white mb-1 line-clamp-1 hover:text-[#CC9965] transition-colors">{live.title}</h3>
-                  <p className="text-sm text-white/50 line-clamp-2 mb-3">{live.description}</p>
+                  <p className="text-sm text-[#8b8f98] line-clamp-2 mb-3">{live.description}</p>
                 </div>
-                <div className="flex gap-2 pt-3 border-t border-white/[0.06]">
+                <div className="flex gap-2 pt-3 border-t border-[#eef0f3]">
                   {live.youtubeUrl && (
                     <a href={live.youtubeUrl} target="_blank" rel="noopener noreferrer"
                       className="flex-1 flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white text-xs font-bold py-2.5 rounded-lg transition-colors"
@@ -160,7 +160,7 @@ export default function Home() {
                     </a>
                   )}
                   <button
-                    className="flex-1 flex items-center justify-center gap-2 border border-white/10 text-white/60 hover:text-[#CC9965] hover:border-[#CC9965]/30 text-xs font-bold py-2.5 rounded-lg transition-colors"
+                    className="flex-1 flex items-center justify-center gap-2 border border-[#e5e7eb] text-[#484d57] hover:text-[#CC9965] hover:border-[#CC9965]/30 text-xs font-bold py-2.5 rounded-lg transition-colors"
                     onClick={() => setModalReplay(live)}>
                     <Star className="h-3.5 w-3.5" /> 후기 작성하기
                   </button>
@@ -194,7 +194,7 @@ export default function Home() {
                   <span className="text-xs font-bold text-[#CC9965] uppercase tracking-wide">UPCOMING</span>
                 </div>
                 <h3 className="font-bold text-white mb-1 line-clamp-1">{live.title}</h3>
-                <p className="text-sm text-white/50 line-clamp-1 mb-3">{live.description}</p>
+                <p className="text-sm text-[#8b8f98] line-clamp-1 mb-3">{live.description}</p>
                 <span className="text-xs text-[#CC9965]/80 font-medium">{formatDate(live.scheduledAt)}</span>
               </div>
             ))}
@@ -218,7 +218,7 @@ export default function Home() {
             const inner = (
               <div className={`${gcHover} p-6 cursor-pointer group`}>
                 <div className="flex items-start justify-between mb-4">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-white/5 border border-white/10">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#f7f8fa] border border-[#e5e7eb]">
                     <res.icon className={`h-5 w-5 ${res.color}`} />
                   </div>
                   {(res as any).badge && (
@@ -228,7 +228,7 @@ export default function Home() {
                   )}
                 </div>
                 <h3 className="font-bold text-white text-sm mb-1 group-hover:text-[#CC9965] transition-colors">{res.title}</h3>
-                <p className="text-xs text-white/40">{res.description}</p>
+                <p className="text-xs text-[#8b8f98]">{res.description}</p>
               </div>
             );
             return isExternal ? (
@@ -282,7 +282,7 @@ export default function Home() {
                     {((replay as any).tags as string[] | null)?.length ? (
                       <div className="flex flex-wrap gap-1">
                         {((replay as any).tags as string[]).slice(0, 3).map((tag) => (
-                          <span key={tag} className="text-[11px] bg-white/5 text-white/40 px-2 py-0.5 rounded-full border border-white/5">{tag}</span>
+                          <span key={tag} className="text-[11px] bg-[#f7f8fa] text-[#8b8f98] px-2 py-0.5 rounded-full border border-white/5">{tag}</span>
                         ))}
                       </div>
                     ) : null}
@@ -319,7 +319,7 @@ export default function Home() {
             <h3 className="text-lg sm:text-xl font-bold text-white mb-2">
               보육원에 1,400만원 기부 강의
             </h3>
-            <p className="text-sm text-white/50 mb-4 leading-relaxed">
+            <p className="text-sm text-[#8b8f98] mb-4 leading-relaxed">
               <span className="text-[#CC9965] font-semibold">나민수, 노션다움, 조쉬, 윤자동</span> — 4명의 강사가 모여 진행한 특별 기부 라이브. 수익금 전액이 보육원에 기부되었습니다.
             </p>
             <a
@@ -342,7 +342,7 @@ export default function Home() {
           <div key={section.tag}>
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center bg-white/5 border border-white/10`}>
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center bg-[#f7f8fa] border border-[#e5e7eb]`}>
                   <section.icon className={`h-4 w-4 ${section.color}`} />
                 </div>
                 <h2 className="text-lg font-bold text-white">{section.label}</h2>
@@ -387,10 +387,10 @@ export default function Home() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className={`${gc} overflow-hidden`}>
-              <Skeleton className="aspect-video w-full bg-white/5" />
+              <Skeleton className="aspect-video w-full bg-[#f7f8fa]" />
               <div className="p-4 space-y-2">
-                <Skeleton className="h-4 w-3/4 bg-white/5" />
-                <Skeleton className="h-3 w-1/2 bg-white/5" />
+                <Skeleton className="h-4 w-3/4 bg-[#f7f8fa]" />
+                <Skeleton className="h-3 w-1/2 bg-[#f7f8fa]" />
               </div>
             </div>
           ))}

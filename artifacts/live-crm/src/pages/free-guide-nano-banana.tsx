@@ -44,7 +44,7 @@ export default function FreeGuideNanoBanana() {
       {/* Back link */}
       <div>
         <Link href="/resources">
-          <span className="inline-flex items-center gap-1.5 text-sm text-white/50 hover:text-[#CC9965] transition-colors cursor-pointer">
+          <span className="inline-flex items-center gap-1.5 text-sm text-[#8b8f98] hover:text-[#CC9965] transition-colors cursor-pointer">
             <ArrowLeft className="h-3.5 w-3.5" /> 무료 자료 전체 보기
           </span>
         </Link>
@@ -65,7 +65,7 @@ export default function FreeGuideNanoBanana() {
             나노바나나 vs 덕테이프<br />
             <span className="text-[#CC9965]">프롬프트 가이드</span>
           </h1>
-          <p className="text-white/60 text-sm sm:text-base mb-8 max-w-xl leading-relaxed">
+          <p className="text-[#484d57] text-sm sm:text-base mb-8 max-w-xl leading-relaxed">
             AI 이미지 / 영상 생성, 어떤 모델을 언제 써야 할까?
             실전에서 바로 쓰는 프롬프트와 케이스별 의사결정 기준을 한 권에 담았습니다.
           </p>
@@ -83,14 +83,14 @@ export default function FreeGuideNanoBanana() {
               href={KAKAO_ROOM_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 border border-white/20 text-white/80 font-semibold text-sm px-6 py-3 rounded-xl hover:bg-white/5 hover:border-white/30 transition-all"
+              className="inline-flex items-center gap-2 border border-[#d1d5db] text-[#111318] font-semibold text-sm px-6 py-3 rounded-xl hover:bg-[#f7f8fa] hover:border-white/30 transition-all"
             >
               <MessageCircle className="h-4 w-4" />
               매주 무료 특강 대기방
             </a>
           </div>
 
-          <div className="mt-6 flex items-center gap-2 text-xs text-white/40">
+          <div className="mt-6 flex items-center gap-2 text-xs text-[#8b8f98]">
             <FileText className="h-3.5 w-3.5" />
             PDF · 약 1.1MB · 윤자동 클래스 무료 배포
           </div>
@@ -106,7 +106,7 @@ export default function FreeGuideNanoBanana() {
           </div>
           <ul className="space-y-3">
             {HIGHLIGHTS.map((line) => (
-              <li key={line} className="flex items-start gap-3 text-sm text-white/70 leading-relaxed">
+              <li key={line} className="flex items-start gap-3 text-sm text-[#484d57] leading-relaxed">
                 <CheckCircle2 className="h-4 w-4 text-emerald-400 flex-shrink-0 mt-0.5" />
                 <span>{line}</span>
               </li>
@@ -119,7 +119,7 @@ export default function FreeGuideNanoBanana() {
             <Zap className="h-4 w-4 text-[#CC9965]" />
             <h2 className="text-base font-bold text-white">이런 분께 추천</h2>
           </div>
-          <ul className="space-y-3 text-sm text-white/70 leading-relaxed">
+          <ul className="space-y-3 text-sm text-[#484d57] leading-relaxed">
             <li className="flex items-start gap-3">
               <span className="text-[#CC9965] font-bold">·</span>
               <span>AI로 콘텐츠 만들고 싶은데 어떤 툴부터 써야 할지 막막한 분</span>
@@ -142,7 +142,7 @@ export default function FreeGuideNanoBanana() {
           <Download className="h-6 w-6 text-[#CC9965]" />
         </div>
         <h3 className="text-xl font-bold text-white mb-2">지금 바로 다운로드</h3>
-        <p className="text-sm text-white/50 mb-6">
+        <p className="text-sm text-[#8b8f98] mb-6">
           가입 / 로그인 없이 받아갈 수 있습니다. 도움이 됐다면 주변에도 공유해주세요.
         </p>
         <button
@@ -168,7 +168,7 @@ export default function FreeGuideNanoBanana() {
             <h3 className="text-lg sm:text-xl font-bold text-white mb-2">
               윤자동 무료 특강 대기방
             </h3>
-            <p className="text-sm text-white/60 leading-relaxed mb-5">
+            <p className="text-sm text-[#484d57] leading-relaxed mb-5">
               매주 진행되는 AI · 자동화 무료 라이브 특강 일정 안내,
               오늘 같은 PDF / 프롬프트 / 템플릿이 가장 먼저 풀리는 곳입니다.
               가이드 받으셨다면 대기방에서 다음 자료까지 챙겨가세요.
@@ -188,7 +188,7 @@ export default function FreeGuideNanoBanana() {
       </div>
 
       {/* Final note */}
-      <p className="text-center text-xs text-white/30 pt-4">
+      <p className="text-center text-xs text-[#a0a4ab] pt-4">
         자동화 필요하면 윤자동 + 구독
       </p>
 
@@ -204,7 +204,7 @@ export default function FreeGuideNanoBanana() {
           >
             <button
               onClick={() => setShowInviteModal(false)}
-              className="absolute top-4 right-4 text-white/40 hover:text-white transition-colors"
+              className="absolute top-4 right-4 text-[#8b8f98] hover:text-white transition-colors"
               aria-label="닫기"
             >
               <X className="h-5 w-5" />
@@ -215,7 +215,7 @@ export default function FreeGuideNanoBanana() {
                 <CheckCircle2 className="h-7 w-7 text-emerald-400" />
               </div>
               <h3 className="text-xl font-bold text-white mb-2">다운로드 시작했어요</h3>
-              <p className="text-sm text-white/60 leading-relaxed mb-6">
+              <p className="text-sm text-[#484d57] leading-relaxed mb-6">
                 PDF 잘 받으셨나요? <br />
                 <span className="text-[#CC9965] font-semibold">매주 새로 풀리는 무료 자료와 라이브 특강</span>은
                 카톡 대기방에서 가장 먼저 안내드립니다.
@@ -234,7 +234,7 @@ export default function FreeGuideNanoBanana() {
                 </a>
                 <button
                   onClick={() => setShowInviteModal(false)}
-                  className="text-xs text-white/40 hover:text-white/70 py-2 transition-colors"
+                  className="text-xs text-[#8b8f98] hover:text-[#484d57] py-2 transition-colors"
                 >
                   나중에 할게요
                 </button>

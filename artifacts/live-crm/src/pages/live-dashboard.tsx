@@ -153,15 +153,15 @@ export default function LiveDashboard() {
 
   if (loading && !data) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "#050A0A" }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#ffffff" }}>
         <Loader2 className="h-6 w-6 animate-spin text-[#CC9965]" />
       </div>
     );
   }
   if (error || !data || !view) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "#050A0A" }}>
-        <p className="text-white/50">{error ?? "데이터 없음"}</p>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#ffffff" }}>
+        <p className="text-[#8b8f98]">{error ?? "데이터 없음"}</p>
       </div>
     );
   }
@@ -203,12 +203,12 @@ export default function LiveDashboard() {
             {data.live.title}
           </h1>
           {data.live.scheduledAt && (
-            <p className="text-white/40 text-sm sm:text-base">{fmtDate(data.live.scheduledAt)}</p>
+            <p className="text-[#8b8f98] text-sm sm:text-base">{fmtDate(data.live.scheduledAt)}</p>
           )}
 
           {/* Big total count */}
           <div className="mt-12 sm:mt-14">
-            <p className="text-[11px] sm:text-xs font-medium tracking-[0.3em] uppercase text-white/40 mb-3">
+            <p className="text-[11px] sm:text-xs font-medium tracking-[0.3em] uppercase text-[#8b8f98] mb-3">
               {filter ? "선택된 신청자" : "오늘 모셔본 분"}
             </p>
             <div className="relative inline-block">
@@ -225,10 +225,10 @@ export default function LiveDashboard() {
               >
                 {view.total}
               </p>
-              <span className="absolute -bottom-1 -right-8 sm:-right-10 text-2xl sm:text-3xl font-bold text-white/70">명</span>
+              <span className="absolute -bottom-1 -right-8 sm:-right-10 text-2xl sm:text-3xl font-bold text-[#484d57]">명</span>
             </div>
             {filter && (
-              <p className="mt-4 text-sm text-white/40">전체 {data.total}명 중</p>
+              <p className="mt-4 text-sm text-[#8b8f98]">전체 {data.total}명 중</p>
             )}
           </div>
 
@@ -336,7 +336,7 @@ function SectionHeader({ eyebrow, title, sub }: { eyebrow: string; title: string
     <div className="text-center mb-8">
       <p className="text-[10px] font-bold tracking-[0.3em] uppercase text-[#CC9965]/70 mb-2">{eyebrow}</p>
       <h2 className="text-xl sm:text-2xl font-bold text-white">{title}</h2>
-      {sub && <p className="text-sm text-white/40 mt-2">{sub}</p>}
+      {sub && <p className="text-sm text-[#8b8f98] mt-2">{sub}</p>}
     </div>
   );
 }
@@ -409,16 +409,16 @@ function DonutCard({
                   className="w-2.5 h-2.5 rounded-full flex-shrink-0"
                   style={{ background: PALETTE[i % PALETTE.length], boxShadow: `0 0 12px ${PALETTE[i % PALETTE.length]}80` }}
                 />
-                <span className="text-sm text-white/85 leading-relaxed flex-1 break-words">{d.value}</span>
-                <span className="text-[13px] font-semibold text-white/60 tabular-nums whitespace-nowrap flex-shrink-0">
-                  {d.count}<span className="text-white/30 ml-0.5">명</span>
+                <span className="text-sm text-[#111318] leading-relaxed flex-1 break-words">{d.value}</span>
+                <span className="text-[13px] font-semibold text-[#484d57] tabular-nums whitespace-nowrap flex-shrink-0">
+                  {d.count}<span className="text-[#a0a4ab] ml-0.5">명</span>
                   <span className="text-white/35 ml-2">{pct(d.count, total)}%</span>
                 </span>
               </button>
             );
           })}
           {data.length > TOP_N && (
-            <p className="text-[11px] text-white/30 pt-2">+ {data.length - TOP_N}개 더</p>
+            <p className="text-[11px] text-[#a0a4ab] pt-2">+ {data.length - TOP_N}개 더</p>
           )}
         </div>
       </div>
@@ -446,14 +446,14 @@ function QuestionCard({
           {question}
         </h3>
         <div className="flex-shrink-0 text-right">
-          <p className="text-sm font-bold text-[#CC9965] tabular-nums">{answeredCount}<span className="text-white/40 text-xs ml-1 font-normal">명 응답</span></p>
+          <p className="text-sm font-bold text-[#CC9965] tabular-nums">{answeredCount}<span className="text-[#8b8f98] text-xs ml-1 font-normal">명 응답</span></p>
         </div>
       </div>
 
       {isFreeText ? (
-        <p className="text-sm text-white/40 italic">자유 입력 응답 — 텍스트 비공개, 응답 수만 집계</p>
+        <p className="text-sm text-[#8b8f98] italic">자유 입력 응답 — 텍스트 비공개, 응답 수만 집계</p>
       ) : !breakdown || breakdown.length === 0 ? (
-        <p className="text-sm text-white/30">아직 응답이 없습니다.</p>
+        <p className="text-sm text-[#a0a4ab]">아직 응답이 없습니다.</p>
       ) : (
         <div className="space-y-4">
           {breakdown.map((d, i) => {
@@ -468,16 +468,16 @@ function QuestionCard({
                 className={`w-full text-left group transition-all duration-200 ${dimmed ? "opacity-30" : ""}`}
               >
                 <div className="flex items-baseline justify-between gap-3 mb-2">
-                  <span className="text-[15px] sm:text-base text-white/90 leading-relaxed flex-1 group-hover:text-white">
+                  <span className="text-[15px] sm:text-base text-[#111318] leading-relaxed flex-1 group-hover:text-white">
                     {d.value}
                   </span>
                   <span className="text-sm font-bold tabular-nums whitespace-nowrap flex-shrink-0">
                     <span style={{ color }}>{d.count}</span>
-                    <span className="text-white/30 mx-1">·</span>
-                    <span className="text-white/60">{sharePct}%</span>
+                    <span className="text-[#a0a4ab] mx-1">·</span>
+                    <span className="text-[#484d57]">{sharePct}%</span>
                   </span>
                 </div>
-                <div className="h-2 rounded-full bg-white/[0.04] overflow-hidden">
+                <div className="h-2 rounded-full bg-[#f7f8fa] overflow-hidden">
                   <div
                     className="h-full rounded-full transition-all duration-700 ease-out"
                     style={{
@@ -515,7 +515,7 @@ function MessagesGrid({ messages }: { messages: string[] }) {
             }}
           >
             <Quote className="h-4 w-4 text-[#CC9965]/40 mb-2" />
-            <p className="text-[14px] text-white/85 leading-relaxed whitespace-pre-wrap break-words">
+            <p className="text-[14px] text-[#111318] leading-relaxed whitespace-pre-wrap break-words">
               {m}
             </p>
           </div>

@@ -23,7 +23,7 @@ export function TipTapEditor({ value, onChange, placeholder }: Props) {
     },
     editorProps: {
       attributes: {
-        class: "prose prose-invert max-w-none min-h-[280px] px-4 py-3 focus:outline-none text-white/85 prose-headings:text-white prose-strong:text-white prose-a:text-[#CC9965]",
+        class: "prose prose-invert max-w-none min-h-[280px] px-4 py-3 focus:outline-none text-[#111318] prose-headings:text-white prose-strong:text-white prose-a:text-[#CC9965]",
       },
     },
   });
@@ -31,11 +31,11 @@ export function TipTapEditor({ value, onChange, placeholder }: Props) {
   if (!editor) return null;
 
   const btn = (active: boolean) =>
-    `p-2 rounded-md transition-colors ${active ? "bg-[#CC9965]/20 text-[#CC9965]" : "text-white/50 hover:text-white hover:bg-white/5"}`;
+    `p-2 rounded-md transition-colors ${active ? "bg-[#CC9965]/20 text-[#CC9965]" : "text-[#8b8f98] hover:text-white hover:bg-[#f7f8fa]"}`;
 
   return (
-    <div className="rounded-xl border border-white/10 bg-white/[0.02] overflow-hidden">
-      <div className="flex flex-wrap gap-1 px-2 py-1.5 border-b border-white/[0.06]">
+    <div className="rounded-xl border border-[#e5e7eb] bg-[#f7f8fa] overflow-hidden">
+      <div className="flex flex-wrap gap-1 px-2 py-1.5 border-b border-[#eef0f3]">
         <button type="button" onClick={() => editor.chain().focus().toggleBold().run()} className={btn(editor.isActive("bold"))} aria-label="굵게">
           <Bold className="h-4 w-4" />
         </button>

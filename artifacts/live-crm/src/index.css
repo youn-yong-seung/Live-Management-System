@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800;900&display=swap');
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.min.css');
 @import "tailwindcss";
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
@@ -68,50 +68,82 @@
 }
 
 :root {
-  --button-outline: rgba(255,255,255,.08);
-  --badge-outline: rgba(255,255,255,.04);
+  /* ── yun-platform 디자인 토큰 (공유) ── */
+  --bg: #ffffff;
+  --bg-2: #f7f8fa;
+  --bg-3: #eef0f4;
+  --ink: #111318;
+  --ink-2: #484d57;
+  --ink-3: #8b8f98;
+  --line: #e5e7eb;
+  --line-2: #eef0f3;
+  --brand: #111318;
+  --accent-red: #ff3b30;
+  --accent-red-soft: #fff0ee;
+  --blue: #1b64f2;
+  --blue-soft: #e8f0fe;
+  --green: #00b894;
+  --green-soft: #e6f9f3;
+  --yellow: #ffcc00;
+  --purple: #7c3aed;
+  --purple-soft: #f3f0ff;
+  --gold: #CC9965;
+  --gold-soft: #f7f1e8;
+
+  /* ── Card shared tokens ── */
+  --card-bg: #ffffff;
+  --card-border-color: var(--line);
+  --card-radius: 16px;
+  --card-radius-sm: 12px;
+  --card-shadow-subtle: 0 8px 32px rgba(0, 0, 0, 0.08);
+  --card-shadow-hover: 0 16px 40px -16px rgba(0, 0, 0, 0.12);
+  --card-transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+
+  --button-outline: rgba(0, 0, 0, 0.08);
+  --badge-outline: rgba(0, 0, 0, 0.04);
   --opaque-button-border-intensity: 8;
-  --elevate-1: rgba(255,255,255,.02);
-  --elevate-2: rgba(255,255,255,.06);
+  --elevate-1: rgba(0, 0, 0, 0.02);
+  --elevate-2: rgba(0, 0, 0, 0.06);
 
-  --background: 180 33% 3%;
-  --foreground: 0 0% 88%;
-  --border: 180 10% 12%;
+  /* ── shadcn 변수 (라이트 톤) ── */
+  --background: 0 0% 100%;
+  --foreground: 220 13% 9%;
+  --border: 220 13% 91%;
 
-  --card: 180 15% 5%;
-  --card-foreground: 0 0% 88%;
-  --card-border: 180 10% 12%;
+  --card: 0 0% 100%;
+  --card-foreground: 220 13% 9%;
+  --card-border: 220 13% 91%;
 
-  --sidebar: 180 33% 3%;
-  --sidebar-foreground: 0 0% 88%;
-  --sidebar-border: 180 10% 12%;
-  --sidebar-primary: 34 50% 60%;
-  --sidebar-primary-foreground: 0 0% 5%;
-  --sidebar-accent: 180 15% 8%;
-  --sidebar-accent-foreground: 0 0% 88%;
-  --sidebar-ring: 34 50% 60%;
+  --sidebar: 220 14% 96%;
+  --sidebar-foreground: 220 13% 9%;
+  --sidebar-border: 220 13% 91%;
+  --sidebar-primary: 34 50% 50%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 220 14% 93%;
+  --sidebar-accent-foreground: 220 13% 9%;
+  --sidebar-ring: 34 50% 50%;
 
-  --popover: 180 20% 5%;
-  --popover-foreground: 0 0% 88%;
-  --popover-border: 180 10% 12%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 220 13% 9%;
+  --popover-border: 220 13% 91%;
 
-  --primary: 34 50% 60%;
-  --primary-foreground: 0 0% 5%;
+  --primary: 34 50% 50%;
+  --primary-foreground: 0 0% 100%;
 
-  --secondary: 180 15% 8%;
-  --secondary-foreground: 0 0% 88%;
+  --secondary: 220 14% 96%;
+  --secondary-foreground: 220 13% 9%;
 
-  --muted: 180 10% 10%;
-  --muted-foreground: 0 0% 55%;
+  --muted: 220 14% 96%;
+  --muted-foreground: 220 9% 46%;
 
-  --accent: 180 15% 8%;
-  --accent-foreground: 0 0% 88%;
+  --accent: 220 14% 96%;
+  --accent-foreground: 220 13% 9%;
 
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 100%;
 
-  --input: 180 10% 12%;
-  --ring: 34 50% 60%;
+  --input: 220 13% 91%;
+  --ring: 34 50% 50%;
 
   --chart-1: 221 83% 53%;
   --chart-2: 270 70% 50%;
@@ -119,7 +151,7 @@
   --chart-4: 40 70% 50%;
   --chart-5: 160 70% 50%;
 
-  --app-font-sans: 'Noto Sans KR', sans-serif;
+  --app-font-sans: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
   --app-font-serif: Georgia, serif;
   --app-font-mono: Menlo, monospace;
   --radius: 0.75rem;
@@ -153,8 +185,10 @@
   body {
     @apply font-sans antialiased text-foreground;
     letter-spacing: var(--tracking-normal);
-    background: #050A0A;
+    background: var(--bg);
+    color: var(--ink);
     min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
   }
 }
 
@@ -164,108 +198,43 @@
   }
 }
 
-/* ── Tinted Glassmorphism ─────────────────────────────── */
+/* ── Cards (라이트 톤, yun-platform 패턴) ─────────────── */
 
-/* Green-tinted glass (default) */
 .glass-card {
   position: relative;
-  background: rgba(0, 80, 81, 0.2);
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid rgba(0, 80, 81, 0.3);
-  border-radius: 16px;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
-  overflow: hidden;
-}
-
-.glass-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(
-    180deg,
-    rgba(0, 120, 121, 0.4) 0%,
-    rgba(0, 80, 81, 0.15) 50%,
-    transparent 100%
-  );
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
-  transition: all 0.3s ease;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border-color);
+  border-radius: var(--card-radius);
+  transition: var(--card-transition);
 }
 
 .glass-card:hover {
-  background: rgba(0, 80, 81, 0.28);
-  border-color: rgba(0, 100, 101, 0.4);
+  box-shadow: var(--card-shadow-subtle);
+  transform: translateY(-2px);
 }
 
-.glass-card:hover::before {
-  background: linear-gradient(
-    180deg,
-    rgba(204, 153, 101, 0.5) 0%,
-    rgba(204, 153, 101, 0.1) 40%,
-    transparent 100%
-  );
-}
-
-/* Gold-tinted glass (accent — for LIVE / featured) */
 .glass-card-gold {
   position: relative;
-  background: rgba(204, 153, 101, 0.15);
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  background: var(--card-bg);
   border: 1px solid rgba(204, 153, 101, 0.4);
-  border-radius: 16px;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
-  overflow: hidden;
-  transition: all 0.3s ease;
-}
-
-.glass-card-gold::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(
-    180deg,
-    rgba(204, 153, 101, 0.5) 0%,
-    rgba(204, 153, 101, 0.15) 50%,
-    transparent 100%
-  );
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
-  transition: all 0.3s ease;
+  border-radius: var(--card-radius);
+  box-shadow: 0 4px 16px rgba(204, 153, 101, 0.08);
+  transition: var(--card-transition);
 }
 
 .glass-card-gold:hover {
-  background: rgba(204, 153, 101, 0.22);
-  border-color: rgba(204, 153, 101, 0.5);
-  box-shadow: 0 0 20px rgba(204, 153, 101, 0.2), 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+  box-shadow: 0 16px 40px -16px rgba(204, 153, 101, 0.25);
+  border-color: rgba(204, 153, 101, 0.6);
+  transform: translateY(-2px);
 }
 
-.glass-card-gold:hover::before {
-  background: linear-gradient(
-    180deg,
-    rgba(204, 153, 101, 0.7) 0%,
-    rgba(204, 153, 101, 0.2) 50%,
-    transparent 100%
-  );
-}
-
-/* Gold glow for buttons */
 .gold-glow {
-  box-shadow: 0 0 15px rgba(204, 153, 101, 0.3);
+  box-shadow: 0 4px 12px rgba(204, 153, 101, 0.25);
   transition: box-shadow 0.3s ease;
 }
 
 .gold-glow:hover {
-  box-shadow: 0 0 25px rgba(204, 153, 101, 0.5);
+  box-shadow: 0 8px 24px rgba(204, 153, 101, 0.4);
 }
 
 /* ── Text contrast fixes ────────────────────────────── */
