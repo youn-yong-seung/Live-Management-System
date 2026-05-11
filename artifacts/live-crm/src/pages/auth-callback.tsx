@@ -17,7 +17,7 @@ export default function AuthCallback() {
   }, [loading, user, navigate]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 bg-gradient-to-br from-[#0a1a1a] via-[#071515] to-[#050A0A]">
+    <div className="min-h-screen flex items-center justify-center px-4 hero-bg relative overflow-hidden">
       <div className="text-center">
         <div className="inline-block w-10 h-10 border-2 border-[#CC9965] border-t-transparent rounded-full animate-spin mb-4" />
         <p className="text-[#484d57] text-sm">

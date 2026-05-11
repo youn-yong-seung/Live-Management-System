@@ -237,6 +237,34 @@
   box-shadow: 0 8px 24px rgba(204, 153, 101, 0.4);
 }
 
+/* ── Hero backgrounds (yun-platform 패턴) ─────────────── */
+
+/* 베이스 라이트 그라데이션 — 부드러운 페이스텔 톤 */
+.hero-bg {
+  background: linear-gradient(170deg, #fafbfc 0%, #eef2ff 25%, #f0f4ff 45%, #fff8f0 70%, #fafbfc 100%);
+}
+
+/* 컬러 mesh — radial gradients (파랑/보라/골드/빨강 옅은 점) */
+.hero-mesh {
+  opacity: 0.45;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(27, 100, 242, 0.14) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(124, 58, 237, 0.10) 0%, transparent 50%),
+    radial-gradient(circle at 50% 80%, rgba(204, 153, 101, 0.10) 0%, transparent 50%),
+    radial-gradient(circle at 70% 60%, rgba(255, 59, 48, 0.05) 0%, transparent 40%);
+}
+
+/* 추가 glow (정적) */
+.hero-glow {
+  position: absolute;
+  width: 520px;
+  height: 520px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(27, 100, 242, 0.10) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 1;
+}
+
 /* ── Text contrast fixes ────────────────────────────── */
 
 /* Dark-bg dialogs: light text for inputs */

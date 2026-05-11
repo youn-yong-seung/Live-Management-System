@@ -11,7 +11,7 @@ export default function Login() {
   }, [loading, user, navigate]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 bg-gradient-to-br from-[#0a1a1a] via-[#071515] to-[#050A0A]">
+    <div className="min-h-screen flex items-center justify-center px-4 hero-bg relative overflow-hidden">
       <div className="absolute top-0 right-0 w-96 h-96 bg-[#CC9965]/10 rounded-full blur-[100px]" />
       <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#005051]/40 rounded-full blur-[80px]" />
 
