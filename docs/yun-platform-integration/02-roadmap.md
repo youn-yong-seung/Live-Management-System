@@ -68,14 +68,26 @@
 
 ## Phase 2 — 머무를 이유 (커뮤니티 + 다시보기 확장)
 
-### Phase 2A — 커뮤니티 게시판
-- [ ] `community_posts`, `community_attachments`, `community_post_polls`, `comment_replies` 테이블
-- [ ] TipTap 에디터 도입 (`/community/new`)
-- [ ] 게시글 목록 / 상세 (`/community`, `/community/:id`)
-- [ ] 첨부파일 업로드 (Vercel Blob 또는 Supabase Storage 결정 필요)
-- [ ] 폴(투표) 기능
-- [ ] 댓글 + 대댓글
-- [ ] 링크프리뷰 (OG 메타 추출)
+### Phase 2A — 커뮤니티 게시판 ✅ MVP 완료 (2026-05-11)
+- [x] `community_posts`, `community_comments` 테이블 (Drizzle 스키마 + DB push)
+- [x] TipTap 에디터 (`/community/new`, StarterKit + Placeholder + Link)
+- [x] 게시글 목록 (`/community`) — 아바타·작성자·ADMIN뱃지·조회수·댓글수·상대시간
+- [x] 게시글 상세 (`/community/:id`) — TipTap HTML 렌더, 본인/admin 삭제
+- [x] 댓글 작성 + 삭제
+- [x] 백엔드 API — GET/POST/DELETE posts, GET posts/:id (조회수 +1), POST/DELETE comments
+- [x] 권한 — 본인 또는 admin만 글/댓글 삭제
+- [x] 헤더 네비게이션에 "커뮤니티" 추가
+- [x] 자동 회귀 검증 — 라이브 신청/cron/자료실 영향 0
+- [ ] 첨부파일 업로드 (Vercel Blob 또는 Supabase Storage) — 후속
+- [ ] 폴(투표) 기능 — 후속
+- [ ] 대댓글 (parent_comment_id 컬럼은 있음, UI만 추가하면 됨) — 후속
+- [ ] 링크프리뷰 (OG 메타 추출) — 후속
+
+### Phase 1B — 유입 깔때기 진척
+- [x] 1B-A 매직링크 인프라 → ❌ 폐기 (한국 UX 부적합 — 사용자 통찰). 코드 제거.
+- [x] 1B-B-1 라이브 신청 완료 페이지 가입 유도 UI (2026-05-11) — Google 가입 버튼 + 회원 혜택 안내
+- [ ] 1B-B-2 registrations.user_id 컬럼 + 이메일 자동 매칭 — 후속
+- [ ] 1B-B-3 자료실 다운로드 로그인 게이트 — 후속
 
 ### Phase 2B — 다시보기 클래스/레슨
 - [ ] 기존 `replays` 페이지 확장 → 클래스(시리즈) → 레슨(개별 영상) 구조
