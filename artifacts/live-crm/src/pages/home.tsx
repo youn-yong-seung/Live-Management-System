@@ -172,14 +172,14 @@ export default function Home() {
         <div className={`declare-v2-inner ${declare.visible ? "revealed" : ""}`}>
           <div className="declare-v2-icon">💡</div>
           <h2>
-            <em>모든 라이브 다시보기,</em>
+            <em>매주 새 라이브,</em>
             <br />
-            100% 무료로 제공합니다.
+            다시보기는 100% 무료.
           </h2>
           <p>
-            권바이브 강사님 라이브부터 클로드코드 설치·고급 응용까지 — 모든 과정을 이 사이트에서 차곡차곡 관리합니다.
+            매주 현업자들의 실속 있는 AI 강의와 비즈니스 인사이트를 무료 라이브로 진행하고, 모든 다시보기를 100% 무료로 제공 중입니다.
             <br />
-            매주 현업자들의 실속 있는 AI 강의와 비즈니스 인사이트를 무료 라이브로 진행하고, 다시보기로 다 챙겨갈 수 있어요.
+            뭐부터 봐야 할지 모르겠다면 — 난이도별·단계별로 큐레이션해드리는 테크트리에서 시작하세요.
           </p>
           <div className="declare-v2-line" />
         </div>
