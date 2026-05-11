@@ -26,7 +26,7 @@ const COURSES = [
     rating: 4.0,
     reviewCount: 1,
     badge: "베스트",
-    badgeColor: "bg-[#CC9965]",
+    badgeColor: "bg-[#6366F1]",
     tags: ["노션", "자동화", "입문"],
     url: "https://class101.net/ko/products/6981c07d92b7d0a4ebd2036b",
   },
@@ -53,8 +53,8 @@ export default function Courses() {
       {/* Banner */}
       <div className="glass-card-gold p-6 sm:p-8">
         <div className="flex items-start gap-4">
-          <div className="w-12 h-12 bg-[#CC9965]/15 rounded-xl flex items-center justify-center flex-shrink-0">
-            <GraduationCap className="h-6 w-6 text-[#CC9965]" />
+          <div className="w-12 h-12 bg-[#6366F1]/15 rounded-xl flex items-center justify-center flex-shrink-0">
+            <GraduationCap className="h-6 w-6 text-[#6366F1]" />
           </div>
           <div>
             <h2 className="text-lg font-bold text-[#111318] mb-1">무료 특강으로 부족하셨나요?</h2>
@@ -82,7 +82,7 @@ export default function Courses() {
                   <span className="text-xs text-[#a0a4ab] font-medium">{course.platform}</span>
                 </div>
 
-                <h3 className="text-xl font-bold text-[#111318] mb-2 group-hover:text-[#CC9965] transition-colors">
+                <h3 className="text-xl font-bold text-[#111318] mb-2 group-hover:text-[#6366F1] transition-colors">
                   {course.title}
                 </h3>
                 <p className="text-sm text-[#8b8f98] mb-4 leading-relaxed">{course.description}</p>
@@ -99,13 +99,13 @@ export default function Courses() {
                   <div>
                     {course.rating && (
                       <div className="flex items-center gap-1 mb-2">
-                        <Star className="h-4 w-4 fill-[#CC9965] text-[#CC9965]" />
+                        <Star className="h-4 w-4 fill-[#6366F1] text-[#6366F1]" />
                         <span className="text-sm font-semibold text-[#111318]">{course.rating}</span>
                         <span className="text-xs text-[#a0a4ab]">({course.reviewCount})</span>
                       </div>
                     )}
                     {course.discountRate && (
-                      <span className="text-[#CC9965] font-bold text-lg mr-2">{course.discountRate}</span>
+                      <span className="text-[#6366F1] font-bold text-lg mr-2">{course.discountRate}</span>
                     )}
                     {course.originalPrice && (
                       <span className="text-xl font-bold text-[#111318]">{course.originalPrice}</span>
@@ -115,7 +115,7 @@ export default function Courses() {
                     )}
                   </div>
 
-                  <div className="flex items-center gap-2 bg-[#CC9965] text-black px-5 py-2.5 rounded-xl font-bold text-sm group-hover:bg-[#d4a570] transition-colors gold-glow">
+                  <div className="flex items-center gap-2 bg-[#6366F1] text-black px-5 py-2.5 rounded-xl font-bold text-sm group-hover:bg-[#818CF8] transition-colors gold-glow">
                     자세히 보기
                     <ExternalLink className="h-4 w-4" />
                   </div>

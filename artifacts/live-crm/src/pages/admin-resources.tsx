@@ -46,7 +46,7 @@ const emptyForm: FormState = {
   category: "",
   iconName: "FileText",
   badge: "",
-  badgeColor: "bg-[#CC9965]",
+  badgeColor: "bg-[#6366F1]",
   externalUrl: "",
   filePath: "",
   fileMimeType: "",
@@ -70,7 +70,7 @@ const BADGE_COLOR_OPTIONS = [
   { value: "bg-indigo-500", label: "남색 (강의)" },
   { value: "bg-amber-500", label: "주황 (가이드)" },
   { value: "bg-rose-500", label: "빨강 (NEW)" },
-  { value: "bg-[#CC9965]", label: "골드 (PRO)" },
+  { value: "bg-[#6366F1]", label: "골드 (PRO)" },
 ];
 
 async function authHeaders(): Promise<HeadersInit> {
@@ -120,7 +120,7 @@ export default function AdminResources() {
       category: r.category,
       iconName: r.iconName ?? "FileText",
       badge: r.badge ?? "",
-      badgeColor: r.badgeColor ?? "bg-[#CC9965]",
+      badgeColor: r.badgeColor ?? "bg-[#6366F1]",
       externalUrl: r.externalUrl ?? "",
       filePath: r.filePath ?? "",
       fileMimeType: r.fileMimeType ?? "",
@@ -240,7 +240,7 @@ export default function AdminResources() {
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10 space-y-6">
       <Link href="/admin">
-        <span className="inline-flex items-center gap-1.5 text-sm text-[#8b8f98] hover:text-[#CC9965] transition-colors cursor-pointer">
+        <span className="inline-flex items-center gap-1.5 text-sm text-[#8b8f98] hover:text-[#6366F1] transition-colors cursor-pointer">
           <ArrowLeft className="h-3.5 w-3.5" /> 관리자 홈
         </span>
       </Link>
@@ -252,7 +252,7 @@ export default function AdminResources() {
         </div>
         <button
           onClick={openCreate}
-          className="inline-flex items-center gap-1.5 bg-[#CC9965] text-white font-bold text-sm px-5 py-2.5 rounded-xl hover:bg-[#d4a570] transition-all gold-glow"
+          className="inline-flex items-center gap-1.5 bg-[#6366F1] text-white font-bold text-sm px-5 py-2.5 rounded-xl hover:bg-[#818CF8] transition-all gold-glow"
         >
           <Plus className="h-4 w-4" /> 자료 추가
         </button>
@@ -318,7 +318,7 @@ export default function AdminResources() {
                   </td>
                   <td className="px-3 py-3 text-center text-[#8b8f98] text-xs">{r.downloadCount}</td>
                   <td className="px-4 py-3 text-right">
-                    <button onClick={() => openEdit(r)} className="text-[#484d57] hover:text-[#CC9965] mr-3" aria-label="수정">
+                    <button onClick={() => openEdit(r)} className="text-[#484d57] hover:text-[#6366F1] mr-3" aria-label="수정">
                       <Pencil className="h-4 w-4" />
                     </button>
                     <button onClick={() => handleDelete(r.id)} className="text-rose-600 hover:text-rose-700" aria-label="삭제">
@@ -349,7 +349,7 @@ export default function AdminResources() {
                   type="text"
                   value={editing.title}
                   onChange={(e) => setEditing({ ...editing, title: e.target.value })}
-                  className="w-full px-3 py-2 rounded-lg border border-[#e5e7eb] focus:outline-none focus:border-[#CC9965] text-sm text-[#111318]"
+                  className="w-full px-3 py-2 rounded-lg border border-[#e5e7eb] focus:outline-none focus:border-[#6366F1] text-sm text-[#111318]"
                   placeholder="자료 제목"
                 />
               </div>
@@ -359,7 +359,7 @@ export default function AdminResources() {
                   value={editing.description}
                   onChange={(e) => setEditing({ ...editing, description: e.target.value })}
                   rows={2}
-                  className="w-full px-3 py-2 rounded-lg border border-[#e5e7eb] focus:outline-none focus:border-[#CC9965] text-sm text-[#111318] resize-none"
+                  className="w-full px-3 py-2 rounded-lg border border-[#e5e7eb] focus:outline-none focus:border-[#6366F1] text-sm text-[#111318] resize-none"
                   placeholder="간단한 설명"
                 />
               </div>
@@ -371,7 +371,7 @@ export default function AdminResources() {
                     list="categories"
                     value={editing.category}
                     onChange={(e) => setEditing({ ...editing, category: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border border-[#e5e7eb] focus:outline-none focus:border-[#CC9965] text-sm text-[#111318]"
+                    className="w-full px-3 py-2 rounded-lg border border-[#e5e7eb] focus:outline-none focus:border-[#6366F1] text-sm text-[#111318]"
                     placeholder="자동화 프로그램"
                   />
                   <datalist id="categories">
@@ -384,7 +384,7 @@ export default function AdminResources() {
                     type="text"
                     value={editing.iconName}
                     onChange={(e) => setEditing({ ...editing, iconName: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border border-[#e5e7eb] focus:outline-none focus:border-[#CC9965] text-sm text-[#111318]"
+                    className="w-full px-3 py-2 rounded-lg border border-[#e5e7eb] focus:outline-none focus:border-[#6366F1] text-sm text-[#111318]"
                     placeholder="FileText, Zap, BookOpen ..."
                   />
                 </div>
@@ -397,7 +397,7 @@ export default function AdminResources() {
                     type="text"
                     value={editing.badge}
                     onChange={(e) => setEditing({ ...editing, badge: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border border-[#e5e7eb] focus:outline-none focus:border-[#CC9965] text-sm text-[#111318]"
+                    className="w-full px-3 py-2 rounded-lg border border-[#e5e7eb] focus:outline-none focus:border-[#6366F1] text-sm text-[#111318]"
                     placeholder="무료, PRO, NEW ..."
                   />
                 </div>
@@ -406,7 +406,7 @@ export default function AdminResources() {
                   <select
                     value={editing.badgeColor}
                     onChange={(e) => setEditing({ ...editing, badgeColor: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border border-[#e5e7eb] focus:outline-none focus:border-[#CC9965] text-sm text-[#111318] bg-white"
+                    className="w-full px-3 py-2 rounded-lg border border-[#e5e7eb] focus:outline-none focus:border-[#6366F1] text-sm text-[#111318] bg-white"
                   >
                     {BADGE_COLOR_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
                   </select>
@@ -421,7 +421,7 @@ export default function AdminResources() {
                     type="url"
                     value={editing.externalUrl}
                     onChange={(e) => setEditing({ ...editing, externalUrl: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border border-[#e5e7eb] focus:outline-none focus:border-[#CC9965] text-sm text-[#111318]"
+                    className="w-full px-3 py-2 rounded-lg border border-[#e5e7eb] focus:outline-none focus:border-[#6366F1] text-sm text-[#111318]"
                     placeholder="https://..."
                   />
                 </div>
@@ -431,7 +431,7 @@ export default function AdminResources() {
                     type="text"
                     value={editing.internalRoute}
                     onChange={(e) => setEditing({ ...editing, internalRoute: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border border-[#e5e7eb] focus:outline-none focus:border-[#CC9965] text-sm text-[#111318]"
+                    className="w-full px-3 py-2 rounded-lg border border-[#e5e7eb] focus:outline-none focus:border-[#6366F1] text-sm text-[#111318]"
                     placeholder="/resources/some-page"
                   />
                 </div>
@@ -450,7 +450,7 @@ export default function AdminResources() {
                       </button>
                     </div>
                   ) : (
-                    <label className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-dashed border-[#d1d5db] hover:border-[#CC9965] hover:bg-[#f7f8fa] cursor-pointer transition-colors">
+                    <label className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-dashed border-[#d1d5db] hover:border-[#6366F1] hover:bg-[#f7f8fa] cursor-pointer transition-colors">
                       <Upload className="h-4 w-4 text-[#8b8f98]" />
                       <span className="text-xs text-[#484d57]">{uploading ? "업로드 중..." : "파일 선택"}</span>
                       <input
@@ -474,7 +474,7 @@ export default function AdminResources() {
                     type="number"
                     value={editing.displayOrder}
                     onChange={(e) => setEditing({ ...editing, displayOrder: parseInt(e.target.value, 10) || 0 })}
-                    className="w-full px-3 py-2 rounded-lg border border-[#e5e7eb] focus:outline-none focus:border-[#CC9965] text-sm text-[#111318]"
+                    className="w-full px-3 py-2 rounded-lg border border-[#e5e7eb] focus:outline-none focus:border-[#6366F1] text-sm text-[#111318]"
                   />
                 </div>
                 <div className="flex items-end">
@@ -501,7 +501,7 @@ export default function AdminResources() {
                 <button
                   onClick={handleSave}
                   disabled={saving}
-                  className="inline-flex items-center gap-2 bg-[#CC9965] text-white font-bold text-sm px-6 py-2.5 rounded-xl hover:bg-[#d4a570] disabled:opacity-50 gold-glow"
+                  className="inline-flex items-center gap-2 bg-[#6366F1] text-white font-bold text-sm px-6 py-2.5 rounded-xl hover:bg-[#818CF8] disabled:opacity-50 gold-glow"
                 >
                   {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
                   저장

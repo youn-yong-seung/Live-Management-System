@@ -19,7 +19,7 @@ export default function AuthCallback() {
   return (
     <div className="min-h-screen flex items-center justify-center px-4 hero-bg relative overflow-hidden">
       <div className="text-center">
-        <div className="inline-block w-10 h-10 border-2 border-[#CC9965] border-t-transparent rounded-full animate-spin mb-4" />
+        <div className="inline-block w-10 h-10 border-2 border-[#6366F1] border-t-transparent rounded-full animate-spin mb-4" />
         <p className="text-[#484d57] text-sm">
           {loading ? "로그인 처리 중..." : user ? "환영합니다! 홈으로 이동합니다." : "로그인 정보를 확인할 수 없습니다. 다시 시도해주세요."}
         </p>

@@ -44,7 +44,7 @@ function categoryIconColor(category: string): string {
   if (category.includes("템플릿")) return "text-purple-600";
   if (category.includes("강의")) return "text-sky-600";
   if (category.includes("전자책") || category.includes("PDF")) return "text-emerald-600";
-  return "text-[#CC9965]";
+  return "text-[#6366F1]";
 }
 
 function categoryIconName(category: string): string {
@@ -130,19 +130,19 @@ export default function Resources() {
                 <div className={`${gcHover} p-5 group block h-full`}>
                   <div className="flex items-start justify-between mb-3">
                     {item.badge && (
-                      <span className={`${item.badgeColor ?? "bg-[#CC9965]"} text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full`}>
+                      <span className={`${item.badgeColor ?? "bg-[#6366F1]"} text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full`}>
                         {item.badge}
                       </span>
                     )}
                     {isInternal ? (
-                      <ArrowRight className="h-4 w-4 text-[#a0a4ab] group-hover:text-[#CC9965] transition-colors flex-shrink-0" />
+                      <ArrowRight className="h-4 w-4 text-[#a0a4ab] group-hover:text-[#6366F1] transition-colors flex-shrink-0" />
                     ) : isFile ? (
-                      <Download className="h-4 w-4 text-[#a0a4ab] group-hover:text-[#CC9965] transition-colors flex-shrink-0" />
+                      <Download className="h-4 w-4 text-[#a0a4ab] group-hover:text-[#6366F1] transition-colors flex-shrink-0" />
                     ) : (
-                      <ExternalLink className="h-4 w-4 text-[#a0a4ab] group-hover:text-[#CC9965] transition-colors flex-shrink-0" />
+                      <ExternalLink className="h-4 w-4 text-[#a0a4ab] group-hover:text-[#6366F1] transition-colors flex-shrink-0" />
                     )}
                   </div>
-                  <h3 className="font-bold text-[#111318] text-sm mb-1 group-hover:text-[#CC9965] transition-colors">{item.title}</h3>
+                  <h3 className="font-bold text-[#111318] text-sm mb-1 group-hover:text-[#6366F1] transition-colors">{item.title}</h3>
                   {item.description && (
                     <p className="text-xs text-[#8b8f98] leading-relaxed">{item.description}</p>
                   )}

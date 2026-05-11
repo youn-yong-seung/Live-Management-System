@@ -44,7 +44,7 @@ export default function FreeGuideNanoBanana() {
       {/* Back link */}
       <div>
         <Link href="/resources">
-          <span className="inline-flex items-center gap-1.5 text-sm text-[#8b8f98] hover:text-[#CC9965] transition-colors cursor-pointer">
+          <span className="inline-flex items-center gap-1.5 text-sm text-[#8b8f98] hover:text-[#6366F1] transition-colors cursor-pointer">
             <ArrowLeft className="h-3.5 w-3.5" /> 무료 자료 전체 보기
           </span>
         </Link>
@@ -53,7 +53,7 @@ export default function FreeGuideNanoBanana() {
       {/* Hero */}
       <div className="relative overflow-hidden rounded-3xl p-8 sm:p-12 glass-card-gold">
         <div className="absolute inset-0 hero-bg" /><div className="absolute inset-0 hero-mesh" />
-        <div className="absolute top-0 right-0 w-96 h-96 bg-[#CC9965]/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-[#6366F1]/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3" />
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#005051]/40 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/4" />
 
         <div className="relative">
@@ -63,7 +63,7 @@ export default function FreeGuideNanoBanana() {
           </div>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#111318] leading-tight mb-4">
             나노바나나 vs 덕테이프<br />
-            <span className="text-[#CC9965]">프롬프트 가이드</span>
+            <span className="text-[#6366F1]">프롬프트 가이드</span>
           </h1>
           <p className="text-[#484d57] text-sm sm:text-base mb-8 max-w-xl leading-relaxed">
             AI 이미지 / 영상 생성, 어떤 모델을 언제 써야 할까?
@@ -73,7 +73,7 @@ export default function FreeGuideNanoBanana() {
           <div className="flex flex-wrap gap-3">
             <button
               onClick={handleDownload}
-              className="inline-flex items-center gap-2 bg-[#CC9965] text-black font-bold text-sm px-6 py-3 rounded-xl hover:bg-[#d4a570] transition-all cursor-pointer gold-glow"
+              className="inline-flex items-center gap-2 bg-[#6366F1] text-black font-bold text-sm px-6 py-3 rounded-xl hover:bg-[#818CF8] transition-all cursor-pointer gold-glow"
               data-testid="btn-download-pdf"
             >
               <Download className="h-4 w-4" />
@@ -101,7 +101,7 @@ export default function FreeGuideNanoBanana() {
       <div className="grid gap-8 md:grid-cols-2">
         <div className="glass-card p-6 sm:p-8">
           <div className="flex items-center gap-2 mb-5">
-            <Sparkles className="h-4 w-4 text-[#CC9965]" />
+            <Sparkles className="h-4 w-4 text-[#6366F1]" />
             <h2 className="text-base font-bold text-[#111318]">이 가이드에 담긴 것</h2>
           </div>
           <ul className="space-y-3">
@@ -116,20 +116,20 @@ export default function FreeGuideNanoBanana() {
 
         <div className="glass-card-gold p-6 sm:p-8">
           <div className="flex items-center gap-2 mb-5">
-            <Zap className="h-4 w-4 text-[#CC9965]" />
+            <Zap className="h-4 w-4 text-[#6366F1]" />
             <h2 className="text-base font-bold text-[#111318]">이런 분께 추천</h2>
           </div>
           <ul className="space-y-3 text-sm text-[#484d57] leading-relaxed">
             <li className="flex items-start gap-3">
-              <span className="text-[#CC9965] font-bold">·</span>
+              <span className="text-[#6366F1] font-bold">·</span>
               <span>AI로 콘텐츠 만들고 싶은데 어떤 툴부터 써야 할지 막막한 분</span>
             </li>
             <li className="flex items-start gap-3">
-              <span className="text-[#CC9965] font-bold">·</span>
+              <span className="text-[#6366F1] font-bold">·</span>
               <span>프롬프트 잘 못 짜서 결과물이 마음에 안 드는 분</span>
             </li>
             <li className="flex items-start gap-3">
-              <span className="text-[#CC9965] font-bold">·</span>
+              <span className="text-[#6366F1] font-bold">·</span>
               <span>업무에 AI를 실전 투입하고 싶은 1인 사업자 / 마케터 / 크리에이터</span>
             </li>
           </ul>
@@ -138,8 +138,8 @@ export default function FreeGuideNanoBanana() {
 
       {/* Big download CTA */}
       <div className="glass-card p-8 sm:p-10 text-center">
-        <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[#CC9965]/15 border border-[#CC9965]/30 mb-5">
-          <Download className="h-6 w-6 text-[#CC9965]" />
+        <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[#6366F1]/15 border border-[#6366F1]/30 mb-5">
+          <Download className="h-6 w-6 text-[#6366F1]" />
         </div>
         <h3 className="text-xl font-bold text-[#111318] mb-2">지금 바로 다운로드</h3>
         <p className="text-sm text-[#8b8f98] mb-6">
@@ -147,7 +147,7 @@ export default function FreeGuideNanoBanana() {
         </p>
         <button
           onClick={handleDownload}
-          className="inline-flex items-center gap-2 bg-[#CC9965] text-black font-bold text-sm px-7 py-3.5 rounded-xl hover:bg-[#d4a570] transition-all cursor-pointer gold-glow"
+          className="inline-flex items-center gap-2 bg-[#6366F1] text-black font-bold text-sm px-7 py-3.5 rounded-xl hover:bg-[#818CF8] transition-all cursor-pointer gold-glow"
         >
           <Download className="h-4 w-4" />
           PDF 다운로드
@@ -157,8 +157,8 @@ export default function FreeGuideNanoBanana() {
       {/* Soft funnel — 라이브 대기방 */}
       <div className="glass-card-gold p-6 sm:p-10">
         <div className="flex flex-col sm:flex-row items-start gap-6">
-          <div className="w-14 h-14 rounded-2xl bg-[#CC9965]/15 border border-[#CC9965]/30 flex items-center justify-center flex-shrink-0">
-            <MessageCircle className="h-6 w-6 text-[#CC9965]" />
+          <div className="w-14 h-14 rounded-2xl bg-[#6366F1]/15 border border-[#6366F1]/30 flex items-center justify-center flex-shrink-0">
+            <MessageCircle className="h-6 w-6 text-[#6366F1]" />
           </div>
           <div className="flex-1">
             <div className="inline-flex items-center gap-2 bg-rose-500/15 rounded-full px-3 py-1 text-xs font-bold text-rose-700 border border-rose-500/20 mb-3">
@@ -177,7 +177,7 @@ export default function FreeGuideNanoBanana() {
               href={KAKAO_ROOM_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-[#CC9965] text-black font-bold text-sm px-5 py-2.5 rounded-xl hover:bg-[#d4a570] transition-all cursor-pointer"
+              className="inline-flex items-center gap-2 bg-[#6366F1] text-black font-bold text-sm px-5 py-2.5 rounded-xl hover:bg-[#818CF8] transition-all cursor-pointer"
               data-testid="btn-join-kakao-room"
             >
               <MessageCircle className="h-4 w-4" />
@@ -217,7 +217,7 @@ export default function FreeGuideNanoBanana() {
               <h3 className="text-xl font-bold text-[#111318] mb-2">다운로드 시작했어요</h3>
               <p className="text-sm text-[#484d57] leading-relaxed mb-6">
                 PDF 잘 받으셨나요? <br />
-                <span className="text-[#CC9965] font-semibold">매주 새로 풀리는 무료 자료와 라이브 특강</span>은
+                <span className="text-[#6366F1] font-semibold">매주 새로 풀리는 무료 자료와 라이브 특강</span>은
                 카톡 대기방에서 가장 먼저 안내드립니다.
               </p>
 
@@ -226,7 +226,7 @@ export default function FreeGuideNanoBanana() {
                   href={KAKAO_ROOM_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 bg-[#CC9965] text-black font-bold text-sm px-5 py-3 rounded-xl hover:bg-[#d4a570] transition-all"
+                  className="inline-flex items-center justify-center gap-2 bg-[#6366F1] text-black font-bold text-sm px-5 py-3 rounded-xl hover:bg-[#818CF8] transition-all"
                   onClick={() => setShowInviteModal(false)}
                 >
                   <MessageCircle className="h-4 w-4" />

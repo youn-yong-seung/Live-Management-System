@@ -50,7 +50,7 @@ export default function Community() {
         </div>
         {user ? (
           <Link href="/community/new">
-            <span className="inline-flex items-center gap-2 bg-[#CC9965] text-black font-bold text-sm px-5 py-2.5 rounded-xl hover:bg-[#d4a570] transition-all cursor-pointer gold-glow">
+            <span className="inline-flex items-center gap-2 bg-[#6366F1] text-black font-bold text-sm px-5 py-2.5 rounded-xl hover:bg-[#818CF8] transition-all cursor-pointer gold-glow">
               <PenSquare className="h-4 w-4" /> 글쓰기
             </span>
           </Link>
@@ -88,10 +88,10 @@ export default function Community() {
             <Link key={p.id} href={`/community/${p.id}`}>
               <div className="glass-card hover:bg-[#eef0f3] hover:-translate-y-0.5 transition-all p-5 cursor-pointer group" data-testid={`post-${p.id}`}>
                 <div className="flex items-start justify-between gap-3 mb-2">
-                  <h2 className="font-bold text-[#111318] text-base leading-snug line-clamp-1 group-hover:text-[#CC9965] transition-colors">
+                  <h2 className="font-bold text-[#111318] text-base leading-snug line-clamp-1 group-hover:text-[#6366F1] transition-colors">
                     {p.title}
                   </h2>
-                  <ChevronRight className="h-4 w-4 text-[#d1d5db] group-hover:text-[#CC9965] flex-shrink-0 mt-1 transition-colors" />
+                  <ChevronRight className="h-4 w-4 text-[#d1d5db] group-hover:text-[#6366F1] flex-shrink-0 mt-1 transition-colors" />
                 </div>
                 <p className="text-sm text-[#8b8f98] line-clamp-2 mb-3 whitespace-pre-line">{p.body}</p>
                 <div className="flex flex-wrap items-center gap-3 text-xs text-[#8b8f98]">
@@ -99,11 +99,11 @@ export default function Community() {
                     {p.authorAvatarUrl ? (
                       <img src={p.authorAvatarUrl} alt={p.authorName ?? ""} className="w-5 h-5 rounded-full" />
                     ) : (
-                      <div className="w-5 h-5 rounded-full bg-[#CC9965]/15 border border-[#CC9965]/30" />
+                      <div className="w-5 h-5 rounded-full bg-[#6366F1]/15 border border-[#6366F1]/30" />
                     )}
                     <span>{p.authorName ?? "회원"}</span>
                     {p.authorRole === "admin" && (
-                      <span className="inline-flex items-center gap-0.5 text-[9px] font-bold px-1 py-0.5 rounded bg-[#CC9965]/15 text-[#CC9965] border border-[#CC9965]/30">
+                      <span className="inline-flex items-center gap-0.5 text-[9px] font-bold px-1 py-0.5 rounded bg-[#6366F1]/15 text-[#6366F1] border border-[#6366F1]/30">
                         <Shield className="h-2.5 w-2.5" /> ADMIN
                       </span>
                     )}

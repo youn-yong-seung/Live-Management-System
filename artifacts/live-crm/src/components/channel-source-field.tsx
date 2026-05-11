@@ -114,7 +114,7 @@ export function ChannelSourceField({
     ? "border-[#e5e7eb] bg-[#f7f8fa] hover:bg-white/10 text-[#484d57]"
     : "border-gray-200 bg-white hover:bg-gray-50 text-gray-700";
   const cardActive = isDark
-    ? "border-[#CC9965] bg-[#CC9965]/10 text-[#CC9965]"
+    ? "border-[#6366F1] bg-[#6366F1]/10 text-[#6366F1]"
     : "border-blue-500 bg-blue-50 text-blue-700";
   const channelLabel = isDark ? "text-[#484d57]" : "text-gray-700";
   const inputCls = isDark
@@ -157,7 +157,7 @@ export function ChannelSourceField({
               {selected && (
                 <span
                   className={`absolute top-1.5 right-1.5 ${
-                    isDark ? "text-[#CC9965]" : "text-blue-600"
+                    isDark ? "text-[#6366F1]" : "text-blue-600"
                   }`}
                 >
                   <Check className="h-3 w-3" />

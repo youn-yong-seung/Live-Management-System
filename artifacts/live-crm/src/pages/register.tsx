@@ -161,7 +161,7 @@ export default function RegisterPage() {
   // Loading
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center" style={{ background: "#ffffff" }}>
-      <Loader2 className="h-6 w-6 animate-spin text-[#CC9965]" />
+      <Loader2 className="h-6 w-6 animate-spin text-[#6366F1]" />
     </div>
   );
 
@@ -181,7 +181,7 @@ export default function RegisterPage() {
       <div className="max-w-lg w-full space-y-5">
         {/* 신청 완료 카드 */}
         <div className="glass-card-gold p-8 text-center">
-          <CheckCircle className="h-12 w-12 text-[#CC9965] mx-auto mb-4" />
+          <CheckCircle className="h-12 w-12 text-[#6366F1] mx-auto mb-4" />
           <h2 className="text-xl font-bold text-[#111318] mb-2">{fc?.thankYouTitle || "신청이 완료되었습니다!"}</h2>
           <p className="text-[#8b8f98] text-sm whitespace-pre-wrap mb-6">{fc?.thankYouBody || "라이브 시작 전 알림톡으로 접속 링크를 보내드립니다."}</p>
           <a
@@ -197,7 +197,7 @@ export default function RegisterPage() {
         {/* 회원가입 유도 — 비로그인 사용자에게만 노출 */}
         {!authLoading && !authUser && (
           <div className="glass-card p-8" data-testid="signup-promo">
-            <div className="inline-flex items-center gap-2 bg-[#CC9965]/15 rounded-full px-3 py-1 text-xs font-bold text-[#CC9965] border border-[#CC9965]/30 mb-4">
+            <div className="inline-flex items-center gap-2 bg-[#6366F1]/15 rounded-full px-3 py-1 text-xs font-bold text-[#6366F1] border border-[#6366F1]/30 mb-4">
               <Sparkles className="h-3.5 w-3.5" />
               회원이 되시면 더 많은 혜택
             </div>
@@ -209,15 +209,15 @@ export default function RegisterPage() {
 
             <ul className="space-y-2 mb-6">
               <li className="flex items-center gap-2 text-sm text-[#484d57]">
-                <PlayCircle className="h-4 w-4 text-[#CC9965]" />
+                <PlayCircle className="h-4 w-4 text-[#6366F1]" />
                 지난 라이브 다시보기 무료 열람
               </li>
               <li className="flex items-center gap-2 text-sm text-[#484d57]">
-                <Download className="h-4 w-4 text-[#CC9965]" />
+                <Download className="h-4 w-4 text-[#6366F1]" />
                 무료자료실의 PDF·템플릿 다운로드
               </li>
               <li className="flex items-center gap-2 text-sm text-[#484d57]">
-                <MessageSquare className="h-4 w-4 text-[#CC9965]" />
+                <MessageSquare className="h-4 w-4 text-[#6366F1]" />
                 커뮤니티 글쓰기 / 댓글 참여
               </li>
             </ul>
@@ -246,7 +246,7 @@ export default function RegisterPage() {
         {!authLoading && authUser && (
           <div className="glass-card p-6 text-center" data-testid="member-shortcut">
             <p className="text-sm text-[#484d57] mb-4">
-              <span className="text-[#CC9965] font-semibold">{authUser.name ?? authUser.email}</span>님,<br />
+              <span className="text-[#6366F1] font-semibold">{authUser.name ?? authUser.email}</span>님,<br />
               회원이라 바로 다시보기 / 자료실 / 커뮤니티 이용하실 수 있어요.
             </p>
             <div className="flex flex-wrap gap-2 justify-center">
@@ -272,7 +272,7 @@ export default function RegisterPage() {
       <div className="max-w-lg mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-6">
-          <span className="text-xl font-black text-[#CC9965]">윤자동</span>
+          <span className="text-xl font-black text-[#6366F1]">윤자동</span>
           <span className="text-[#8b8f98] text-sm ml-2">클래스</span>
         </div>
 
@@ -289,7 +289,7 @@ export default function RegisterPage() {
           {live.description && <p className="text-sm text-[#8b8f98] mb-3">{live.description}</p>}
           <div className="flex items-center gap-4 text-xs text-[#8b8f98]">
             {live.scheduledAt && (
-              <span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5 text-[#CC9965]" />{formatDate(live.scheduledAt)}</span>
+              <span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5 text-[#6366F1]" />{formatDate(live.scheduledAt)}</span>
             )}
           </div>
         </div>
@@ -459,7 +459,7 @@ export default function RegisterPage() {
               )}
 
               {/* 제출 */}
-              <Button type="submit" className="w-full bg-[#CC9965] hover:bg-[#d4a570] text-black font-bold rounded-xl gold-glow py-3" disabled={submitting}>
+              <Button type="submit" className="w-full bg-[#6366F1] hover:bg-[#818CF8] text-black font-bold rounded-xl gold-glow py-3" disabled={submitting}>
                 {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                 참가 신청하기
               </Button>

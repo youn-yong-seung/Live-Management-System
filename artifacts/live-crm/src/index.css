@@ -87,7 +87,7 @@
   --yellow: #ffcc00;
   --purple: #7c3aed;
   --purple-soft: #f3f0ff;
-  --gold: #CC9965;
+  --gold: #6366F1;
   --gold-soft: #f7f1e8;
 
   /* ── Card shared tokens ── */
@@ -117,17 +117,17 @@
   --sidebar: 220 14% 96%;
   --sidebar-foreground: 220 13% 9%;
   --sidebar-border: 220 13% 91%;
-  --sidebar-primary: 34 50% 50%;
+  --sidebar-primary: 234 84% 67%;
   --sidebar-primary-foreground: 0 0% 100%;
   --sidebar-accent: 220 14% 93%;
   --sidebar-accent-foreground: 220 13% 9%;
-  --sidebar-ring: 34 50% 50%;
+  --sidebar-ring: 234 84% 67%;
 
   --popover: 0 0% 100%;
   --popover-foreground: 220 13% 9%;
   --popover-border: 220 13% 91%;
 
-  --primary: 34 50% 50%;
+  --primary: 234 84% 67%;
   --primary-foreground: 0 0% 100%;
 
   --secondary: 220 14% 96%;
@@ -143,7 +143,7 @@
   --destructive-foreground: 0 0% 100%;
 
   --input: 220 13% 91%;
-  --ring: 34 50% 50%;
+  --ring: 234 84% 67%;
 
   --chart-1: 221 83% 53%;
   --chart-2: 270 70% 50%;
@@ -216,25 +216,25 @@
 .glass-card-gold {
   position: relative;
   background: var(--card-bg);
-  border: 1px solid rgba(204, 153, 101, 0.4);
+  border: 1px solid rgba(99, 102, 241, 0.4);
   border-radius: var(--card-radius);
-  box-shadow: 0 4px 16px rgba(204, 153, 101, 0.08);
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.08);
   transition: var(--card-transition);
 }
 
 .glass-card-gold:hover {
-  box-shadow: 0 16px 40px -16px rgba(204, 153, 101, 0.25);
-  border-color: rgba(204, 153, 101, 0.6);
+  box-shadow: 0 16px 40px -16px rgba(99, 102, 241, 0.25);
+  border-color: rgba(99, 102, 241, 0.6);
   transform: translateY(-2px);
 }
 
 .gold-glow {
-  box-shadow: 0 4px 12px rgba(204, 153, 101, 0.25);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
   transition: box-shadow 0.3s ease;
 }
 
 .gold-glow:hover {
-  box-shadow: 0 8px 24px rgba(204, 153, 101, 0.4);
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
 }
 
 /* ── Hero backgrounds (yun-platform 패턴) ─────────────── */
@@ -250,7 +250,7 @@
   background:
     radial-gradient(circle at 20% 30%, rgba(27, 100, 242, 0.14) 0%, transparent 50%),
     radial-gradient(circle at 80% 20%, rgba(124, 58, 237, 0.10) 0%, transparent 50%),
-    radial-gradient(circle at 50% 80%, rgba(204, 153, 101, 0.10) 0%, transparent 50%),
+    radial-gradient(circle at 50% 80%, rgba(99, 102, 241, 0.10) 0%, transparent 50%),
     radial-gradient(circle at 70% 60%, rgba(255, 59, 48, 0.05) 0%, transparent 40%);
 }
 

@@ -33,7 +33,7 @@ function PlanListCard({ plan }: { plan: VideoPlan }) {
             <div className="flex items-center gap-2 mb-2">
               <span className="text-[10px] font-medium text-[#8b8f98] uppercase tracking-wider">{v.subtitle}</span>
               {versionCount > 1 && (
-                <span className="text-[10px] text-[#CC9965] font-medium">v{v.version} (총 {versionCount}개 버전)</span>
+                <span className="text-[10px] text-[#6366F1] font-medium">v{v.version} (총 {versionCount}개 버전)</span>
               )}
             </div>
             <h3 className="text-base font-semibold text-[#111318] leading-snug mb-3">

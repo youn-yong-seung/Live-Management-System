@@ -938,10 +938,10 @@ export default function Admin() {
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="m-3 flex h-[calc(100vh-1.5rem)] flex-col rounded-[2rem] border border-white/80 bg-white/95 shadow-[0_28px_70px_-38px_rgba(204,153,101,0.45)] backdrop-blur-md">
+        <div className="m-3 flex h-[calc(100vh-1.5rem)] flex-col rounded-[2rem] border border-white/80 bg-white/95 shadow-[0_28px_70px_-38px_rgba(99,102,241,0.45)] backdrop-blur-md">
           {/* Brand header */}
           <div className="flex items-center gap-3 border-b border-gray-100 px-4 py-4">
-            <div className="overflow-hidden rounded-2xl border border-amber-200/40 bg-gradient-to-br from-amber-100 to-amber-50 p-1 shadow-[0_18px_36px_-24px_rgba(204,153,101,0.55)]">
+            <div className="overflow-hidden rounded-2xl border border-amber-200/40 bg-gradient-to-br from-amber-100 to-amber-50 p-1 shadow-[0_18px_36px_-24px_rgba(99,102,241,0.55)]">
               <div className="h-10 w-10 rounded-xl bg-white flex items-center justify-center">
                 <Settings className="h-5 w-5 text-amber-700" />
               </div>
@@ -978,7 +978,7 @@ export default function Admin() {
                         onClick={() => handleNavClick(item.id, item.onSelect)}
                         className={`group w-full flex items-center gap-3 rounded-2xl border px-3 py-2.5 text-sm transition-all text-left ${
                           isActive
-                            ? "border-amber-500/20 bg-amber-500 text-[#111318] shadow-[0_16px_32px_-22px_rgba(204,153,101,0.7)] font-semibold"
+                            ? "border-amber-500/20 bg-amber-500 text-[#111318] shadow-[0_16px_32px_-22px_rgba(99,102,241,0.7)] font-semibold"
                             : "border-transparent text-gray-500 hover:border-amber-200/50 hover:bg-amber-50/60 hover:text-gray-900"
                         }`}
                       >
@@ -1035,10 +1035,10 @@ export default function Admin() {
 
       {/* Desktop sidebar — floating sticky card */}
       <aside className="hidden lg:flex lg:sticky lg:top-4 lg:h-[calc(100vh-2rem)] lg:w-72 lg:flex-shrink-0 lg:flex-col">
-        <div className="m-3 flex h-full flex-col rounded-[2rem] border border-white/80 bg-white/85 shadow-[0_28px_70px_-38px_rgba(204,153,101,0.4)] backdrop-blur-md">
+        <div className="m-3 flex h-full flex-col rounded-[2rem] border border-white/80 bg-white/85 shadow-[0_28px_70px_-38px_rgba(99,102,241,0.4)] backdrop-blur-md">
           {/* Brand header */}
           <div className="flex items-center gap-3 border-b border-gray-100 px-4 py-4">
-            <div className="overflow-hidden rounded-2xl border border-amber-200/40 bg-gradient-to-br from-amber-100 to-amber-50 p-1 shadow-[0_18px_36px_-24px_rgba(204,153,101,0.55)]">
+            <div className="overflow-hidden rounded-2xl border border-amber-200/40 bg-gradient-to-br from-amber-100 to-amber-50 p-1 shadow-[0_18px_36px_-24px_rgba(99,102,241,0.55)]">
               <div className="h-10 w-10 rounded-xl bg-white flex items-center justify-center">
                 <Settings className="h-5 w-5 text-amber-700" />
               </div>
@@ -1068,7 +1068,7 @@ export default function Admin() {
                         onClick={() => handleNavClick(item.id, item.onSelect)}
                         className={`group w-full flex items-center gap-3 rounded-2xl border px-3 py-2.5 text-sm transition-all text-left ${
                           isActive
-                            ? "border-amber-500/20 bg-amber-500 text-[#111318] shadow-[0_16px_32px_-22px_rgba(204,153,101,0.7)] font-semibold"
+                            ? "border-amber-500/20 bg-amber-500 text-[#111318] shadow-[0_16px_32px_-22px_rgba(99,102,241,0.7)] font-semibold"
                             : "border-transparent text-gray-500 hover:border-amber-200/50 hover:bg-amber-50/60 hover:text-gray-900"
                         }`}
                       >
@@ -1213,7 +1213,7 @@ export default function Admin() {
                           <Button variant="outline" size="sm" className="h-8 rounded-lg border-gray-200 text-gray-500 hover:text-purple-600 hover:border-purple-200 text-xs gap-1" onClick={() => openAnalyticsModal(live)}>
                             <BarChart2 className="h-3.5 w-3.5" />신청 현황
                           </Button>
-                          <Button variant="outline" size="sm" className="h-8 rounded-lg border-gray-200 text-gray-500 hover:text-[#CC9965] hover:border-[#CC9965]/30 text-xs gap-1" onClick={() => window.open(`/lives/${live.id}/dashboard`, "_blank")} title="라이브 중 화면에 띄울 공개 대시보드">
+                          <Button variant="outline" size="sm" className="h-8 rounded-lg border-gray-200 text-gray-500 hover:text-[#6366F1] hover:border-[#6366F1]/30 text-xs gap-1" onClick={() => window.open(`/lives/${live.id}/dashboard`, "_blank")} title="라이브 중 화면에 띄울 공개 대시보드">
                             <MonitorPlay className="h-3.5 w-3.5" />공개 대시보드
                           </Button>
                           <Button variant="outline" size="sm" className="h-8 rounded-lg border-gray-200 text-gray-500 hover:text-blue-600 hover:border-blue-200 text-xs gap-1" onClick={() => openRulesModal(live)}>

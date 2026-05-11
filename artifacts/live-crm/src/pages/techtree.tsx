@@ -166,7 +166,7 @@ function NodeTooltip({ node, color }: { node: TreeNode; color: string }) {
 
           {/* Gains */}
           <div className="space-y-1.5 mb-3">
-            <p className="text-[10px] font-semibold text-[#CC9965] uppercase tracking-wider">습득 스킬</p>
+            <p className="text-[10px] font-semibold text-[#6366F1] uppercase tracking-wider">습득 스킬</p>
             {node.gains.map((g) => (
               <div key={g} className="flex items-center gap-2 text-xs text-[#484d57]">
                 <span className="w-1 h-1 rounded-full flex-shrink-0" style={{ background: color }} />
@@ -206,8 +206,8 @@ function SkillInfoPanel({
         style={{
           background: "rgba(0, 50, 51, 0.92)",
           backdropFilter: "blur(20px)",
-          border: "1px solid rgba(204, 153, 101, 0.35)",
-          boxShadow: "0 12px 40px rgba(0,0,0,0.6), 0 0 20px rgba(204,153,101,0.08)",
+          border: "1px solid rgba(99, 102, 241, 0.35)",
+          boxShadow: "0 12px 40px rgba(0,0,0,0.6), 0 0 20px rgba(99,102,241,0.08)",
         }}>
         {/* Thumbnail */}
         {ytId && (
@@ -230,7 +230,7 @@ function SkillInfoPanel({
 
           {/* Gains */}
           <div className="mb-4">
-            <p className="text-[9px] font-bold text-[#CC9965] uppercase tracking-[0.15em] mb-2">습득 스킬</p>
+            <p className="text-[9px] font-bold text-[#6366F1] uppercase tracking-[0.15em] mb-2">습득 스킬</p>
             <div className="space-y-1.5">
               {node.gains.map((g) => (
                 <div key={g} className="flex items-start gap-2">
@@ -245,7 +245,7 @@ function SkillInfoPanel({
           {ytId ? (
             <button
               onClick={onWatch}
-              className="w-full py-2.5 rounded-xl text-sm font-bold text-black bg-[#CC9965] hover:bg-[#d4a570] transition-all gold-glow flex items-center justify-center gap-2"
+              className="w-full py-2.5 rounded-xl text-sm font-bold text-black bg-[#6366F1] hover:bg-[#818CF8] transition-all gold-glow flex items-center justify-center gap-2"
             >
               <Play className="h-4 w-4" />
               100% 무료로 시청하기
@@ -258,7 +258,7 @@ function SkillInfoPanel({
 
       {/* Left arrow */}
       <div className="absolute left-0 top-1/2 -translate-x-[7px] -translate-y-1/2 w-3.5 h-3.5 rotate-45"
-        style={{ background: "rgba(0, 50, 51, 0.92)", borderLeft: "1px solid rgba(204,153,101,0.35)", borderBottom: "1px solid rgba(204,153,101,0.35)" }} />
+        style={{ background: "rgba(0, 50, 51, 0.92)", borderLeft: "1px solid rgba(99,102,241,0.35)", borderBottom: "1px solid rgba(99,102,241,0.35)" }} />
     </div>
   );
 }

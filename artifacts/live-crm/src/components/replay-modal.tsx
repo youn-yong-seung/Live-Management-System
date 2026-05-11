@@ -139,7 +139,7 @@ export function ReplayModal({
                 ) : null}
                 {replay.youtubeUrl && (
                   <a href={replay.youtubeUrl} target="_blank" rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 mt-3 text-xs font-semibold text-[#CC9965] hover:text-[#d4a570] transition-colors">
+                    className="inline-flex items-center gap-2 mt-3 text-xs font-semibold text-[#6366F1] hover:text-[#818CF8] transition-colors">
                     <ExternalLink className="h-3.5 w-3.5" /> YouTube에서 보기
                   </a>
                 )}
@@ -149,7 +149,7 @@ export function ReplayModal({
             {/* Right: Reviews */}
             <div className="w-full lg:w-[360px] border-t lg:border-t-0 lg:border-l border-[#e5e7eb] flex flex-col min-h-0 max-h-[40vh] lg:max-h-none">
               <div className="flex items-center gap-2 px-5 py-4 border-b border-[#e5e7eb] flex-shrink-0">
-                <MessageSquare className="h-4 w-4 text-[#CC9965]" />
+                <MessageSquare className="h-4 w-4 text-[#6366F1]" />
                 <span className="font-bold text-[#111318] text-sm">후기</span>
                 <span className="text-xs text-[#8b8f98]">({reviews.length})</span>
               </div>
@@ -197,7 +197,7 @@ export function ReplayModal({
                   <Button
                     onClick={handleSubmitReview}
                     disabled={isSubmitting}
-                    className="self-end bg-[#CC9965] hover:bg-[#d4a570] text-black rounded-lg h-[60px] w-[60px] flex-shrink-0"
+                    className="self-end bg-[#6366F1] hover:bg-[#818CF8] text-black rounded-lg h-[60px] w-[60px] flex-shrink-0"
                   >
                     <Send className="h-4 w-4" />
                   </Button>

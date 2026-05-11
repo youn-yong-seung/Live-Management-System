@@ -51,7 +51,7 @@ const STATUS_MAP: Record<string, { label: string; color: string; bg: string }> =
   revision:       { label: "수정 요청", color: "text-rose-400", bg: "bg-rose-500/15" },
   approved:       { label: "승인 완료", color: "text-green-400", bg: "bg-green-500/15" },
   scheduled:      { label: "업로드 예약", color: "text-sky-400", bg: "bg-sky-500/15" },
-  uploaded:       { label: "업로드 완료", color: "text-[#CC9965]", bg: "bg-[#CC9965]/15" },
+  uploaded:       { label: "업로드 완료", color: "text-[#6366F1]", bg: "bg-[#6366F1]/15" },
 };
 
 function shortDate(d: string | null) {
@@ -93,7 +93,7 @@ function LoginScreen({ onLogin }: { onLogin: (editor: EditorInfo) => void }) {
     <div className="min-h-screen flex items-center justify-center px-4" style={{ background: "#ffffff" }}>
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <span className="text-2xl font-black text-[#CC9965]">윤자동</span>
+          <span className="text-2xl font-black text-[#6366F1]">윤자동</span>
           <span className="text-[#8b8f98] text-sm ml-2">편집자 포털</span>
         </div>
         <div className="glass-card p-6 space-y-4">
@@ -114,7 +114,7 @@ function LoginScreen({ onLogin }: { onLogin: (editor: EditorInfo) => void }) {
               onKeyDown={(e) => e.key === "Enter" && handleLogin()}
             />
           </div>
-          <Button onClick={handleLogin} disabled={loading} className="w-full bg-[#CC9965] hover:bg-[#d4a570] text-black font-bold gold-glow">
+          <Button onClick={handleLogin} disabled={loading} className="w-full bg-[#6366F1] hover:bg-[#818CF8] text-black font-bold gold-glow">
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <><LogIn className="h-4 w-4 mr-2" /> 로그인</>}
           </Button>
         </div>
@@ -148,7 +148,7 @@ function ProjectCard({ project, onAction }: {
       {/* Info */}
       <div className="grid grid-cols-2 gap-3 text-xs">
         <div className="flex items-center gap-2 text-[#8b8f98]">
-          <Calendar className="h-3.5 w-3.5 text-[#CC9965]" />
+          <Calendar className="h-3.5 w-3.5 text-[#6366F1]" />
           <span>마감: {shortDate(deadline)}</span>
         </div>
         {project.scheduledUploadAt && (
@@ -164,7 +164,7 @@ function ProjectCard({ project, onAction }: {
           </div>
         )}
         {project.youtubeUrl && (
-          <a href={project.youtubeUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[#CC9965] hover:text-[#d4a570]">
+          <a href={project.youtubeUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[#6366F1] hover:text-[#818CF8]">
             <ExternalLink className="h-3.5 w-3.5" />
             <span>YouTube</span>
           </a>
@@ -175,7 +175,7 @@ function ProjectCard({ project, onAction }: {
       <div className="flex flex-wrap gap-2 pt-2 border-t border-[#eef0f3]">
         {(project.status === "assigned") && (
           <>
-            <Button size="sm" className="bg-[#CC9965] hover:bg-[#d4a570] text-black font-bold text-xs rounded-lg gold-glow" onClick={() => onAction("accept", project)}>
+            <Button size="sm" className="bg-[#6366F1] hover:bg-[#818CF8] text-black font-bold text-xs rounded-lg gold-glow" onClick={() => onAction("accept", project)}>
               <CheckCircle className="h-3.5 w-3.5 mr-1" /> 수락
             </Button>
             <Button size="sm" variant="outline" className="border-[#e5e7eb] text-[#484d57] text-xs rounded-lg hover:bg-[#f7f8fa]" onClick={() => onAction("propose-date", project)}>
@@ -305,7 +305,7 @@ export default function EditorPortal() {
   // Checking session...
   if (checking) return (
     <div className="min-h-screen flex items-center justify-center" style={{ background: "#ffffff" }}>
-      <Loader2 className="h-6 w-6 animate-spin text-[#CC9965]" />
+      <Loader2 className="h-6 w-6 animate-spin text-[#6366F1]" />
     </div>
   );
 
@@ -322,7 +322,7 @@ export default function EditorPortal() {
       <header className="sticky top-0 z-50 backdrop-blur-2xl bg-[rgba(5,10,10,0.85)] border-b border-[#eef0f3]">
         <div className="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-lg font-black text-[#CC9965]">윤자동</span>
+            <span className="text-lg font-black text-[#6366F1]">윤자동</span>
             <span className="text-xs text-[#a0a4ab]">편집자 포털</span>
           </div>
           <div className="flex items-center gap-3">
@@ -338,7 +338,7 @@ export default function EditorPortal() {
         {/* Active Projects */}
         <div>
           <h2 className="text-lg font-bold text-[#111318] mb-4 flex items-center gap-2">
-            <Film className="h-5 w-5 text-[#CC9965]" />
+            <Film className="h-5 w-5 text-[#6366F1]" />
             진행 중인 프로젝트 <span className="text-sm text-[#a0a4ab] font-normal">({activeProjects.length})</span>
           </h2>
           {loading ? (
@@ -371,7 +371,7 @@ export default function EditorPortal() {
         {/* Pay Summary */}
         {projects.length > 0 && (
           <div className="glass-card-gold p-5">
-            <h3 className="text-sm font-bold text-[#CC9965] mb-3 flex items-center gap-2">
+            <h3 className="text-sm font-bold text-[#6366F1] mb-3 flex items-center gap-2">
               <DollarSign className="h-4 w-4" /> 정산 내역
             </h3>
             <div className="grid grid-cols-2 gap-4 text-sm">
@@ -411,7 +411,7 @@ export default function EditorPortal() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDateModal(null)} className="border-[#e5e7eb] text-[#484d57]">취소</Button>
-            <Button onClick={submitProposedDate} className="bg-[#CC9965] text-black font-bold">요청하기</Button>
+            <Button onClick={submitProposedDate} className="bg-[#6366F1] text-black font-bold">요청하기</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -451,7 +451,7 @@ export default function EditorPortal() {
             ) : messages.map((m) => (
               <div key={m.id} className={`p-3 rounded-xl text-sm ${
                 m.senderType === "pd"
-                  ? "bg-[#CC9965]/10 border border-[#CC9965]/20 ml-6"
+                  ? "bg-[#6366F1]/10 border border-[#6366F1]/20 ml-6"
                   : "bg-[#f7f8fa] border border-white/5 mr-6"
               }`}>
                 <p className="text-[10px] font-semibold text-[#a0a4ab] mb-1">
@@ -466,7 +466,7 @@ export default function EditorPortal() {
               placeholder="메시지를 입력하세요..."
               className="bg-[#f7f8fa] border-[#e5e7eb] text-[#111318] placeholder:text-[#a0a4ab]"
               onKeyDown={(e) => e.key === "Enter" && sendMessage()} />
-            <Button onClick={sendMessage} disabled={!newMsg.trim()} className="bg-[#CC9965] text-black">
+            <Button onClick={sendMessage} disabled={!newMsg.trim()} className="bg-[#6366F1] text-black">
               <Send className="h-4 w-4" />
             </Button>
           </div>

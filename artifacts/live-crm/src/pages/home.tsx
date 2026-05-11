@@ -42,10 +42,10 @@ const FREE_RESOURCES = [
 /* ── Category config ────────────────────────────────── */
 
 const CATEGORY_SECTIONS = [
-  { label: "입문자 추천", tag: "입문", icon: Sparkles, color: "text-[#CC9965]" },
-  { label: "자동화", tag: "자동화", icon: Zap, color: "text-[#CC9965]" },
-  { label: "노션", tag: "노션", icon: BookOpen, color: "text-[#CC9965]" },
-  { label: "클로드코드", tag: "클로드코드", icon: TrendingUp, color: "text-[#CC9965]" },
+  { label: "입문자 추천", tag: "입문", icon: Sparkles, color: "text-[#6366F1]" },
+  { label: "자동화", tag: "자동화", icon: Zap, color: "text-[#6366F1]" },
+  { label: "노션", tag: "노션", icon: BookOpen, color: "text-[#6366F1]" },
+  { label: "클로드코드", tag: "클로드코드", icon: TrendingUp, color: "text-[#6366F1]" },
 ];
 
 /* ── Helpers ─────────────────────────────────────────── */
@@ -116,11 +116,11 @@ export default function Home() {
       {/* ── Hero Section ──────────────────────────────── */}
       <div className="relative overflow-hidden rounded-3xl p-8 sm:p-12 glass-card-gold">
         <div className="absolute inset-0 hero-bg" /><div className="absolute inset-0 hero-mesh" />
-        <div className="absolute top-0 right-0 w-96 h-96 bg-[#CC9965]/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-[#6366F1]/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3" />
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#005051]/50 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/4" />
 
         <div className="relative">
-          <div className="inline-flex items-center gap-2 bg-[#CC9965]/15 backdrop-blur-sm rounded-full px-4 py-1.5 text-sm font-medium mb-6 text-[#CC9965] border border-[#CC9965]/20">
+          <div className="inline-flex items-center gap-2 bg-[#6366F1]/15 backdrop-blur-sm rounded-full px-4 py-1.5 text-sm font-medium mb-6 text-[#6366F1] border border-[#6366F1]/20">
             <Sparkles className="h-4 w-4" />
             무료 라이브 특강
           </div>
@@ -133,7 +133,7 @@ export default function Home() {
           </p>
           <div className="flex flex-wrap gap-4">
             <Link href="/lives">
-              <span className="inline-flex items-center gap-2 bg-[#CC9965] text-black font-bold text-sm px-6 py-3 rounded-xl hover:bg-[#d4a570] transition-all cursor-pointer gold-glow">
+              <span className="inline-flex items-center gap-2 bg-[#6366F1] text-black font-bold text-sm px-6 py-3 rounded-xl hover:bg-[#818CF8] transition-all cursor-pointer gold-glow">
                 <Video className="h-4 w-4" />
                 라이브 신청하기
               </span>
@@ -185,7 +185,7 @@ export default function Home() {
                     <span className="text-xs font-bold text-red-400 uppercase tracking-wide">LIVE NOW</span>
                     <span className="text-xs text-[#a0a4ab]">{live.registrationCount}명 참석</span>
                   </div>
-                  <h3 className="font-bold text-[#111318] mb-1 line-clamp-1 hover:text-[#CC9965] transition-colors">{live.title}</h3>
+                  <h3 className="font-bold text-[#111318] mb-1 line-clamp-1 hover:text-[#6366F1] transition-colors">{live.title}</h3>
                   <p className="text-sm text-[#8b8f98] line-clamp-2 mb-3">{live.description}</p>
                 </div>
                 <div className="flex gap-2 pt-3 border-t border-[#eef0f3]">
@@ -197,7 +197,7 @@ export default function Home() {
                     </a>
                   )}
                   <button
-                    className="flex-1 flex items-center justify-center gap-2 border border-[#e5e7eb] text-[#484d57] hover:text-[#CC9965] hover:border-[#CC9965]/30 text-xs font-bold py-2.5 rounded-lg transition-colors"
+                    className="flex-1 flex items-center justify-center gap-2 border border-[#e5e7eb] text-[#484d57] hover:text-[#6366F1] hover:border-[#6366F1]/30 text-xs font-bold py-2.5 rounded-lg transition-colors"
                     onClick={() => setModalReplay(live)}>
                     <Star className="h-3.5 w-3.5" /> 후기 작성하기
                   </button>
@@ -214,7 +214,7 @@ export default function Home() {
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-bold text-[#111318]">예정된 라이브</h2>
             <Link href="/lives">
-              <span className="text-sm text-[#CC9965] hover:text-[#d4a570] font-medium flex items-center gap-1 cursor-pointer">
+              <span className="text-sm text-[#6366F1] hover:text-[#818CF8] font-medium flex items-center gap-1 cursor-pointer">
                 전체 보기 <ArrowRight className="h-3.5 w-3.5" />
               </span>
             </Link>
@@ -227,12 +227,12 @@ export default function Home() {
                 className="glass-card-gold hover:-translate-y-1 transition-all duration-300 p-6 cursor-pointer"
               >
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="h-2 w-2 rounded-full bg-[#CC9965] animate-pulse" />
-                  <span className="text-xs font-bold text-[#CC9965] uppercase tracking-wide">UPCOMING</span>
+                  <span className="h-2 w-2 rounded-full bg-[#6366F1] animate-pulse" />
+                  <span className="text-xs font-bold text-[#6366F1] uppercase tracking-wide">UPCOMING</span>
                 </div>
                 <h3 className="font-bold text-[#111318] mb-1 line-clamp-1">{live.title}</h3>
                 <p className="text-sm text-[#8b8f98] line-clamp-1 mb-3">{live.description}</p>
-                <span className="text-xs text-[#CC9965]/80 font-medium">{formatDate(live.scheduledAt)}</span>
+                <span className="text-xs text-[#6366F1]/80 font-medium">{formatDate(live.scheduledAt)}</span>
               </div>
             ))}
           </div>
@@ -244,7 +244,7 @@ export default function Home() {
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-bold text-[#111318]">무료 자료 나눔</h2>
           <Link href="/resources">
-            <span className="text-sm text-[#CC9965] hover:text-[#d4a570] font-medium flex items-center gap-1 cursor-pointer">
+            <span className="text-sm text-[#6366F1] hover:text-[#818CF8] font-medium flex items-center gap-1 cursor-pointer">
               전체 보기 <ArrowRight className="h-3.5 w-3.5" />
             </span>
           </Link>
@@ -264,7 +264,7 @@ export default function Home() {
                     </span>
                   )}
                 </div>
-                <h3 className="font-bold text-[#111318] text-sm mb-1 group-hover:text-[#CC9965] transition-colors">{res.title}</h3>
+                <h3 className="font-bold text-[#111318] text-sm mb-1 group-hover:text-[#6366F1] transition-colors">{res.title}</h3>
                 <p className="text-xs text-[#8b8f98]">{res.description}</p>
               </div>
             );
@@ -282,11 +282,11 @@ export default function Home() {
         <div>
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
-              <Star className="h-5 w-5 text-[#CC9965]" />
+              <Star className="h-5 w-5 text-[#6366F1]" />
               <h2 className="text-lg font-bold text-[#111318]">추천 다시보기</h2>
             </div>
             <Link href="/replays">
-              <span className="text-sm text-[#CC9965] hover:text-[#d4a570] font-medium flex items-center gap-1 cursor-pointer">
+              <span className="text-sm text-[#6366F1] hover:text-[#818CF8] font-medium flex items-center gap-1 cursor-pointer">
                 전체 보기 <ArrowRight className="h-3.5 w-3.5" />
               </span>
             </Link>
@@ -309,7 +309,7 @@ export default function Home() {
                       </div>
                     )}
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      <div className="w-12 h-12 bg-[#CC9965]/90 rounded-full flex items-center justify-center shadow-lg">
+                      <div className="w-12 h-12 bg-[#6366F1]/90 rounded-full flex items-center justify-center shadow-lg">
                         <PlayCircle className="h-6 w-6 text-black" />
                       </div>
                     </div>
@@ -343,7 +343,7 @@ export default function Home() {
               className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-300"
             />
             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-              <div className="w-14 h-14 bg-[#CC9965]/90 rounded-full flex items-center justify-center shadow-lg">
+              <div className="w-14 h-14 bg-[#6366F1]/90 rounded-full flex items-center justify-center shadow-lg">
                 <PlayCircle className="h-8 w-8 text-black" />
               </div>
             </div>
@@ -357,13 +357,13 @@ export default function Home() {
               보육원에 1,400만원 기부 강의
             </h3>
             <p className="text-sm text-[#8b8f98] mb-4 leading-relaxed">
-              <span className="text-[#CC9965] font-semibold">나민수, 노션다움, 조쉬, 윤자동</span> — 4명의 강사가 모여 진행한 특별 기부 라이브. 수익금 전액이 보육원에 기부되었습니다.
+              <span className="text-[#6366F1] font-semibold">나민수, 노션다움, 조쉬, 윤자동</span> — 4명의 강사가 모여 진행한 특별 기부 라이브. 수익금 전액이 보육원에 기부되었습니다.
             </p>
             <a
               href="https://www.youtube.com/watch?v=e3eJjWSqhuk"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-sm font-semibold text-[#CC9965] hover:text-[#d4a570] transition-colors w-fit"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-[#6366F1] hover:text-[#818CF8] transition-colors w-fit"
             >
               영상 보러가기 <ExternalLink className="h-3.5 w-3.5" />
             </a>
@@ -385,7 +385,7 @@ export default function Home() {
                 <h2 className="text-lg font-bold text-[#111318]">{section.label}</h2>
               </div>
               <Link href="/replays">
-                <span className="text-sm text-[#CC9965] hover:text-[#d4a570] font-medium flex items-center gap-1 cursor-pointer">
+                <span className="text-sm text-[#6366F1] hover:text-[#818CF8] font-medium flex items-center gap-1 cursor-pointer">
                   더보기 <ArrowRight className="h-3.5 w-3.5" />
                 </span>
               </Link>

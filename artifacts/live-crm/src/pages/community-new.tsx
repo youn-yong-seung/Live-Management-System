@@ -72,7 +72,7 @@ export default function CommunityNew() {
   return (
     <div className="space-y-6">
       <Link href="/community">
-        <span className="inline-flex items-center gap-1.5 text-sm text-[#8b8f98] hover:text-[#CC9965] transition-colors cursor-pointer">
+        <span className="inline-flex items-center gap-1.5 text-sm text-[#8b8f98] hover:text-[#6366F1] transition-colors cursor-pointer">
           <ArrowLeft className="h-3.5 w-3.5" /> 커뮤니티 목록
         </span>
       </Link>
@@ -90,7 +90,7 @@ export default function CommunityNew() {
           placeholder="제목을 입력하세요"
           maxLength={200}
           disabled={submitting}
-          className="w-full px-5 py-3.5 rounded-xl bg-[#f7f8fa] border border-[#e5e7eb] text-[#111318] text-lg font-semibold placeholder:text-[#a0a4ab] focus:outline-none focus:border-[#CC9965]/50 focus:bg-[#eef0f3] transition-colors disabled:opacity-50"
+          className="w-full px-5 py-3.5 rounded-xl bg-[#f7f8fa] border border-[#e5e7eb] text-[#111318] text-lg font-semibold placeholder:text-[#a0a4ab] focus:outline-none focus:border-[#6366F1]/50 focus:bg-[#eef0f3] transition-colors disabled:opacity-50"
           data-testid="input-post-title"
         />
 
@@ -118,7 +118,7 @@ export default function CommunityNew() {
           <button
             type="submit"
             disabled={submitting}
-            className="inline-flex items-center gap-2 bg-[#CC9965] text-black font-bold text-sm px-6 py-2.5 rounded-xl hover:bg-[#d4a570] transition-all cursor-pointer disabled:opacity-50 gold-glow"
+            className="inline-flex items-center gap-2 bg-[#6366F1] text-black font-bold text-sm px-6 py-2.5 rounded-xl hover:bg-[#818CF8] transition-all cursor-pointer disabled:opacity-50 gold-glow"
             data-testid="btn-submit-post"
           >
             {submitting ? (

@@ -12,12 +12,12 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 hero-bg relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-96 h-96 bg-[#CC9965]/10 rounded-full blur-[100px]" />
+      <div className="absolute top-0 right-0 w-96 h-96 bg-[#6366F1]/10 rounded-full blur-[100px]" />
       <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#005051]/40 rounded-full blur-[80px]" />
 
       <div className="relative glass-card-gold w-full max-w-md p-8 sm:p-10 rounded-3xl">
         <div className="text-center mb-8">
-          <div className="text-3xl font-black text-[#CC9965] tracking-tight mb-1">윤자동</div>
+          <div className="text-3xl font-black text-[#6366F1] tracking-tight mb-1">윤자동</div>
           <div className="text-xs font-semibold text-[#8b8f98] border border-[#e5e7eb] rounded px-2 py-0.5 inline-block">클래스</div>
         </div>
 

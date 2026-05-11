@@ -152,7 +152,7 @@ export default function CommunityDetail() {
       <div className="glass-card p-12 text-center">
         <p className="text-[#8b8f98] mb-4">게시글을 찾을 수 없습니다.</p>
         <Link href="/community">
-          <span className="text-sm text-[#CC9965] hover:underline cursor-pointer">커뮤니티 목록으로</span>
+          <span className="text-sm text-[#6366F1] hover:underline cursor-pointer">커뮤니티 목록으로</span>
         </Link>
       </div>
     );
@@ -163,7 +163,7 @@ export default function CommunityDetail() {
   return (
     <div className="space-y-6">
       <Link href="/community">
-        <span className="inline-flex items-center gap-1.5 text-sm text-[#8b8f98] hover:text-[#CC9965] transition-colors cursor-pointer">
+        <span className="inline-flex items-center gap-1.5 text-sm text-[#8b8f98] hover:text-[#6366F1] transition-colors cursor-pointer">
           <ArrowLeft className="h-3.5 w-3.5" /> 커뮤니티 목록
         </span>
       </Link>
@@ -176,13 +176,13 @@ export default function CommunityDetail() {
             {post.authorAvatarUrl ? (
               <img src={post.authorAvatarUrl} alt={post.authorName ?? ""} className="w-8 h-8 rounded-full" />
             ) : (
-              <div className="w-8 h-8 rounded-full bg-[#CC9965]/15 border border-[#CC9965]/30" />
+              <div className="w-8 h-8 rounded-full bg-[#6366F1]/15 border border-[#6366F1]/30" />
             )}
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="text-[#111318] font-medium">{post.authorName ?? "회원"}</span>
                 {post.authorRole === "admin" && (
-                  <span className="inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#CC9965]/15 text-[#CC9965] border border-[#CC9965]/30">
+                  <span className="inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#6366F1]/15 text-[#6366F1] border border-[#6366F1]/30">
                     <Shield className="h-3 w-3" /> ADMIN
                   </span>
                 )}
@@ -208,7 +208,7 @@ export default function CommunityDetail() {
 
         {post.bodyHtml ? (
           <div
-            className="prose prose-invert max-w-none text-[#111318] prose-headings:text-[#111318] prose-strong:text-[#111318] prose-a:text-[#CC9965]"
+            className="prose prose-invert max-w-none text-[#111318] prose-headings:text-[#111318] prose-strong:text-[#111318] prose-a:text-[#6366F1]"
             dangerouslySetInnerHTML={{ __html: post.bodyHtml }}
           />
         ) : (
@@ -219,7 +219,7 @@ export default function CommunityDetail() {
       {/* Comments */}
       <section className="glass-card p-6 sm:p-8">
         <h2 className="flex items-center gap-2 text-sm font-bold text-[#111318] mb-5">
-          <MessageSquare className="h-4 w-4 text-[#CC9965]" />
+          <MessageSquare className="h-4 w-4 text-[#6366F1]" />
           댓글 {comments.length}
         </h2>
 
@@ -236,11 +236,11 @@ export default function CommunityDetail() {
                       {c.authorAvatarUrl ? (
                         <img src={c.authorAvatarUrl} alt={c.authorName ?? ""} className="w-5 h-5 rounded-full" />
                       ) : (
-                        <div className="w-5 h-5 rounded-full bg-[#CC9965]/15 border border-[#CC9965]/30" />
+                        <div className="w-5 h-5 rounded-full bg-[#6366F1]/15 border border-[#6366F1]/30" />
                       )}
                       <span className="text-[#111318] font-medium">{c.authorName ?? "회원"}</span>
                       {c.authorRole === "admin" && (
-                        <span className="inline-flex items-center gap-0.5 text-[9px] font-bold px-1 py-0.5 rounded bg-[#CC9965]/15 text-[#CC9965] border border-[#CC9965]/30">
+                        <span className="inline-flex items-center gap-0.5 text-[9px] font-bold px-1 py-0.5 rounded bg-[#6366F1]/15 text-[#6366F1] border border-[#6366F1]/30">
                           <Shield className="h-2.5 w-2.5" /> ADMIN
                         </span>
                       )}
@@ -271,14 +271,14 @@ export default function CommunityDetail() {
               placeholder="댓글을 입력하세요"
               rows={3}
               maxLength={5000}
-              className="w-full px-4 py-3 rounded-xl bg-[#f7f8fa] border border-[#e5e7eb] text-[#111318] text-sm placeholder:text-[#a0a4ab] focus:outline-none focus:border-[#CC9965]/50 focus:bg-[#eef0f3] transition-colors resize-none"
+              className="w-full px-4 py-3 rounded-xl bg-[#f7f8fa] border border-[#e5e7eb] text-[#111318] text-sm placeholder:text-[#a0a4ab] focus:outline-none focus:border-[#6366F1]/50 focus:bg-[#eef0f3] transition-colors resize-none"
               data-testid="input-comment-body"
             />
             <div className="flex justify-end">
               <button
                 type="submit"
                 disabled={submittingComment || commentBody.trim().length === 0}
-                className="inline-flex items-center gap-1.5 bg-[#CC9965] text-black font-bold text-xs px-4 py-2 rounded-lg hover:bg-[#d4a570] transition-all cursor-pointer disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 bg-[#6366F1] text-black font-bold text-xs px-4 py-2 rounded-lg hover:bg-[#818CF8] transition-all cursor-pointer disabled:opacity-50"
                 data-testid="btn-submit-comment"
               >
                 {submittingComment ? (
@@ -294,7 +294,7 @@ export default function CommunityDetail() {
         ) : (
           <div className="text-center py-4 border-t border-[#eef0f3]">
             <Link href="/login">
-              <span className="text-sm text-[#CC9965] hover:underline cursor-pointer">로그인하고 댓글 작성하기</span>
+              <span className="text-sm text-[#6366F1] hover:underline cursor-pointer">로그인하고 댓글 작성하기</span>
             </Link>
           </div>
         )}

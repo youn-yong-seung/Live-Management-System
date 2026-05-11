@@ -31,7 +31,7 @@ type Filter =
   | { type: "answer"; questionKey: string; value: string }
   | null;
 
-const PALETTE = ["#CC9965", "#00E5E5", "#A78BFA", "#F59E0B", "#10B981", "#EC4899", "#3B82F6", "#F472B6", "#84CC16", "#06B6D4"];
+const PALETTE = ["#6366F1", "#00E5E5", "#A78BFA", "#F59E0B", "#10B981", "#EC4899", "#3B82F6", "#F472B6", "#84CC16", "#06B6D4"];
 
 function skillLabel(s: string): string {
   if (s === "beginner") return "초보";
@@ -154,7 +154,7 @@ export default function LiveDashboard() {
   if (loading && !data) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: "#ffffff" }}>
-        <Loader2 className="h-6 w-6 animate-spin text-[#CC9965]" />
+        <Loader2 className="h-6 w-6 animate-spin text-[#6366F1]" />
       </div>
     );
   }
@@ -177,7 +177,7 @@ export default function LiveDashboard() {
       className="min-h-screen text-[#111318] relative overflow-hidden"
       style={{
         background:
-          "radial-gradient(ellipse at top left, rgba(204,153,101,0.08) 0%, transparent 50%), radial-gradient(ellipse at bottom right, rgba(0,229,229,0.06) 0%, transparent 50%), #050A0A",
+          "radial-gradient(ellipse at top left, rgba(99,102,241,0.08) 0%, transparent 50%), radial-gradient(ellipse at bottom right, rgba(0,229,229,0.06) 0%, transparent 50%), #050A0A",
       }}
     >
       {/* Decorative grid */}
@@ -193,13 +193,13 @@ export default function LiveDashboard() {
       <div className="relative max-w-[1200px] mx-auto px-5 sm:px-8 py-12 sm:py-16">
         {/* ── HERO ─────────────────────────────────── */}
         <div className="text-center mb-16 sm:mb-20">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-6 border border-[#CC9965]/30 bg-[#CC9965]/5">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#CC9965] animate-pulse" />
-            <span className="text-[10px] font-bold tracking-[0.25em] uppercase text-[#CC9965]">LIVE BRIEFING</span>
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-6 border border-[#6366F1]/30 bg-[#6366F1]/5">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#6366F1] animate-pulse" />
+            <span className="text-[10px] font-bold tracking-[0.25em] uppercase text-[#6366F1]">LIVE BRIEFING</span>
           </div>
 
           <h1 className="text-2xl sm:text-4xl font-extrabold leading-tight mb-3 max-w-3xl mx-auto"
-            style={{ textShadow: "0 0 60px rgba(204,153,101,0.2)" }}>
+            style={{ textShadow: "0 0 60px rgba(99,102,241,0.2)" }}>
             {data.live.title}
           </h1>
           {data.live.scheduledAt && (
@@ -216,11 +216,11 @@ export default function LiveDashboard() {
                 className="font-extrabold tabular-nums leading-none"
                 style={{
                   fontSize: "clamp(80px, 18vw, 180px)",
-                  background: "linear-gradient(135deg, #CC9965 0%, #FFD89B 50%, #CC9965 100%)",
+                  background: "linear-gradient(135deg, #6366F1 0%, #FFD89B 50%, #6366F1 100%)",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                   backgroundClip: "text",
-                  filter: "drop-shadow(0 0 40px rgba(204,153,101,0.3))",
+                  filter: "drop-shadow(0 0 40px rgba(99,102,241,0.3))",
                 }}
               >
                 {view.total}
@@ -237,7 +237,7 @@ export default function LiveDashboard() {
             <div className="mt-8">
               <button
                 onClick={() => setFilter(null)}
-                className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full text-sm font-semibold bg-[#CC9965]/15 text-[#CC9965] border border-[#CC9965]/40 hover:bg-[#CC9965]/25 transition-colors"
+                className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full text-sm font-semibold bg-[#6366F1]/15 text-[#6366F1] border border-[#6366F1]/40 hover:bg-[#6366F1]/25 transition-colors"
               >
                 <Filter className="h-4 w-4" />
                 {filterLabel}
@@ -334,7 +334,7 @@ export default function LiveDashboard() {
 function SectionHeader({ eyebrow, title, sub }: { eyebrow: string; title: string; sub?: string }) {
   return (
     <div className="text-center mb-8">
-      <p className="text-[10px] font-bold tracking-[0.3em] uppercase text-[#CC9965]/70 mb-2">{eyebrow}</p>
+      <p className="text-[10px] font-bold tracking-[0.3em] uppercase text-[#6366F1]/70 mb-2">{eyebrow}</p>
       <h2 className="text-xl sm:text-2xl font-bold text-[#111318]">{title}</h2>
       {sub && <p className="text-sm text-[#8b8f98] mt-2">{sub}</p>}
     </div>
@@ -372,7 +372,7 @@ function DonutCard({
   const sorted = data.slice(0, TOP_N);
   return (
     <Card>
-      <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-[#CC9965]/70 mb-5">{title}</p>
+      <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-[#6366F1]/70 mb-5">{title}</p>
       <div className="flex flex-col sm:flex-row sm:items-center gap-6">
         <div className="w-[180px] h-[180px] flex-shrink-0 mx-auto sm:mx-0">
           <ResponsiveContainer width="100%" height="100%">
@@ -389,7 +389,7 @@ function DonutCard({
                 ))}
               </Pie>
               <Tooltip
-                contentStyle={{ background: "rgba(5,10,10,0.98)", border: "1px solid rgba(204,153,101,0.3)", borderRadius: 12, fontSize: 12 }}
+                contentStyle={{ background: "rgba(5,10,10,0.98)", border: "1px solid rgba(99,102,241,0.3)", borderRadius: 12, fontSize: 12 }}
                 itemStyle={{ color: "#fff" }}
                 formatter={(v: number, _name, item: any) => [`${v}명 · ${pct(v, total)}%`, item.payload.value]}
               />
@@ -446,7 +446,7 @@ function QuestionCard({
           {question}
         </h3>
         <div className="flex-shrink-0 text-right">
-          <p className="text-sm font-bold text-[#CC9965] tabular-nums">{answeredCount}<span className="text-[#8b8f98] text-xs ml-1 font-normal">명 응답</span></p>
+          <p className="text-sm font-bold text-[#6366F1] tabular-nums">{answeredCount}<span className="text-[#8b8f98] text-xs ml-1 font-normal">명 응답</span></p>
         </div>
       </div>
 
@@ -510,11 +510,11 @@ function MessagesGrid({ messages }: { messages: string[] }) {
             className="rounded-2xl border border-white/[0.08] p-5 relative"
             style={{
               background:
-                "linear-gradient(135deg, rgba(204,153,101,0.05) 0%, rgba(255,255,255,0.02) 100%)",
+                "linear-gradient(135deg, rgba(99,102,241,0.05) 0%, rgba(255,255,255,0.02) 100%)",
               backdropFilter: "blur(16px)",
             }}
           >
-            <Quote className="h-4 w-4 text-[#CC9965]/40 mb-2" />
+            <Quote className="h-4 w-4 text-[#6366F1]/40 mb-2" />
             <p className="text-[14px] text-[#111318] leading-relaxed whitespace-pre-wrap break-words">
               {m}
             </p>
@@ -525,7 +525,7 @@ function MessagesGrid({ messages }: { messages: string[] }) {
         <div className="text-center mt-6">
           <button
             onClick={() => setExpanded(!expanded)}
-            className="text-xs font-semibold text-[#CC9965] hover:text-[#FFD89B] tracking-wider uppercase transition-colors"
+            className="text-xs font-semibold text-[#6366F1] hover:text-[#FFD89B] tracking-wider uppercase transition-colors"
           >
             {expanded ? "접기" : `+ ${messages.length - VISIBLE}개 더 보기`}
           </button>

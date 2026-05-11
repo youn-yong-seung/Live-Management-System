@@ -63,7 +63,7 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   revision: { label: "수정 요청", color: "text-rose-400" },
   approved: { label: "승인", color: "text-green-400" },
   scheduled: { label: "업로드 예약", color: "text-sky-400" },
-  uploaded: { label: "완료", color: "text-[#CC9965]" },
+  uploaded: { label: "완료", color: "text-[#6366F1]" },
 };
 
 const PAY_LABELS: Record<string, string> = {

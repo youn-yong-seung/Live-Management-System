@@ -48,7 +48,7 @@ export function Layout({ children }: { children: ReactNode }) {
       <header className="sticky top-0 z-50 backdrop-blur-xl bg-white/90 border-b border-[#e5e7eb]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5" data-testid="nav-home">
-            <span className="text-xl font-black text-[#CC9965] tracking-tight">윤자동</span>
+            <span className="text-xl font-black text-[#6366F1] tracking-tight">윤자동</span>
             <span className="hidden sm:inline-block text-xs font-semibold text-[#8b8f98] border border-[#e5e7eb] rounded px-1.5 py-0.5">클래스</span>
           </Link>
 
@@ -60,7 +60,7 @@ export function Layout({ children }: { children: ReactNode }) {
                   <span
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                       isActive
-                        ? "bg-[#CC9965]/12 text-[#CC9965]"
+                        ? "bg-[#6366F1]/12 text-[#6366F1]"
                         : "text-[#484d57] hover:text-[#111318] hover:bg-[#f7f8fa]"
                     }`}
                     data-testid={`nav-${item.href.replace("/", "") || "home"}`}
@@ -84,8 +84,8 @@ export function Layout({ children }: { children: ReactNode }) {
                   {user.avatarUrl ? (
                     <img src={user.avatarUrl} alt={user.name ?? user.email} className="w-8 h-8 rounded-full" />
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-[#CC9965]/15 border border-[#CC9965]/30 flex items-center justify-center">
-                      <UserIcon className="h-4 w-4 text-[#CC9965]" />
+                    <div className="w-8 h-8 rounded-full bg-[#6366F1]/15 border border-[#6366F1]/30 flex items-center justify-center">
+                      <UserIcon className="h-4 w-4 text-[#6366F1]" />
                     </div>
                   )}
                 </button>
@@ -96,7 +96,7 @@ export function Layout({ children }: { children: ReactNode }) {
                       <div className="text-sm font-semibold text-[#111318] truncate">{user.name ?? "회원"}</div>
                       <div className="text-xs text-[#8b8f98] truncate">{user.email}</div>
                       {user.role === "admin" && (
-                        <span className="inline-block mt-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#CC9965]/15 text-[#CC9965] border border-[#CC9965]/30">ADMIN</span>
+                        <span className="inline-block mt-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#6366F1]/15 text-[#6366F1] border border-[#6366F1]/30">ADMIN</span>
                       )}
                     </div>
                     <button
@@ -140,7 +140,7 @@ export function Layout({ children }: { children: ReactNode }) {
                   <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)}>
                     <span
                       className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium ${
-                        isActive ? "bg-[#CC9965]/12 text-[#CC9965]" : "text-[#484d57] hover:bg-[#f7f8fa]"
+                        isActive ? "bg-[#6366F1]/12 text-[#6366F1]" : "text-[#484d57] hover:bg-[#f7f8fa]"
                       }`}
                     >
                       {Icon && <Icon className="h-4 w-4" />}

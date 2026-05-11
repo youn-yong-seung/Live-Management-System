@@ -15,7 +15,7 @@ export function TipTapEditor({ value, onChange, placeholder }: Props) {
     extensions: [
       StarterKit,
       Placeholder.configure({ placeholder: placeholder ?? "내용을 입력하세요..." }),
-      Link.configure({ openOnClick: false, HTMLAttributes: { class: "text-[#CC9965] underline" } }),
+      Link.configure({ openOnClick: false, HTMLAttributes: { class: "text-[#6366F1] underline" } }),
     ],
     content: value,
     onUpdate: ({ editor }) => {
@@ -23,7 +23,7 @@ export function TipTapEditor({ value, onChange, placeholder }: Props) {
     },
     editorProps: {
       attributes: {
-        class: "prose prose-invert max-w-none min-h-[280px] px-4 py-3 focus:outline-none text-[#111318] prose-headings:text-[#111318] prose-strong:text-[#111318] prose-a:text-[#CC9965]",
+        class: "prose prose-invert max-w-none min-h-[280px] px-4 py-3 focus:outline-none text-[#111318] prose-headings:text-[#111318] prose-strong:text-[#111318] prose-a:text-[#6366F1]",
       },
     },
   });
@@ -31,7 +31,7 @@ export function TipTapEditor({ value, onChange, placeholder }: Props) {
   if (!editor) return null;
 
   const btn = (active: boolean) =>
-    `p-2 rounded-md transition-colors ${active ? "bg-[#CC9965]/20 text-[#CC9965]" : "text-[#8b8f98] hover:text-[#111318] hover:bg-[#f7f8fa]"}`;
+    `p-2 rounded-md transition-colors ${active ? "bg-[#6366F1]/20 text-[#6366F1]" : "text-[#8b8f98] hover:text-[#111318] hover:bg-[#f7f8fa]"}`;
 
   return (
     <div className="rounded-xl border border-[#e5e7eb] bg-[#f7f8fa] overflow-hidden">

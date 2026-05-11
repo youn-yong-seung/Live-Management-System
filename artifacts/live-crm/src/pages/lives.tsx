@@ -241,7 +241,7 @@ export default function Lives() {
         <div className="flex items-center justify-between mb-5">
           <button
             onClick={() => setCalMonth(subMonths(calMonth, 1))}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-[#8b8f98] hover:text-[#CC9965] hover:bg-[#f7f8fa] transition-colors"
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-[#8b8f98] hover:text-[#6366F1] hover:bg-[#f7f8fa] transition-colors"
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
@@ -250,7 +250,7 @@ export default function Lives() {
           </h3>
           <button
             onClick={() => setCalMonth(addMonths(calMonth, 1))}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-[#8b8f98] hover:text-[#CC9965] hover:bg-[#f7f8fa] transition-colors"
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-[#8b8f98] hover:text-[#6366F1] hover:bg-[#f7f8fa] transition-colors"
           >
             <ChevronRight className="h-5 w-5" />
           </button>
@@ -279,7 +279,7 @@ export default function Lives() {
                 <span
                   className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm transition-colors ${
                     today
-                      ? "bg-[#CC9965]/20 text-[#CC9965] font-bold border border-[#CC9965]/30"
+                      ? "bg-[#6366F1]/20 text-[#6366F1] font-bold border border-[#6366F1]/30"
                       : dayLives
                         ? "text-[#111318] font-semibold"
                         : "text-[#8b8f98]"
@@ -290,7 +290,7 @@ export default function Lives() {
                 {dayLives && inMonth && (
                   <div className="flex justify-center gap-0.5 mt-0.5">
                     {dayLives.slice(0, 3).map((_, i) => (
-                      <span key={i} className="w-1.5 h-1.5 rounded-full bg-[#CC9965]" />
+                      <span key={i} className="w-1.5 h-1.5 rounded-full bg-[#6366F1]" />
                     ))}
                   </div>
                 )}
@@ -308,11 +308,11 @@ export default function Lives() {
                 className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] hover:bg-[#eef0f3] transition-colors cursor-pointer"
                 onClick={() => { setSelectedLiveId(live.id); setIsDialogOpen(true); }}
               >
-                <div className="w-10 h-10 rounded-lg bg-[#CC9965]/15 border border-[#CC9965]/20 flex flex-col items-center justify-center flex-shrink-0">
-                  <span className="text-[10px] text-[#CC9965]/70 font-medium leading-none">
+                <div className="w-10 h-10 rounded-lg bg-[#6366F1]/15 border border-[#6366F1]/20 flex flex-col items-center justify-center flex-shrink-0">
+                  <span className="text-[10px] text-[#6366F1]/70 font-medium leading-none">
                     {live.scheduledAt ? format(new Date(live.scheduledAt), "M월") : "-"}
                   </span>
-                  <span className="text-sm font-bold text-[#CC9965] leading-none">
+                  <span className="text-sm font-bold text-[#6366F1] leading-none">
                     {live.scheduledAt ? format(new Date(live.scheduledAt), "d") : "-"}
                   </span>
                 </div>
@@ -325,7 +325,7 @@ export default function Lives() {
                 </div>
                 <Button
                   size="sm"
-                  className="bg-[#CC9965] hover:bg-[#d4a570] text-black font-bold text-xs rounded-lg gold-glow flex-shrink-0"
+                  className="bg-[#6366F1] hover:bg-[#818CF8] text-black font-bold text-xs rounded-lg gold-glow flex-shrink-0"
                   onClick={(e) => { e.stopPropagation(); setSelectedLiveId(live.id); setIsDialogOpen(true); }}
                 >
                   신청
@@ -351,7 +351,7 @@ export default function Lives() {
                   <span className="text-xs font-bold text-red-400 uppercase tracking-wide">LIVE NOW</span>
                   <span className="text-xs text-[#a0a4ab]">{live.registrationCount}명 참석</span>
                 </div>
-                <h3 className="font-bold text-[#111318] hover:text-[#CC9965] transition-colors mb-1">{live.title}</h3>
+                <h3 className="font-bold text-[#111318] hover:text-[#6366F1] transition-colors mb-1">{live.title}</h3>
                 <p className="text-sm text-[#8b8f98] line-clamp-2 mb-3">{live.description}</p>
               </div>
               <div className="flex gap-2 pt-3 border-t border-[#eef0f3]">
@@ -362,7 +362,7 @@ export default function Lives() {
                   </a>
                 )}
                 <button
-                  className="flex-1 flex items-center justify-center gap-2 border border-[#e5e7eb] text-[#484d57] hover:text-[#CC9965] hover:border-[#CC9965]/30 text-xs font-bold py-2.5 rounded-lg transition-colors"
+                  className="flex-1 flex items-center justify-center gap-2 border border-[#e5e7eb] text-[#484d57] hover:text-[#6366F1] hover:border-[#6366F1]/30 text-xs font-bold py-2.5 rounded-lg transition-colors"
                   onClick={() => setModalReplay(live)}>
                   <Star className="h-3.5 w-3.5" /> 후기 작성하기
                 </button>
@@ -399,7 +399,7 @@ export default function Lives() {
                 </div>
               )}
               <div className="p-5 flex flex-col flex-1">
-                <div className="flex items-center gap-1.5 text-xs text-[#CC9965] font-medium mb-2">
+                <div className="flex items-center gap-1.5 text-xs text-[#6366F1] font-medium mb-2">
                   <Calendar className="h-3.5 w-3.5" />
                   <span>{formatDate(live.scheduledAt)}</span>
                 </div>
@@ -410,10 +410,10 @@ export default function Lives() {
                     <Users className="h-3.5 w-3.5" />
                     <span>신청자 {live.registrationCount}명</span>
                   </div>
-                  <span className="inline-block bg-[#CC9965]/15 text-[#CC9965] text-xs font-semibold px-2.5 py-1 rounded-full border border-[#CC9965]/30">예정됨</span>
+                  <span className="inline-block bg-[#6366F1]/15 text-[#6366F1] text-xs font-semibold px-2.5 py-1 rounded-full border border-[#6366F1]/30">예정됨</span>
                 </div>
                 <Button
-                  className="w-full bg-[#CC9965] hover:bg-[#d4a570] text-black font-bold rounded-xl gold-glow"
+                  className="w-full bg-[#6366F1] hover:bg-[#818CF8] text-black font-bold rounded-xl gold-glow"
                   onClick={() => { setSelectedLiveId(live.id); setIsDialogOpen(true); }}
                   data-testid={`btn-register-${live.id}`}
                 >

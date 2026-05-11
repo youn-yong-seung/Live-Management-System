@@ -47,7 +47,7 @@ export default function Replays() {
             onClick={() => setSelectedCategory(null)}
             className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
               selectedCategory === null
-                ? "bg-[#CC9965] text-black"
+                ? "bg-[#6366F1] text-black"
                 : "bg-[#f7f8fa] text-[#484d57] border border-[#e5e7eb] hover:bg-white/10"
             }`}
           >
@@ -59,7 +59,7 @@ export default function Replays() {
               onClick={() => setSelectedCategory(selectedCategory === cat ? null : cat)}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
                 selectedCategory === cat
-                  ? "bg-[#CC9965] text-black"
+                  ? "bg-[#6366F1] text-black"
                   : "bg-[#f7f8fa] text-[#484d57] border border-[#e5e7eb] hover:bg-white/10"
               }`}
             >
@@ -100,7 +100,7 @@ export default function Replays() {
                     </div>
                   )}
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <div className="w-14 h-14 bg-[#CC9965]/90 rounded-full flex items-center justify-center shadow-lg">
+                    <div className="w-14 h-14 bg-[#6366F1]/90 rounded-full flex items-center justify-center shadow-lg">
                       <PlayCircle className="h-8 w-8 text-black" />
                     </div>
                   </div>
@@ -123,7 +123,7 @@ export default function Replays() {
                         <span
                           key={tag}
                           onClick={(e) => { e.stopPropagation(); setSelectedCategory(selectedCategory === tag ? null : tag); }}
-                          className="inline-block bg-[#f7f8fa] text-[#8b8f98] text-xs font-medium px-2.5 py-1 rounded-full border border-white/5 cursor-pointer hover:bg-[#CC9965]/10 hover:text-[#CC9965] hover:border-[#CC9965]/20 transition-all"
+                          className="inline-block bg-[#f7f8fa] text-[#8b8f98] text-xs font-medium px-2.5 py-1 rounded-full border border-white/5 cursor-pointer hover:bg-[#6366F1]/10 hover:text-[#6366F1] hover:border-[#6366F1]/20 transition-all"
                         >
                           {tag}
                         </span>
