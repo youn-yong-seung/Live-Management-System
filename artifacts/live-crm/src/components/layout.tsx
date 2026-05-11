@@ -1,6 +1,7 @@
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "wouter";
-import { Home, Video, PlaySquare, GraduationCap, Download, GitBranch, Settings, Menu, X, Clapperboard } from "lucide-react";
+import { Home, Video, PlaySquare, GraduationCap, Download, GitBranch, Settings, Menu, X, Clapperboard, LogIn, LogOut, User as UserIcon } from "lucide-react";
+import { useAuth } from "@/lib/auth";
 
 const navItems = [
   { href: "/", label: "홈" },
@@ -25,6 +26,20 @@ const navIcons: Record<string, typeof Home> = {
 export function Layout({ children }: { children: ReactNode }) {
   const [location] = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { user, loading, signOut } = useAuth();
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!profileOpen) return;
+    const onClick = (e: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+        setProfileOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, [profileOpen]);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -56,13 +71,62 @@ export function Layout({ children }: { children: ReactNode }) {
             })}
           </nav>
 
-          <button
-            className="md:hidden p-2 rounded-lg text-white/60 hover:bg-white/5"
-            onClick={() => setMobileOpen(!mobileOpen)}
-            data-testid="mobile-menu"
-          >
-            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
+          <div className="flex items-center gap-2">
+            {!loading && (user ? (
+              <div className="relative" ref={profileRef}>
+                <button
+                  onClick={() => setProfileOpen(!profileOpen)}
+                  className="flex items-center gap-2 p-1 rounded-full hover:bg-white/5 transition-colors"
+                  data-testid="nav-profile"
+                  aria-label="프로필 메뉴"
+                >
+                  {user.avatarUrl ? (
+                    <img src={user.avatarUrl} alt={user.name ?? user.email} className="w-8 h-8 rounded-full" />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-[#CC9965]/20 border border-[#CC9965]/30 flex items-center justify-center">
+                      <UserIcon className="h-4 w-4 text-[#CC9965]" />
+                    </div>
+                  )}
+                </button>
+
+                {profileOpen && (
+                  <div className="absolute right-0 mt-2 w-56 glass-card-gold rounded-xl overflow-hidden shadow-xl z-50">
+                    <div className="px-4 py-3 border-b border-white/[0.06]">
+                      <div className="text-sm font-semibold text-white truncate">{user.name ?? "회원"}</div>
+                      <div className="text-xs text-white/40 truncate">{user.email}</div>
+                      {user.role === "admin" && (
+                        <span className="inline-block mt-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#CC9965]/15 text-[#CC9965] border border-[#CC9965]/30">ADMIN</span>
+                      )}
+                    </div>
+                    <button
+                      onClick={async () => {
+                        setProfileOpen(false);
+                        await signOut();
+                      }}
+                      className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-white/70 hover:bg-white/5 transition-colors"
+                      data-testid="btn-logout"
+                    >
+                      <LogOut className="h-4 w-4" /> 로그아웃
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link href="/login">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-white/80 hover:bg-white/5 border border-white/15 cursor-pointer transition-all" data-testid="nav-login">
+                  <LogIn className="h-3.5 w-3.5" /> <span className="hidden sm:inline">로그인</span>
+                </span>
+              </Link>
+            ))}
+
+            <button
+              className="md:hidden p-2 rounded-lg text-white/60 hover:bg-white/5"
+              onClick={() => setMobileOpen(!mobileOpen)}
+              data-testid="mobile-menu"
+            >
+              {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+          </div>
         </div>
 
         {mobileOpen && (
