@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import { supabaseAnon } from "../lib/supabase.js";
-import { db, usersTable } from "@workspace/db";
-import { eq, sql } from "drizzle-orm";
+import { db, usersTable, registrationsTable } from "@workspace/db";
+import { and, eq, isNull, sql } from "drizzle-orm";
 import { requireUser } from "../middleware/userAuth.js";
 
 const SEED_ADMIN_EMAILS = new Set<string>([
@@ -71,6 +71,12 @@ router.post("/auth/sync", async (req, res) => {
       })
       .where(eq(usersTable.id, supaUser.id));
   }
+
+  // Backfill: 같은 이메일로 들어온 이전 라이브 신청에 user_id 채움
+  await db
+    .update(registrationsTable)
+    .set({ userId: supaUser.id })
+    .where(and(eq(registrationsTable.email, email), isNull(registrationsTable.userId)));
 
   const [row] = await db
     .select({

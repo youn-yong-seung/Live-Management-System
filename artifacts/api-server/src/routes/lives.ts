@@ -8,6 +8,7 @@ import {
   reviewsTable,
   afterpartyGlobalConfigTable,
   afterpartyEventsTable,
+  usersTable,
   insertLiveSchema,
   insertRegistrationSchema,
   insertReviewSchema,
@@ -698,8 +699,19 @@ router.post("/lives/:liveId/registrations", async (req: Request, res: Response) 
       return;
     }
 
+    let matchedUserId: string | null = null;
+    if (body.email) {
+      const [u] = await db
+        .select({ id: usersTable.id })
+        .from(usersTable)
+        .where(eq(usersTable.email, body.email))
+        .limit(1);
+      if (u) matchedUserId = u.id;
+    }
+
     const insertData = insertRegistrationSchema.parse({
       liveId,
+      userId: matchedUserId,
       name: body.name,
       phone: body.phone,
       email: body.email ?? null,

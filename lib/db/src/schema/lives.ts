@@ -44,6 +44,8 @@ export const registrationsTable = pgTable("registrations", {
   liveId: integer("live_id")
     .notNull()
     .references(() => livesTable.id, { onDelete: "cascade" }),
+  /** 회원과 연결 (이메일 자동 매칭). 비회원 신청은 null. */
+  userId: text("user_id"),
   name: text("name").notNull(),
   phone: text("phone").notNull(),
   email: text("email"),

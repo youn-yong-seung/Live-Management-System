@@ -89,6 +89,50 @@ export default function CommunityDetail() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [postId]);
 
+  // 코드블록에 복사 버튼 자동 부착
+  useEffect(() => {
+    if (!post?.bodyHtml) return;
+    const pres = document.querySelectorAll<HTMLPreElement>(".post-body pre");
+    const cleanups: Array<() => void> = [];
+
+    pres.forEach((pre) => {
+      if (pre.dataset.copyAttached) return;
+      pre.dataset.copyAttached = "true";
+      pre.style.position = "relative";
+
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.textContent = "복사";
+      btn.style.cssText =
+        "position:absolute;top:8px;right:8px;background:rgba(255,255,255,0.08);color:#cbd5e1;font-size:11px;font-weight:600;padding:4px 10px;border-radius:4px;cursor:pointer;border:1px solid rgba(255,255,255,0.12);transition:all .15s ease;";
+      const onClick = async () => {
+        const text = pre.innerText.replace(/^복사$/m, "").trim();
+        try {
+          await navigator.clipboard.writeText(text);
+          btn.textContent = "복사됨 ✓";
+          btn.style.background = "rgba(99,102,241,0.2)";
+          btn.style.color = "#a5b4fc";
+          setTimeout(() => {
+            btn.textContent = "복사";
+            btn.style.background = "rgba(255,255,255,0.08)";
+            btn.style.color = "#cbd5e1";
+          }, 1500);
+        } catch {
+          btn.textContent = "복사 실패";
+        }
+      };
+      btn.addEventListener("click", onClick);
+      pre.appendChild(btn);
+      cleanups.push(() => {
+        btn.removeEventListener("click", onClick);
+        if (btn.parentNode) btn.parentNode.removeChild(btn);
+        delete pre.dataset.copyAttached;
+      });
+    });
+
+    return () => cleanups.forEach((c) => c());
+  }, [post?.bodyHtml]);
+
   const submitComment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (submittingComment) return;
@@ -208,7 +252,7 @@ export default function CommunityDetail() {
 
         {post.bodyHtml ? (
           <div
-            className="prose max-w-none text-[#111318] prose-headings:text-[#111318] prose-strong:text-[#111318] prose-a:text-[#6366F1] prose-code:bg-[#f7f8fa] prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-[#6366F1] prose-code:before:hidden prose-code:after:hidden prose-pre:bg-[#0f172a] prose-pre:text-[#e2e8f0] prose-pre:rounded-lg prose-pre:p-4 prose-img:rounded-lg prose-img:my-4"
+            className="post-body prose max-w-none text-[#111318] prose-headings:text-[#111318] prose-strong:text-[#111318] prose-a:text-[#6366F1] prose-code:bg-[#f7f8fa] prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-[#6366F1] prose-code:before:hidden prose-code:after:hidden prose-pre:bg-[#0f172a] prose-pre:text-[#e2e8f0] prose-pre:rounded-lg prose-pre:p-4 prose-img:rounded-lg prose-img:my-4"
             dangerouslySetInnerHTML={{ __html: post.bodyHtml }}
           />
         ) : (
