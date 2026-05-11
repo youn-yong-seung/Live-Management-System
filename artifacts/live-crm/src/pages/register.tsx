@@ -14,8 +14,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate } from "@/lib/date-utils";
-import { Calendar, Users, CheckCircle, Loader2 } from "lucide-react";
+import { Calendar, Users, CheckCircle, Loader2, PlayCircle, Download, MessageSquare, Sparkles } from "lucide-react";
 import { ChannelSourceField, type ChannelSourceItem } from "@/components/channel-source-field";
+import { useAuth } from "@/lib/auth";
 
 /* ── Types ──────────────────────────────────────────── */
 
@@ -77,6 +78,7 @@ export default function RegisterPage() {
   const { toast } = useToast();
   const [, params] = useRoute("/lives/:id/register");
   const liveId = parseInt(params?.id ?? "0", 10);
+  const { user: authUser, loading: authLoading, signInWithGoogle } = useAuth();
 
   const [live, setLive] = useState<LiveInfo | null>(null);
   const [formConfig, setFormConfig] = useState<FormConfig | null>(null);
@@ -175,19 +177,91 @@ export default function RegisterPage() {
 
   // Thank you page
   if (submitted) return (
-    <div className="min-h-screen flex items-center justify-center px-4" style={{ background: "#050A0A" }}>
-      <div className="max-w-md w-full glass-card-gold p-8 text-center">
-        <CheckCircle className="h-12 w-12 text-[#CC9965] mx-auto mb-4" />
-        <h2 className="text-xl font-bold text-white mb-2">{fc?.thankYouTitle || "신청이 완료되었습니다!"}</h2>
-        <p className="text-white/50 text-sm whitespace-pre-wrap mb-6">{fc?.thankYouBody || "라이브 시작 전 알림톡으로 접속 링크를 보내드립니다."}</p>
-        <a
-          href="https://open.kakao.com/o/gCM9Aehi"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 bg-[#FEE500] text-[#3C1E1E] font-bold text-sm px-6 py-3 rounded-xl hover:bg-[#FDD800] transition-colors"
-        >
-          💬 무료 특강 대기방 입장하기
-        </a>
+    <div className="min-h-screen flex items-center justify-center px-4 py-10" style={{ background: "#050A0A" }}>
+      <div className="max-w-lg w-full space-y-5">
+        {/* 신청 완료 카드 */}
+        <div className="glass-card-gold p-8 text-center">
+          <CheckCircle className="h-12 w-12 text-[#CC9965] mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-white mb-2">{fc?.thankYouTitle || "신청이 완료되었습니다!"}</h2>
+          <p className="text-white/50 text-sm whitespace-pre-wrap mb-6">{fc?.thankYouBody || "라이브 시작 전 알림톡으로 접속 링크를 보내드립니다."}</p>
+          <a
+            href="https://open.kakao.com/o/gCM9Aehi"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-[#FEE500] text-[#3C1E1E] font-bold text-sm px-6 py-3 rounded-xl hover:bg-[#FDD800] transition-colors"
+          >
+            💬 무료 특강 대기방 입장하기
+          </a>
+        </div>
+
+        {/* 회원가입 유도 — 비로그인 사용자에게만 노출 */}
+        {!authLoading && !authUser && (
+          <div className="glass-card p-8" data-testid="signup-promo">
+            <div className="inline-flex items-center gap-2 bg-[#CC9965]/15 rounded-full px-3 py-1 text-xs font-bold text-[#CC9965] border border-[#CC9965]/30 mb-4">
+              <Sparkles className="h-3.5 w-3.5" />
+              회원이 되시면 더 많은 혜택
+            </div>
+            <h3 className="text-lg font-bold text-white mb-2">윤자동 클래스 회원가입</h3>
+            <p className="text-sm text-white/60 leading-relaxed mb-5">
+              회원이 되시면 라이브 다시보기, 무료자료실, 커뮤니티까지<br />
+              한 번의 로그인으로 모두 이용하실 수 있어요.
+            </p>
+
+            <ul className="space-y-2 mb-6">
+              <li className="flex items-center gap-2 text-sm text-white/70">
+                <PlayCircle className="h-4 w-4 text-[#CC9965]" />
+                지난 라이브 다시보기 무료 열람
+              </li>
+              <li className="flex items-center gap-2 text-sm text-white/70">
+                <Download className="h-4 w-4 text-[#CC9965]" />
+                무료자료실의 PDF·템플릿 다운로드
+              </li>
+              <li className="flex items-center gap-2 text-sm text-white/70">
+                <MessageSquare className="h-4 w-4 text-[#CC9965]" />
+                커뮤니티 글쓰기 / 댓글 참여
+              </li>
+            </ul>
+
+            <button
+              onClick={signInWithGoogle}
+              className="w-full flex items-center justify-center gap-3 bg-white text-black font-semibold text-sm px-5 py-3.5 rounded-xl hover:bg-white/90 transition-all cursor-pointer"
+              data-testid="btn-signup-google"
+            >
+              <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+                <path d="M17.64 9.205c0-.639-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
+                <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A9 9 0 009 18z" fill="#34A853"/>
+                <path d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
+                <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
+              </svg>
+              Google로 1초 만에 가입하기
+            </button>
+
+            <p className="mt-4 text-[11px] text-white/30 text-center leading-relaxed">
+              가입 시 윤자동 클래스의 이용약관과 개인정보처리방침에 동의하는 것으로 간주합니다.
+            </p>
+          </div>
+        )}
+
+        {/* 이미 로그인된 사용자에게는 자료실/다시보기 안내 */}
+        {!authLoading && authUser && (
+          <div className="glass-card p-6 text-center" data-testid="member-shortcut">
+            <p className="text-sm text-white/70 mb-4">
+              <span className="text-[#CC9965] font-semibold">{authUser.name ?? authUser.email}</span>님,<br />
+              회원이라 바로 다시보기 / 자료실 / 커뮤니티 이용하실 수 있어요.
+            </p>
+            <div className="flex flex-wrap gap-2 justify-center">
+              <a href="/replays" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white/[0.05] hover:bg-white/[0.08] border border-white/10 text-xs font-medium text-white/80 transition-colors">
+                <PlayCircle className="h-3.5 w-3.5" /> 다시보기
+              </a>
+              <a href="/resources" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white/[0.05] hover:bg-white/[0.08] border border-white/10 text-xs font-medium text-white/80 transition-colors">
+                <Download className="h-3.5 w-3.5" /> 자료실
+              </a>
+              <a href="/community" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white/[0.05] hover:bg-white/[0.08] border border-white/10 text-xs font-medium text-white/80 transition-colors">
+                <MessageSquare className="h-3.5 w-3.5" /> 커뮤니티
+              </a>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
