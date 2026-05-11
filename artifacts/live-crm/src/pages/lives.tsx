@@ -235,107 +235,6 @@ export default function Lives() {
         <p className="text-[#8b8f98] text-sm">예정된 라이브 일정을 확인하고 참가 신청하세요. 신청 시 카카오 알림톡이 발송됩니다.</p>
       </div>
 
-      {/* ── Monthly Calendar ──────────────────── */}
-      <div className="glass-card p-6">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-5">
-          <button
-            onClick={() => setCalMonth(subMonths(calMonth, 1))}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-[#8b8f98] hover:text-[#6366F1] hover:bg-[#f7f8fa] transition-colors"
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </button>
-          <h3 className="text-base font-bold text-[#111318]">
-            {format(calMonth, "yyyy년 M월", { locale: ko })}
-          </h3>
-          <button
-            onClick={() => setCalMonth(addMonths(calMonth, 1))}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-[#8b8f98] hover:text-[#6366F1] hover:bg-[#f7f8fa] transition-colors"
-          >
-            <ChevronRight className="h-5 w-5" />
-          </button>
-        </div>
-
-        {/* Weekday headers */}
-        <div className="grid grid-cols-7 mb-2">
-          {["일", "월", "화", "수", "목", "금", "토"].map((d) => (
-            <div key={d} className="text-center text-xs font-medium text-[#a0a4ab] py-1">{d}</div>
-          ))}
-        </div>
-
-        {/* Days */}
-        <div className="grid grid-cols-7">
-          {calDays.map((day) => {
-            const key = format(day, "yyyy-MM-dd");
-            const dayLives = liveDates.get(key);
-            const inMonth = isSameMonth(day, calMonth);
-            const today = isToday(day);
-
-            return (
-              <div
-                key={key}
-                className={`relative py-2 text-center ${!inMonth ? "opacity-20" : ""}`}
-              >
-                <span
-                  className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm transition-colors ${
-                    today
-                      ? "bg-[#6366F1]/20 text-[#6366F1] font-bold border border-[#6366F1]/30"
-                      : dayLives
-                        ? "text-[#111318] font-semibold"
-                        : "text-[#8b8f98]"
-                  }`}
-                >
-                  {format(day, "d")}
-                </span>
-                {dayLives && inMonth && (
-                  <div className="flex justify-center gap-0.5 mt-0.5">
-                    {dayLives.slice(0, 3).map((_, i) => (
-                      <span key={i} className="w-1.5 h-1.5 rounded-full bg-[#6366F1]" />
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Upcoming list under calendar */}
-        {lives && lives.length > 0 && (
-          <div className="mt-5 pt-5 border-t border-[#eef0f3] space-y-3">
-            {lives.slice(0, 5).map((live) => (
-              <div
-                key={live.id}
-                className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] hover:bg-[#eef0f3] transition-colors cursor-pointer"
-                onClick={() => { setSelectedLiveId(live.id); setIsDialogOpen(true); }}
-              >
-                <div className="w-10 h-10 rounded-lg bg-[#6366F1]/15 border border-[#6366F1]/20 flex flex-col items-center justify-center flex-shrink-0">
-                  <span className="text-[10px] text-[#6366F1]/70 font-medium leading-none">
-                    {live.scheduledAt ? format(new Date(live.scheduledAt), "M월") : "-"}
-                  </span>
-                  <span className="text-sm font-bold text-[#6366F1] leading-none">
-                    {live.scheduledAt ? format(new Date(live.scheduledAt), "d") : "-"}
-                  </span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-[#111318] truncate">{live.title}</p>
-                  <p className="text-xs text-[#8b8f98]">
-                    {live.scheduledAt ? format(new Date(live.scheduledAt), "a h:mm", { locale: ko }) : "시간 미정"}
-                    {" · "}신청자 {live.registrationCount}명
-                  </p>
-                </div>
-                <Button
-                  size="sm"
-                  className="bg-[#6366F1] hover:bg-[#818CF8] text-black font-bold text-xs rounded-lg gold-glow flex-shrink-0"
-                  onClick={(e) => { e.stopPropagation(); setSelectedLiveId(live.id); setIsDialogOpen(true); }}
-                >
-                  신청
-                </Button>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
       {/* ── Live Now ─────────────────────────────── */}
       {activeLives && activeLives.length > 0 && (
         <div className="space-y-4">
@@ -438,6 +337,72 @@ export default function Lives() {
           <p className="text-sm text-[#a0a4ab]">새 라이브 일정이 등록되면 이 곳에 표시됩니다.</p>
         </div>
       )}
+
+      {/* ── Monthly Calendar (맨 아래 보조 뷰) ──────────────────── */}
+      <div className="glass-card p-6">
+        <h3 className="text-sm font-semibold text-[#8b8f98] mb-3 uppercase tracking-wide">월간 캘린더</h3>
+        {/* Month nav */}
+        <div className="flex items-center justify-between mb-5">
+          <button
+            onClick={() => setCalMonth(subMonths(calMonth, 1))}
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-[#8b8f98] hover:text-[#6366F1] hover:bg-[#f7f8fa] transition-colors"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          <h3 className="text-base font-bold text-[#111318]">
+            {format(calMonth, "yyyy년 M월", { locale: ko })}
+          </h3>
+          <button
+            onClick={() => setCalMonth(addMonths(calMonth, 1))}
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-[#8b8f98] hover:text-[#6366F1] hover:bg-[#f7f8fa] transition-colors"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </button>
+        </div>
+
+        {/* Weekday headers */}
+        <div className="grid grid-cols-7 mb-2">
+          {["일", "월", "화", "수", "목", "금", "토"].map((d) => (
+            <div key={d} className="text-center text-xs font-medium text-[#a0a4ab] py-1">{d}</div>
+          ))}
+        </div>
+
+        {/* Days */}
+        <div className="grid grid-cols-7">
+          {calDays.map((day) => {
+            const key = format(day, "yyyy-MM-dd");
+            const dayLives = liveDates.get(key);
+            const inMonth = isSameMonth(day, calMonth);
+            const today = isToday(day);
+
+            return (
+              <div
+                key={key}
+                className={`relative py-2 text-center ${!inMonth ? "opacity-20" : ""}`}
+              >
+                <span
+                  className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm transition-colors ${
+                    today
+                      ? "bg-[#6366F1]/20 text-[#6366F1] font-bold border border-[#6366F1]/30"
+                      : dayLives
+                        ? "text-[#111318] font-semibold"
+                        : "text-[#8b8f98]"
+                  }`}
+                >
+                  {format(day, "d")}
+                </span>
+                {dayLives && inMonth && (
+                  <div className="flex justify-center gap-0.5 mt-0.5">
+                    {dayLives.slice(0, 3).map((_, i) => (
+                      <span key={i} className="w-1.5 h-1.5 rounded-full bg-[#6366F1]" />
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
 
       {/* Registration Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={handleOpenChange}>
