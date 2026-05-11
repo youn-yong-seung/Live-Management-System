@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useGetLives, getGetLivesQueryKey } from "@workspace/api-client-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate } from "@/lib/date-utils";
@@ -65,11 +65,30 @@ function youtubeThumbnail(url: string) {
 const gc = "glass-card";
 const gcHover = "glass-card hover:bg-[#eef0f3] hover:-translate-y-1 transition-all duration-300";
 
+/* ── Scroll reveal hook ─────────────────────────────── */
+
+function useReveal(threshold = 0.15) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([e]) => setVisible(e.isIntersecting),
+      { threshold },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [threshold]);
+  return { ref, visible };
+}
+
 /* ── Component ──────────────────────────────────────── */
 
 export default function Home() {
   const [, navigate] = useLocation();
   const [modalReplay, setModalReplay] = useState<any>(null);
+  const declare = useReveal();
 
   const { data: endedLives, isLoading } = useGetLives(
     { status: "ended" },
@@ -129,6 +148,24 @@ export default function Home() {
               무료 특강 대기방 참여하기
             </a>
           </div>
+        </div>
+      </div>
+
+      {/* ── DECLARATION (yun-platform declare-v2) ─────── */}
+      <div className="declare-v2" ref={declare.ref}>
+        <div className={`declare-v2-inner ${declare.visible ? "revealed" : ""}`}>
+          <div className="declare-v2-icon">💡</div>
+          <h2>
+            <em>윤자동의 모든 강의를</em>
+            <br />
+            무료화 선언합니다.
+          </h2>
+          <p>
+            우리는 B2B에서 돈을 법니다. 여러분한테 수익화하려는 목적이 1도 없습니다.
+            <br />
+            AI 시대에는 정보를 나눠야 가치가 있습니다. 여기 오시면 무조건 가져갈 것이 있게 만들겠습니다.
+          </p>
+          <div className="declare-v2-line" />
         </div>
       </div>
 
