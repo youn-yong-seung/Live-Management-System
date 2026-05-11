@@ -4,7 +4,10 @@ import { db, usersTable } from "@workspace/db";
 import { eq, sql } from "drizzle-orm";
 import { requireUser } from "../middleware/userAuth.js";
 
-const SEED_ADMIN_EMAILS = new Set<string>(["yunjadong101@gmail.com"]);
+const SEED_ADMIN_EMAILS = new Set<string>([
+  "yunjadong101@gmail.com",
+  "ceo@yunjadong.com",
+]);
 
 const router: IRouter = Router();
 
