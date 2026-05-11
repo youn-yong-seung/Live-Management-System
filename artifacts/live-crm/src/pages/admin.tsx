@@ -1334,7 +1334,7 @@ export default function Admin() {
 
           {!solapiConfig?.configured && (
             <div className="bg-amber-50 rounded-2xl border border-amber-100 p-5">
-              <p className="text-amber-700 text-sm font-medium">⚠ 자격증명을 입력하고 저장하면 알림톡 · 문자 발송이 활성화됩니다.</p>
+              <p className="text-amber-700 text-sm font-medium">자격증명을 입력하고 저장하면 알림톡 · 문자 발송이 활성화됩니다.</p>
               <p className="text-amber-600 text-xs mt-1">문자(SMS/LMS) 발송은 pfId 없이도 사용 가능합니다.</p>
             </div>
           )}
@@ -2097,7 +2097,7 @@ export default function Admin() {
             <div className="flex-1 space-y-4 py-2">
               {!solapiConfig?.configured && (
                 <div className="p-3 bg-amber-50 rounded-xl border border-amber-100 text-sm text-amber-700">
-                  ⚠ Solapi 자격증명을 먼저 API 설정 탭에서 저장해주세요.
+                  Solapi 자격증명을 먼저 API 설정 탭에서 저장해주세요.
                 </div>
               )}
 
@@ -2107,7 +2107,7 @@ export default function Admin() {
                   {(["alimtalk", "sms"] as const).map((type) => (
                     <button key={type} onClick={() => setSendMsgType(type)}
                       className={`flex-1 py-2 px-3 rounded-xl border text-sm font-semibold transition-colors ${sendMsgType === type ? "bg-blue-600 border-blue-600 text-[#111318]" : "border-gray-200 text-gray-500 hover:border-blue-300"}`}>
-                      {type === "alimtalk" ? "🔔 알림톡" : "💬 문자"}
+                      {type === "alimtalk" ? "알림톡" : "문자"}
                     </button>
                   ))}
                 </div>
@@ -2182,7 +2182,7 @@ export default function Admin() {
                   {sendMsgType === "alimtalk" && selectedTemplateContent ? (
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-100">
-                        <div className="w-8 h-8 bg-yellow-400 rounded-lg flex items-center justify-center text-[10px] font-bold">💬</div>
+                        <div className="w-8 h-8 bg-yellow-400 rounded-lg flex items-center justify-center text-[10px] font-bold">SMS</div>
                         <div>
                           <p className="font-bold text-[11px] text-gray-800">윤자동</p>
                           <p className="text-[9px] text-gray-400">알림톡</p>
@@ -2230,7 +2230,7 @@ export default function Admin() {
 
           {!solapiConfig?.configured && (
             <div className="mx-1 mt-2 p-3 bg-amber-50 rounded-xl border border-amber-100 text-sm text-amber-700">
-              ⚠ Solapi 자격증명을 먼저 API 설정 탭에서 저장해주세요.
+              Solapi 자격증명을 먼저 API 설정 탭에서 저장해주세요.
             </div>
           )}
 
@@ -2278,7 +2278,7 @@ export default function Admin() {
                     onClick={() => setTriggerConfig((s) => ({ ...s, messageType: type }))}
                     className={`flex-1 py-1.5 text-xs rounded-lg border font-semibold transition-colors ${triggerConfig.messageType === type ? "bg-green-600 border-green-600 text-[#111318]" : "border-gray-200 text-gray-500 hover:border-green-300"}`}
                   >
-                    {type === "alimtalk" ? "🔔 알림톡" : "💬 문자"}
+                    {type === "alimtalk" ? "알림톡" : "문자"}
                   </button>
                 ))}
               </div>
@@ -2377,7 +2377,7 @@ export default function Admin() {
                             <div className="bg-[#B2C7D9] rounded-xl p-2">
                               <div className="bg-white rounded-lg p-2.5 shadow-sm">
                                 <div className="flex items-center gap-1.5 mb-2 pb-1.5 border-b border-gray-100">
-                                  <div className="w-5 h-5 bg-yellow-400 rounded flex items-center justify-center text-[7px]">💬</div>
+                                  <div className="w-5 h-5 bg-yellow-400 rounded flex items-center justify-center text-[7px]">SMS</div>
                                   <span className="text-[8px] font-bold text-gray-700">윤자동</span>
                                 </div>
                                 <p className="text-gray-700 whitespace-pre-wrap break-words text-[9px] leading-relaxed">
@@ -2547,7 +2547,7 @@ export default function Admin() {
                         onClick={() => updateRule(idx, { messageType: type })}
                         className={`flex-1 py-1.5 text-xs rounded-lg border font-semibold transition-colors ${rule.messageType === type ? "bg-blue-600 border-blue-600 text-[#111318]" : "border-gray-200 text-gray-500 hover:border-blue-300"}`}
                       >
-                        {type === "alimtalk" ? "🔔 알림톡" : "💬 문자"}
+                        {type === "alimtalk" ? "알림톡" : "문자"}
                       </button>
                     ))}
                   </div>
@@ -2659,7 +2659,7 @@ export default function Admin() {
                                 <div className="bg-[#B2C7D9] rounded-xl p-2">
                                   <div className="bg-white rounded-lg p-2.5 shadow-sm">
                                     <div className="flex items-center gap-1.5 mb-2 pb-1.5 border-b border-gray-100">
-                                      <div className="w-5 h-5 bg-yellow-400 rounded flex items-center justify-center text-[7px]">💬</div>
+                                      <div className="w-5 h-5 bg-yellow-400 rounded flex items-center justify-center text-[7px]">SMS</div>
                                       <span className="text-[8px] font-bold text-gray-700">윤자동</span>
                                     </div>
                                     <p className="text-gray-700 whitespace-pre-wrap break-words text-[9px] leading-relaxed">

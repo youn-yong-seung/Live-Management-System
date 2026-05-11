@@ -14,7 +14,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate } from "@/lib/date-utils";
-import { Calendar, Users, CheckCircle, Loader2, PlayCircle, Download, MessageSquare, Sparkles } from "lucide-react";
+import { Calendar, Users, CheckCircle, Loader2, PlayCircle, Download, MessageSquare, MessageCircle, Sparkles } from "lucide-react";
 import { ChannelSourceField, type ChannelSourceItem } from "@/components/channel-source-field";
 import { useAuth } from "@/lib/auth";
 
@@ -190,7 +190,8 @@ export default function RegisterPage() {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 bg-[#FEE500] text-[#3C1E1E] font-bold text-sm px-6 py-3 rounded-xl hover:bg-[#FDD800] transition-colors"
           >
-            💬 무료 특강 대기방 입장하기
+            <MessageCircle className="h-4 w-4" />
+            무료 특강 대기방 입장하기
           </a>
         </div>
 

@@ -547,7 +547,7 @@ export function AdminEditors() {
           <div className="space-y-4 py-2">
             {!ytConnected && (
               <div className="p-3 bg-amber-50 rounded-xl border border-amber-100 text-sm text-amber-700">
-                ⚠ YouTube 계정을 먼저 연결해주세요.
+                YouTube 계정을 먼저 연결해주세요.
               </div>
             )}
             {ytChannel && (

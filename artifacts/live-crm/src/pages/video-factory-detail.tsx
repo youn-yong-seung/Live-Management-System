@@ -116,7 +116,7 @@ ${v.body.setup.map((s, i) => `${i + 1}. ${s}`).join("\n")}
 ━━━ 본문 — ${v.bodyFormat === "단계별프롬프트형" || v.bodyFormat === "3단계구축형" ? "단계별 프롬프트" : "실습 사례"} ━━━
 ${v.body.practices.map((p, i) => {
     let line = `${i + 1}. ${p.title}`;
-    if (p.prompt) line += `\n   💬 ${p.prompt}`;
+    if (p.prompt) line += `\n   > ${p.prompt}`;
     if (p.highlight) line += `\n   ⭐ ${p.highlight}`;
     return line;
   }).join("\n\n")}

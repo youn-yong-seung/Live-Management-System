@@ -306,11 +306,7 @@
   opacity: 1;
   transform: translateY(0);
 }
-.declare-v2-icon {
-  font-size: 48px;
-  margin-bottom: 20px;
-  animation: float 3s ease-in-out infinite;
-}
+/* declare-v2-icon 제거됨 (기본 이모지 사용 금지 룰) */
 @keyframes float {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-10px); }
