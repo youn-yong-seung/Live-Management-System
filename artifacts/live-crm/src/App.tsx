@@ -16,6 +16,7 @@ import CommunityNew from "@/pages/community-new";
 import CommunityDetail from "@/pages/community-detail";
 import TechTree from "@/pages/techtree";
 import Admin from "@/pages/admin";
+import AdminResources from "@/pages/admin-resources";
 import VideoFactory from "@/pages/video-factory";
 import VideoFactoryDetail from "@/pages/video-factory-detail";
 import ReviewPage from "@/pages/review";
@@ -47,6 +48,7 @@ function MainRouter() {
         <Route path="/video-factory" component={VideoFactory} />
         <Route path="/video-factory/:id" component={VideoFactoryDetail} />
         <Route path="/admin" component={Admin} />
+        <Route path="/admin/resources" component={AdminResources} />
         <Route component={NotFound} />
       </Switch>
     </Layout>

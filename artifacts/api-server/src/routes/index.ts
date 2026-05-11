@@ -9,6 +9,7 @@ import marketingRouter from "./marketing";
 import techTreeRouter from "./tech-tree";
 import authRouter from "./auth";
 import communityRouter from "./community";
+import resourcesRouter from "./resources";
 
 const router: IRouter = Router();
 
@@ -22,5 +23,6 @@ router.use(marketingRouter);
 router.use(techTreeRouter);
 router.use(authRouter);
 router.use(communityRouter);
+router.use(resourcesRouter);
 
 export default router;
