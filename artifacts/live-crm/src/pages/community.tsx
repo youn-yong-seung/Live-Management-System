@@ -46,7 +46,7 @@ export default function Community() {
       <div className="flex flex-wrap items-end justify-between gap-3 pt-2">
         <div>
           <h1 className="text-2xl font-bold text-[#111318] mb-1">커뮤니티</h1>
-          <p className="text-[#8b8f98] text-sm">윤자동 클래스 회원들의 이야기와 질문을 나누세요.</p>
+          <p className="text-[#8b8f98] text-sm">프롬프트·코드 공유, 만든 거 자랑, 질문 — 회원이면 누구나 자유롭게.</p>
         </div>
         {user ? (
           <Link href="/community/new">

@@ -212,12 +212,12 @@ export default function Resources() {
           onClick={() => setGatedResource(null)}
         >
           <div
-            className="bg-white max-w-md w-full p-7 rounded-md border border-[#e5e7eb]"
+            className="bg-white max-w-md w-full p-7 rounded-md border border-[#e5e7eb] relative"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               onClick={() => setGatedResource(null)}
-              className="absolute right-6 mt-[-8px] text-[#8b8f98] hover:text-[#111318]"
+              className="absolute top-4 right-4 text-[#8b8f98] hover:text-[#111318]"
               aria-label="닫기"
             >
               <X className="h-5 w-5" />
