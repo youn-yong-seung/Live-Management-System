@@ -208,7 +208,7 @@ export default function CommunityDetail() {
 
         {post.bodyHtml ? (
           <div
-            className="prose prose-invert max-w-none text-[#111318] prose-headings:text-[#111318] prose-strong:text-[#111318] prose-a:text-[#6366F1]"
+            className="prose max-w-none text-[#111318] prose-headings:text-[#111318] prose-strong:text-[#111318] prose-a:text-[#6366F1] prose-code:bg-[#f7f8fa] prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-[#6366F1] prose-code:before:hidden prose-code:after:hidden prose-pre:bg-[#0f172a] prose-pre:text-[#e2e8f0] prose-pre:rounded-lg prose-pre:p-4 prose-img:rounded-lg prose-img:my-4"
             dangerouslySetInnerHTML={{ __html: post.bodyHtml }}
           />
         ) : (

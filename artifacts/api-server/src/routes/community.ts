@@ -1,10 +1,22 @@
 import { Router, type IRouter } from "express";
+import multer from "multer";
 import { db, communityPostsTable, communityCommentsTable, usersTable } from "@workspace/db";
 import { eq, desc, sql } from "drizzle-orm";
 import { z } from "zod";
+import { randomUUID } from "crypto";
 import { requireUser, optionalUser } from "../middleware/userAuth.js";
+import { supabaseAdmin } from "../lib/supabase.js";
 
 const router: IRouter = Router();
+
+const imageUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (file.mimetype.startsWith("image/")) cb(null, true);
+    else cb(new Error("이미지 파일만 업로드 가능합니다."));
+  },
+});
 
 const createPostSchema = z.object({
   title: z.string().min(2).max(200),
@@ -192,6 +204,25 @@ router.post("/community/posts/:id/comments", requireUser, async (req, res) => {
     .returning();
 
   res.status(201).json({ comment: created });
+});
+
+router.post("/community/upload", requireUser, imageUpload.single("image"), async (req, res) => {
+  const file = req.file;
+  if (!file) {
+    res.status(400).json({ error: "이미지가 없습니다." });
+    return;
+  }
+  const safeName = file.originalname.replace(/[^\w.\-가-힣]/g, "_");
+  const objectPath = `community/${randomUUID()}-${safeName}`;
+  const { error } = await supabaseAdmin.storage
+    .from("resources")
+    .upload(objectPath, file.buffer, { contentType: file.mimetype, upsert: false });
+  if (error) {
+    res.status(500).json({ error: `업로드 실패: ${error.message}` });
+    return;
+  }
+  const { data: pub } = supabaseAdmin.storage.from("resources").getPublicUrl(objectPath);
+  res.json({ url: pub.publicUrl });
 });
 
 router.delete("/community/comments/:id", requireUser, async (req, res) => {

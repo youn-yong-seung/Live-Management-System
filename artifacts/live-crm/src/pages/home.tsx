@@ -8,6 +8,7 @@ import { useLocation } from "wouter";
 import {
   PlayCircle, ArrowRight, MessageCircle, Download, Sparkles,
   Video, BookOpen, Zap, TrendingUp, Star, Heart, ExternalLink,
+  MessageSquare, Eye, Shield, PenSquare,
 } from "lucide-react";
 
 /* ── Free Resources ─────────────────────────────────── */
@@ -89,6 +90,26 @@ export default function Home() {
   const [, navigate] = useLocation();
   const [modalReplay, setModalReplay] = useState<any>(null);
   const declare = useReveal();
+  const [communityPosts, setCommunityPosts] = useState<any[] | null>(null);
+  useEffect(() => {
+    fetch("/api/community/posts?limit=6")
+      .then((r) => (r.ok ? r.json() : { posts: [] }))
+      .then((d) => setCommunityPosts(d.posts ?? []))
+      .catch(() => setCommunityPosts([]));
+  }, []);
+
+  function formatRelative(iso: string): string {
+    const d = new Date(iso);
+    const diff = Date.now() - d.getTime();
+    const m = Math.floor(diff / 60000);
+    if (m < 1) return "방금";
+    if (m < 60) return `${m}분 전`;
+    const h = Math.floor(m / 60);
+    if (h < 24) return `${h}시간 전`;
+    const days = Math.floor(h / 24);
+    if (days < 7) return `${days}일 전`;
+    return d.toLocaleDateString("ko-KR");
+  }
 
   const { data: endedLives, isLoading } = useGetLives(
     { status: "ended" },
@@ -163,6 +184,80 @@ export default function Home() {
           <div className="declare-v2-line" />
         </div>
       </div>
+
+      {/* ── Community Preview ────────────────────────── */}
+      <section className="section-band">
+        <div className="section-band-inner">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-2xl font-bold text-[#111318] mb-1">커뮤니티</h2>
+              <p className="text-sm text-[#8b8f98]">프롬프트·코드·내가 만든 거 자랑하기. 회원이면 누구나 글쓰기 가능.</p>
+            </div>
+            <Link href="/community">
+              <span className="inline-flex items-center gap-1.5 text-sm text-[#6366F1] hover:text-[#818CF8] font-semibold cursor-pointer">
+                전체 보기 <ArrowRight className="h-3.5 w-3.5" />
+              </span>
+            </Link>
+          </div>
+
+          {communityPosts === null && (
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className="glass-card p-5 animate-pulse">
+                  <div className="h-4 w-2/3 bg-[#eef0f3] rounded mb-2" />
+                  <div className="h-3 w-1/3 bg-[#eef0f3] rounded" />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {communityPosts !== null && communityPosts.length === 0 && (
+            <div className="border border-dashed border-[#e5e7eb] rounded-md p-10 text-center">
+              <MessageSquare className="h-8 w-8 text-[#a0a4ab] mx-auto mb-3" />
+              <p className="text-sm text-[#8b8f98] mb-3">아직 글이 없어요. 첫 글을 남겨주세요.</p>
+              <Link href="/community/new">
+                <span className="inline-flex items-center gap-1.5 bg-[#111318] text-white text-xs font-semibold px-4 py-2 rounded-md hover:bg-[#1f2127] cursor-pointer">
+                  <PenSquare className="h-3.5 w-3.5" /> 글쓰기
+                </span>
+              </Link>
+            </div>
+          )}
+
+          {communityPosts !== null && communityPosts.length > 0 && (
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {communityPosts.slice(0, 6).map((p: any) => (
+                <Link key={p.id} href={`/community/${p.id}`}>
+                  <div className="glass-card hover:border-[#d1d5db] transition-all p-5 cursor-pointer group h-full">
+                    <h3 className="font-bold text-[#111318] text-sm mb-1 line-clamp-1 group-hover:text-[#6366F1] transition-colors">
+                      {p.title}
+                    </h3>
+                    <p className="text-xs text-[#8b8f98] line-clamp-2 mb-3 whitespace-pre-line">{p.body}</p>
+                    <div className="flex flex-wrap items-center gap-2 text-[11px] text-[#a0a4ab] pt-3 border-t border-[#eef0f3]">
+                      <div className="flex items-center gap-1.5">
+                        {p.authorAvatarUrl ? (
+                          <img src={p.authorAvatarUrl} alt="" className="w-4 h-4 rounded-full" />
+                        ) : (
+                          <div className="w-4 h-4 rounded-full bg-[#6366F1]/15 border border-[#6366F1]/30" />
+                        )}
+                        <span>{p.authorName ?? "회원"}</span>
+                        {p.authorRole === "admin" && (
+                          <span className="inline-flex items-center gap-0.5 text-[9px] font-bold px-1 py-0.5 rounded bg-[#6366F1]/15 text-[#6366F1] border border-[#6366F1]/30">
+                            <Shield className="h-2.5 w-2.5" /> ADMIN
+                          </span>
+                        )}
+                      </div>
+                      <span>·</span>
+                      <span>{formatRelative(p.createdAt)}</span>
+                      <span className="flex items-center gap-1"><Eye className="h-3 w-3" /> {p.viewCount}</span>
+                      <span className="flex items-center gap-1"><MessageSquare className="h-3 w-3" /> {p.commentCount}</span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
 
       {/* ── Live Now ─────────────────────────────────── */}
       {activeLives && activeLives.length > 0 && (
