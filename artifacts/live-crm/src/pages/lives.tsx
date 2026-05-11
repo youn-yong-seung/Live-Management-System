@@ -389,15 +389,21 @@ export default function Lives() {
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {lives.map((live) => (
             <div key={live.id} className="glass-card hover:bg-[#eef0f3] hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col">
-              {live.thumbnailUrl ? (
-                <div className="h-44 w-full bg-black/30 overflow-hidden">
-                  <img src={live.thumbnailUrl} alt={live.title} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
-                </div>
-              ) : (
-                <div className="h-44 w-full bg-black/20 flex items-center justify-center">
-                  <Video className="h-10 w-10 text-[#d1d5db]" />
-                </div>
-              )}
+              {(() => {
+                const ytId = live.youtubeUrl
+                  ? live.youtubeUrl.match(/(?:youtu\.be\/|v=|\/embed\/|\/live\/)([^#&?]{11})/)?.[1]
+                  : null;
+                const thumb = live.thumbnailUrl ?? (ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : null);
+                return thumb ? (
+                  <div className="h-44 w-full bg-[#f7f8fa] overflow-hidden">
+                    <img src={thumb} alt={live.title} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+                  </div>
+                ) : (
+                  <div className="h-44 w-full bg-[#f7f8fa] flex items-center justify-center">
+                    <Video className="h-10 w-10 text-[#d1d5db]" />
+                  </div>
+                );
+              })()}
               <div className="p-5 flex flex-col flex-1">
                 <div className="flex items-center gap-1.5 text-xs text-[#6366F1] font-medium mb-2">
                   <Calendar className="h-3.5 w-3.5" />
