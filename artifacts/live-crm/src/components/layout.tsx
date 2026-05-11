@@ -5,10 +5,9 @@ import { useAuth } from "@/lib/auth";
 
 const navItems = [
   { href: "/", label: "홈" },
-  { href: "/techtree", label: "테크트리" },
-  { href: "/lives", label: "라이브 신청" },
-  { href: "/replays", label: "다시보기" },
   { href: "/community", label: "커뮤니티" },
+  { href: "/techtree", label: "다시보기 / 테크트리" },
+  { href: "/lives", label: "라이브 신청" },
   { href: "/resources", label: "무료 자료" },
   { href: "/courses", label: "유료 강의" },
 ];

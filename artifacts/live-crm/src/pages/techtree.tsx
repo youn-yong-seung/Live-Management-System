@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect } from "react";
+import Replays from "@/pages/replays";
+import { GitBranch, LayoutGrid } from "lucide-react";
 import { Star, Play, ChevronDown, Sparkles, ExternalLink, Users, MessageSquare } from "lucide-react";
 import { ReplayModal } from "@/components/replay-modal";
 
@@ -366,12 +368,17 @@ function TreeNodeCircle({
 /* ── Main Component ──────────────────────────────────── */
 
 export default function TechTree() {
+  const initialView: "tree" | "all" =
+    typeof window !== "undefined" && new URLSearchParams(window.location.search).get("view") === "all"
+      ? "all"
+      : "tree";
+  const [view, setView] = useState<"tree" | "all">(initialView);
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
   const [activeNodes, setActiveNodes] = useState<Set<string>>(new Set());
   const [hoveredNode, setHoveredNode] = useState<string | null>(null);
   const [infoNode, setInfoNode] = useState<string | null>(null);
   const [modalReplay, setModalReplay] = useState<{ id: number; title: string; description: string | null; youtubeUrl: string | null; tags?: string[] | null } | null>(null);
-  const [paths, setPaths] = useState<TreePath[]>(FALLBACK_PATHS);
+  const [paths, setPaths] = useState<TreePath[] | null>(null);
   const treeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -380,10 +387,24 @@ export default function TechTree() {
       .then((data) => {
         if (data && Array.isArray(data.paths) && data.paths.length > 0) {
           setPaths(data.paths as TreePath[]);
+        } else {
+          setPaths(FALLBACK_PATHS);
         }
       })
-      .catch(() => { /* fallback 유지 */ });
+      .catch(() => setPaths(FALLBACK_PATHS));
   }, []);
+
+  if (paths === null) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-20">
+        <div className="grid gap-4 sm:grid-cols-3 animate-pulse">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-32 bg-[#f7f8fa] rounded-md" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   const PATHS = paths;
   const currentPath = PATHS.find((p) => p.id === selectedPath);
@@ -458,13 +479,52 @@ export default function TechTree() {
   /* Arc offset for each node position */
   const arcOffsets = [24, 8, 0, 8, 24];
 
+  const ViewToggle = (
+    <div className="inline-flex items-center gap-1 p-1 rounded-lg bg-[#f7f8fa] border border-[#e5e7eb]">
+      <button
+        type="button"
+        onClick={() => setView("tree")}
+        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+          view === "tree" ? "bg-white text-[#111318] shadow-sm" : "text-[#8b8f98] hover:text-[#111318]"
+        }`}
+        data-testid="view-tree"
+      >
+        <GitBranch className="h-3.5 w-3.5" /> 테크트리 (추천 순서)
+      </button>
+      <button
+        type="button"
+        onClick={() => setView("all")}
+        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+          view === "all" ? "bg-white text-[#111318] shadow-sm" : "text-[#8b8f98] hover:text-[#111318]"
+        }`}
+        data-testid="view-all"
+      >
+        <LayoutGrid className="h-3.5 w-3.5" /> 전체 다시보기
+      </button>
+    </div>
+  );
+
+  if (view === "all") {
+    return (
+      <div className="space-y-6">
+        <div className="pt-4 text-center">
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-[#111318] mb-3">강의 다시보기</h1>
+          <p className="text-[#8b8f98] text-sm mb-5">뭐부터 봐야 할지 모르겠다면 테크트리, 그냥 다 보고 싶다면 전체 보기.</p>
+          {ViewToggle}
+        </div>
+        <Replays />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-16">
       {/* Header */}
       <div className="pt-4 text-center">
-        <p className="text-[#00E5E5]/60 text-xs font-semibold uppercase tracking-[0.2em] mb-3">SKILL TREE</p>
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-[#111318] mb-3" style={{ textShadow: "0 0 40px rgba(0,229,229,0.15)" }}>테크트리</h1>
-        <p className="text-[#8b8f98] text-sm max-w-md mx-auto">시작 지점을 선택하고 나만의 성장 루트를 따라가세요</p>
+        <p className="text-[#6366F1]/70 text-xs font-semibold uppercase tracking-[0.2em] mb-3">SKILL TREE</p>
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-[#111318] mb-3">테크트리</h1>
+        <p className="text-[#8b8f98] text-sm max-w-md mx-auto mb-5">시작 지점을 선택하고 나만의 성장 루트를 따라가세요</p>
+        {ViewToggle}
       </div>
 
       {/* ── Arc Path Selector ────────────────────────── */}

@@ -172,14 +172,14 @@ export default function Home() {
         <div className={`declare-v2-inner ${declare.visible ? "revealed" : ""}`}>
           <div className="declare-v2-icon">💡</div>
           <h2>
-            <em>윤자동의 모든 강의를</em>
+            <em>모든 라이브 다시보기,</em>
             <br />
-            무료화 선언합니다.
+            100% 무료로 제공합니다.
           </h2>
           <p>
-            우리는 B2B에서 돈을 법니다. 여러분한테 수익화하려는 목적이 1도 없습니다.
+            권바이브 강사님 라이브부터 클로드코드 설치·고급 응용까지 — 모든 과정을 이 사이트에서 차곡차곡 관리합니다.
             <br />
-            AI 시대에는 정보를 나눠야 가치가 있습니다. 여기 오시면 무조건 가져갈 것이 있게 만들겠습니다.
+            매주 현업자들의 실속 있는 AI 강의와 비즈니스 인사이트를 무료 라이브로 진행하고, 다시보기로 다 챙겨갈 수 있어요.
           </p>
           <div className="declare-v2-line" />
         </div>
