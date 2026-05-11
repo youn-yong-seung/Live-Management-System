@@ -37,7 +37,7 @@ export default function Replays() {
   return (
     <div className="space-y-10">
       <div className="pt-2">
-        <h1 className="text-2xl font-bold text-white mb-1">다시보기</h1>
+        <h1 className="text-2xl font-bold text-[#111318] mb-1">다시보기</h1>
         <p className="text-[#8b8f98] text-sm">종료된 라이브를 언제든지 다시 시청하세요.</p>
       </div>
 
@@ -96,7 +96,7 @@ export default function Replays() {
                     <img src={thumb} alt={replay.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 opacity-80 group-hover:opacity-100" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                      <PlaySquare className="h-10 w-10 text-white/20" />
+                      <PlaySquare className="h-10 w-10 text-[#d1d5db]" />
                     </div>
                   )}
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -116,7 +116,7 @@ export default function Replays() {
                       {replay.registrationCount}명 참석
                     </span>
                   </div>
-                  <h3 className="font-bold text-white leading-snug line-clamp-1 mb-2">{replay.title}</h3>
+                  <h3 className="font-bold text-[#111318] leading-snug line-clamp-1 mb-2">{replay.title}</h3>
                   {((replay as any).tags as string[] | null)?.length ? (
                     <div className="flex flex-wrap gap-1.5 mb-3">
                       {((replay as any).tags as string[]).map((tag) => (
@@ -139,7 +139,7 @@ export default function Replays() {
       ) : (
         <div className={`glass-card py-20 text-center`}>
           <div className="w-14 h-14 bg-[#f7f8fa] rounded-2xl border border-[#e5e7eb] flex items-center justify-center mx-auto mb-4">
-            <PlaySquare className="h-6 w-6 text-white/20" />
+            <PlaySquare className="h-6 w-6 text-[#d1d5db]" />
           </div>
           <p className="font-semibold text-[#484d57] mb-1">다시보기 영상이 없습니다</p>
           <p className="text-sm text-[#a0a4ab]">아직 종료된 라이브 스트리밍이 없습니다.</p>

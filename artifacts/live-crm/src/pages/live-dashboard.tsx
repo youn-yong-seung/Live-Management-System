@@ -174,7 +174,7 @@ export default function LiveDashboard() {
 
   return (
     <div
-      className="min-h-screen text-white relative overflow-hidden"
+      className="min-h-screen text-[#111318] relative overflow-hidden"
       style={{
         background:
           "radial-gradient(ellipse at top left, rgba(204,153,101,0.08) 0%, transparent 50%), radial-gradient(ellipse at bottom right, rgba(0,229,229,0.06) 0%, transparent 50%), #050A0A",
@@ -247,7 +247,7 @@ export default function LiveDashboard() {
           )}
 
           {updatedAt && (
-            <p className="text-white/25 text-[11px] mt-10 tracking-wider">
+            <p className="text-[#d1d5db] text-[11px] mt-10 tracking-wider">
               UPDATED {updatedAt.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", second: "2-digit" })} · 30초마다 자동 갱신
             </p>
           )}
@@ -322,7 +322,7 @@ export default function LiveDashboard() {
         )}
 
         {/* Footer */}
-        <p className="mt-20 text-center text-[11px] text-white/25 tracking-wider">
+        <p className="mt-20 text-center text-[11px] text-[#d1d5db] tracking-wider">
           개인을 식별할 수 있는 정보는 표시되지 않습니다.
         </p>
       </div>
@@ -335,7 +335,7 @@ function SectionHeader({ eyebrow, title, sub }: { eyebrow: string; title: string
   return (
     <div className="text-center mb-8">
       <p className="text-[10px] font-bold tracking-[0.3em] uppercase text-[#CC9965]/70 mb-2">{eyebrow}</p>
-      <h2 className="text-xl sm:text-2xl font-bold text-white">{title}</h2>
+      <h2 className="text-xl sm:text-2xl font-bold text-[#111318]">{title}</h2>
       {sub && <p className="text-sm text-[#8b8f98] mt-2">{sub}</p>}
     </div>
   );
@@ -412,7 +412,7 @@ function DonutCard({
                 <span className="text-sm text-[#111318] leading-relaxed flex-1 break-words">{d.value}</span>
                 <span className="text-[13px] font-semibold text-[#484d57] tabular-nums whitespace-nowrap flex-shrink-0">
                   {d.count}<span className="text-[#a0a4ab] ml-0.5">명</span>
-                  <span className="text-white/35 ml-2">{pct(d.count, total)}%</span>
+                  <span className="text-[#8b8f98] ml-2">{pct(d.count, total)}%</span>
                 </span>
               </button>
             );
@@ -442,7 +442,7 @@ function QuestionCard({
   return (
     <Card>
       <div className="flex items-start justify-between gap-4 mb-5">
-        <h3 className="text-base sm:text-lg font-bold text-white leading-snug flex-1">
+        <h3 className="text-base sm:text-lg font-bold text-[#111318] leading-snug flex-1">
           {question}
         </h3>
         <div className="flex-shrink-0 text-right">
@@ -468,7 +468,7 @@ function QuestionCard({
                 className={`w-full text-left group transition-all duration-200 ${dimmed ? "opacity-30" : ""}`}
               >
                 <div className="flex items-baseline justify-between gap-3 mb-2">
-                  <span className="text-[15px] sm:text-base text-[#111318] leading-relaxed flex-1 group-hover:text-white">
+                  <span className="text-[15px] sm:text-base text-[#111318] leading-relaxed flex-1 group-hover:text-[#111318]">
                     {d.value}
                   </span>
                   <span className="text-sm font-bold tabular-nums whitespace-nowrap flex-shrink-0">

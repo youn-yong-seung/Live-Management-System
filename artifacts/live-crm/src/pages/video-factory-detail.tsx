@@ -43,7 +43,7 @@ function VideoRefRow({ video, anchor = false }: { video: VideoRef; anchor?: bool
           <img src={thumb} alt="" className="w-full h-full object-cover" loading="lazy" />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <Film className="w-5 h-5 text-white/20" />
+            <Film className="w-5 h-5 text-[#d1d5db]" />
           </div>
         )}
         {anchor && (
@@ -62,7 +62,7 @@ function VideoRefRow({ video, anchor = false }: { video: VideoRef; anchor?: bool
           <span className="text-[#8b8f98] font-medium">{video.ratio.toFixed(1)}x</span>
         </div>
       </div>
-      {video.url && <ExternalLink className="w-4 h-4 text-white/20 flex-shrink-0" />}
+      {video.url && <ExternalLink className="w-4 h-4 text-[#d1d5db] flex-shrink-0" />}
     </a>
   );
 }
@@ -138,7 +138,7 @@ ${v.outro ? `\n━━━ 아웃트로 ━━━\n${v.outro}` : ""}
         <div className="grid sm:grid-cols-2 gap-4">
           <div className="glass-card p-5">
             <p className="text-[10px] text-[#8b8f98] uppercase mb-1.5">주제</p>
-            <p className="text-base font-semibold text-white leading-snug">{v.topic}</p>
+            <p className="text-base font-semibold text-[#111318] leading-snug">{v.topic}</p>
           </div>
           <div className="glass-card p-5">
             <p className="text-[10px] text-[#8b8f98] uppercase mb-1.5">부제</p>
@@ -207,7 +207,7 @@ ${v.outro ? `\n━━━ 아웃트로 ━━━\n${v.outro}` : ""}
       <Section title="3. 썸네일 & 제목">
         <div className="grid sm:grid-cols-3 gap-4">
           <div className="glass-card p-5 flex flex-col items-center justify-center aspect-video">
-            <span className="text-3xl font-black text-white tracking-tight">{v.thumbTitle}</span>
+            <span className="text-3xl font-black text-[#111318] tracking-tight">{v.thumbTitle}</span>
             <span className="text-[11px] text-[#8b8f98] text-center px-2 leading-tight mt-2">{v.thumbSub}</span>
           </div>
           <div className="glass-card p-5 sm:col-span-2 flex flex-col justify-center">
@@ -384,7 +384,7 @@ export default function VideoFactoryDetail() {
             <div className="w-12 h-12 rounded-xl bg-[#f7f8fa] border border-white/[0.08] flex items-center justify-center mx-auto">
               <Lock className="w-5 h-5 text-[#484d57]" />
             </div>
-            <h2 className="text-base font-semibold text-white">영상 기획 공장</h2>
+            <h2 className="text-base font-semibold text-[#111318]">영상 기획 공장</h2>
             <p className="text-xs text-[#8b8f98]">관리자 비밀번호를 입력하세요</p>
           </div>
           <Input
@@ -392,10 +392,10 @@ export default function VideoFactoryDetail() {
             placeholder="비밀번호"
             value={loginPwd}
             onChange={e => setLoginPwd(e.target.value)}
-            className="bg-white/[0.03] border-[#e5e7eb] text-white placeholder:text-[#a0a4ab]"
+            className="bg-white/[0.03] border-[#e5e7eb] text-[#111318] placeholder:text-[#a0a4ab]"
             autoFocus
           />
-          <Button type="submit" disabled={isLoggingIn || !loginPwd} className="w-full bg-[#e5e7eb] hover:bg-white/[0.12] text-white border border-[#e5e7eb]">
+          <Button type="submit" disabled={isLoggingIn || !loginPwd} className="w-full bg-[#e5e7eb] hover:bg-white/[0.12] text-[#111318] border border-[#e5e7eb]">
             {isLoggingIn ? <Loader2 className="w-4 h-4 animate-spin" /> : "로그인"}
           </Button>
         </form>
@@ -407,7 +407,7 @@ export default function VideoFactoryDetail() {
     return (
       <div className="space-y-4">
         <Link href="/video-factory">
-          <button className="text-sm text-[#484d57] hover:text-white flex items-center gap-2">
+          <button className="text-sm text-[#484d57] hover:text-[#111318] flex items-center gap-2">
             <ArrowLeft className="w-4 h-4" /> 목록으로
           </button>
         </Link>
@@ -432,7 +432,7 @@ export default function VideoFactoryDetail() {
 
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div className="flex-1 min-w-0">
-            <h1 className="text-xl font-bold text-white leading-tight">{currentVersion.topic}</h1>
+            <h1 className="text-xl font-bold text-[#111318] leading-tight">{currentVersion.topic}</h1>
             <p className="text-sm text-[#8b8f98] mt-1">{currentVersion.subtitle}</p>
           </div>
 
@@ -447,7 +447,7 @@ export default function VideoFactoryDetail() {
                     onClick={() => setSelectedVersion(ver.version)}
                     className={`px-3 py-1.5 text-xs transition-colors ${
                       selectedVersion === ver.version
-                        ? "bg-white/10 text-white"
+                        ? "bg-white/10 text-[#111318]"
                         : "text-[#8b8f98] hover:bg-[#f7f8fa] hover:text-[#111318]"
                     }`}
                   >

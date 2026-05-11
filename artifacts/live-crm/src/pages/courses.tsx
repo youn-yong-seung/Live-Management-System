@@ -46,7 +46,7 @@ export default function Courses() {
   return (
     <div className="space-y-10">
       <div className="pt-2">
-        <h1 className="text-2xl font-bold text-white mb-1">유료 강의</h1>
+        <h1 className="text-2xl font-bold text-[#111318] mb-1">유료 강의</h1>
         <p className="text-[#8b8f98] text-sm">더 깊이 배우고 싶다면, 체계적인 커리큘럼의 유료 강의를 확인하세요.</p>
       </div>
 
@@ -57,7 +57,7 @@ export default function Courses() {
             <GraduationCap className="h-6 w-6 text-[#CC9965]" />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-white mb-1">무료 특강으로 부족하셨나요?</h2>
+            <h2 className="text-lg font-bold text-[#111318] mb-1">무료 특강으로 부족하셨나요?</h2>
             <p className="text-[#8b8f98] text-sm">무료 라이브에서 맛본 내용을 유료 강의에서 깊이 있게 배워보세요. 실전 프로젝트와 1:1 코칭까지 포함된 프리미엄 과정입니다.</p>
           </div>
         </div>
@@ -76,13 +76,13 @@ export default function Courses() {
             <div className={`${gcHover} overflow-hidden`}>
               <div className="p-6 sm:p-8">
                 <div className="flex items-center gap-2 mb-4">
-                  <span className={`${course.badgeColor} text-white text-xs font-bold px-3 py-1 rounded-full`}>
+                  <span className={`${course.badgeColor} text-[#111318] text-xs font-bold px-3 py-1 rounded-full`}>
                     {course.badge}
                   </span>
                   <span className="text-xs text-[#a0a4ab] font-medium">{course.platform}</span>
                 </div>
 
-                <h3 className="text-xl font-bold text-white mb-2 group-hover:text-[#CC9965] transition-colors">
+                <h3 className="text-xl font-bold text-[#111318] mb-2 group-hover:text-[#CC9965] transition-colors">
                   {course.title}
                 </h3>
                 <p className="text-sm text-[#8b8f98] mb-4 leading-relaxed">{course.description}</p>
@@ -100,7 +100,7 @@ export default function Courses() {
                     {course.rating && (
                       <div className="flex items-center gap-1 mb-2">
                         <Star className="h-4 w-4 fill-[#CC9965] text-[#CC9965]" />
-                        <span className="text-sm font-semibold text-white">{course.rating}</span>
+                        <span className="text-sm font-semibold text-[#111318]">{course.rating}</span>
                         <span className="text-xs text-[#a0a4ab]">({course.reviewCount})</span>
                       </div>
                     )}
@@ -108,7 +108,7 @@ export default function Courses() {
                       <span className="text-[#CC9965] font-bold text-lg mr-2">{course.discountRate}</span>
                     )}
                     {course.originalPrice && (
-                      <span className="text-xl font-bold text-white">{course.originalPrice}</span>
+                      <span className="text-xl font-bold text-[#111318]">{course.originalPrice}</span>
                     )}
                     {course.installment && (
                       <p className="text-xs text-[#a0a4ab] mt-1">{course.installment}</p>

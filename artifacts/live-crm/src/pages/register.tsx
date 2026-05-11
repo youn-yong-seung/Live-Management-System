@@ -182,7 +182,7 @@ export default function RegisterPage() {
         {/* 신청 완료 카드 */}
         <div className="glass-card-gold p-8 text-center">
           <CheckCircle className="h-12 w-12 text-[#CC9965] mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-white mb-2">{fc?.thankYouTitle || "신청이 완료되었습니다!"}</h2>
+          <h2 className="text-xl font-bold text-[#111318] mb-2">{fc?.thankYouTitle || "신청이 완료되었습니다!"}</h2>
           <p className="text-[#8b8f98] text-sm whitespace-pre-wrap mb-6">{fc?.thankYouBody || "라이브 시작 전 알림톡으로 접속 링크를 보내드립니다."}</p>
           <a
             href="https://open.kakao.com/o/gCM9Aehi"
@@ -201,7 +201,7 @@ export default function RegisterPage() {
               <Sparkles className="h-3.5 w-3.5" />
               회원이 되시면 더 많은 혜택
             </div>
-            <h3 className="text-lg font-bold text-white mb-2">윤자동 클래스 회원가입</h3>
+            <h3 className="text-lg font-bold text-[#111318] mb-2">윤자동 클래스 회원가입</h3>
             <p className="text-sm text-[#484d57] leading-relaxed mb-5">
               회원이 되시면 라이브 다시보기, 무료자료실, 커뮤니티까지<br />
               한 번의 로그인으로 모두 이용하실 수 있어요.
@@ -285,7 +285,7 @@ export default function RegisterPage() {
 
         {/* Live info */}
         <div className="glass-card p-5 mb-6">
-          <h1 className="text-lg font-bold text-white mb-2">{live.title}</h1>
+          <h1 className="text-lg font-bold text-[#111318] mb-2">{live.title}</h1>
           {live.description && <p className="text-sm text-[#8b8f98] mb-3">{live.description}</p>}
           <div className="flex items-center gap-4 text-xs text-[#8b8f98]">
             {live.scheduledAt && (
@@ -302,7 +302,7 @@ export default function RegisterPage() {
               <FormField control={form.control} name="name" render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-sm font-medium text-[#484d57]">이름 <span className="text-red-400">*</span></FormLabel>
-                  <FormControl><Input placeholder="이름을 입력해주세요" className="rounded-xl border-[#e5e7eb] bg-[#f7f8fa] !text-white placeholder:text-[#a0a4ab]" {...field} /></FormControl>
+                  <FormControl><Input placeholder="이름을 입력해주세요" className="rounded-xl border-[#e5e7eb] bg-[#f7f8fa] !text-[#111318] placeholder:text-[#a0a4ab]" {...field} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )} />
@@ -311,7 +311,7 @@ export default function RegisterPage() {
               <FormField control={form.control} name="phone" render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-sm font-medium text-[#484d57]">연락처 <span className="text-red-400">*</span></FormLabel>
-                  <FormControl><Input placeholder="010-0000-0000" className="rounded-xl border-[#e5e7eb] bg-[#f7f8fa] !text-white placeholder:text-[#a0a4ab]" {...field} /></FormControl>
+                  <FormControl><Input placeholder="010-0000-0000" className="rounded-xl border-[#e5e7eb] bg-[#f7f8fa] !text-[#111318] placeholder:text-[#a0a4ab]" {...field} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )} />
@@ -321,7 +321,7 @@ export default function RegisterPage() {
                 <FormField control={form.control} name="email" render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium text-[#484d57]">이메일</FormLabel>
-                    <FormControl><Input type="email" placeholder="example@email.com" className="rounded-xl border-[#e5e7eb] bg-[#f7f8fa] !text-white placeholder:text-[#a0a4ab]" {...field} /></FormControl>
+                    <FormControl><Input type="email" placeholder="example@email.com" className="rounded-xl border-[#e5e7eb] bg-[#f7f8fa] !text-[#111318] placeholder:text-[#a0a4ab]" {...field} /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />
@@ -352,14 +352,14 @@ export default function RegisterPage() {
                     <FormLabel className="text-sm font-medium text-[#484d57]">업종</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger className="rounded-xl border-[#e5e7eb] bg-[#f7f8fa] !text-white">
+                        <SelectTrigger className="rounded-xl border-[#e5e7eb] bg-[#f7f8fa] !text-[#111318]">
                           <SelectValue placeholder="업종을 선택해주세요" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>{activeIndustries.map((i) => <SelectItem key={i} value={i}>{i}</SelectItem>)}</SelectContent>
                     </Select>
                     {(field.value === "직접 입력" || field.value === "기타") && (
-                      <Input placeholder="업종을 직접 입력해주세요" className="mt-2 rounded-xl border-[#e5e7eb] bg-[#f7f8fa] !text-white placeholder:text-[#a0a4ab]" {...form.register("industryCustom")} />
+                      <Input placeholder="업종을 직접 입력해주세요" className="mt-2 rounded-xl border-[#e5e7eb] bg-[#f7f8fa] !text-[#111318] placeholder:text-[#a0a4ab]" {...form.register("industryCustom")} />
                     )}
                   </FormItem>
                 )} />
@@ -384,7 +384,7 @@ export default function RegisterPage() {
                             ))}
                           </RadioGroup>
                           {isCustom && (
-                            <Input placeholder="직접 입력해주세요" className="mt-2 rounded-xl border-[#e5e7eb] bg-[#f7f8fa] !text-white placeholder:text-[#a0a4ab]"
+                            <Input placeholder="직접 입력해주세요" className="mt-2 rounded-xl border-[#e5e7eb] bg-[#f7f8fa] !text-[#111318] placeholder:text-[#a0a4ab]"
                               onChange={(e) => field.onChange(e.target.value ? `직접 입력: ${e.target.value}` : val)} />
                           )}
                         </>
@@ -406,7 +406,7 @@ export default function RegisterPage() {
                             ))}
                           </div>
                           {hasCustom && (
-                            <Input placeholder="직접 입력해주세요" className="mt-2 rounded-xl border-[#e5e7eb] bg-[#f7f8fa] !text-white placeholder:text-[#a0a4ab]" />
+                            <Input placeholder="직접 입력해주세요" className="mt-2 rounded-xl border-[#e5e7eb] bg-[#f7f8fa] !text-[#111318] placeholder:text-[#a0a4ab]" />
                           )}
                         </>
                       );
@@ -414,7 +414,7 @@ export default function RegisterPage() {
                     {(q.questionType === "text" || q.questionType === "textarea") && (
                       <FormControl>
                         <Textarea placeholder="답변을 입력해주세요" rows={q.questionType === "textarea" ? 3 : 2}
-                          className="resize-none rounded-xl border-[#e5e7eb] bg-[#f7f8fa] !text-white placeholder:text-[#a0a4ab] text-sm"
+                          className="resize-none rounded-xl border-[#e5e7eb] bg-[#f7f8fa] !text-[#111318] placeholder:text-[#a0a4ab] text-sm"
                           value={typeof field.value === "string" ? field.value : ""} onChange={(e) => field.onChange(e.target.value)} />
                       </FormControl>
                     )}
@@ -428,7 +428,7 @@ export default function RegisterPage() {
                   <FormItem>
                     <FormLabel className="text-sm font-medium text-[#484d57]">사전 질문 (선택)</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="궁금한 점을 남겨주세요" className="resize-none rounded-xl border-[#e5e7eb] bg-[#f7f8fa] !text-white placeholder:text-[#a0a4ab]" {...field} />
+                      <Textarea placeholder="궁금한 점을 남겨주세요" className="resize-none rounded-xl border-[#e5e7eb] bg-[#f7f8fa] !text-[#111318] placeholder:text-[#a0a4ab]" {...field} />
                     </FormControl>
                   </FormItem>
                 )} />

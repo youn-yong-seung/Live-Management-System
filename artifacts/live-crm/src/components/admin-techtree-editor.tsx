@@ -661,7 +661,7 @@ function ModuleCard({
             <div className="w-full h-full flex items-center justify-center text-gray-300 text-xs">썸네일 없음</div>
           )}
           {/* Level badge */}
-          <span className="absolute top-1.5 left-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded bg-black/70 text-white">
+          <span className="absolute top-1.5 left-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded bg-black/70 text-[#111318]">
             {node.level.split(" ")[0]}
           </span>
           {/* Tool badge */}
@@ -817,12 +817,12 @@ function LiveGalleryModal({
                       )}
                       {used && (
                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                          <span className="text-[10px] font-bold text-white bg-blue-500 px-2 py-1 rounded-full flex items-center gap-1">
+                          <span className="text-[10px] font-bold text-[#111318] bg-blue-500 px-2 py-1 rounded-full flex items-center gap-1">
                             <Check className="h-3 w-3" />이미 추가됨
                           </span>
                         </div>
                       )}
-                      <span className="absolute top-1.5 left-1.5 text-[10px] font-mono px-1.5 py-0.5 rounded bg-black/70 text-white">#{live.id}</span>
+                      <span className="absolute top-1.5 left-1.5 text-[10px] font-mono px-1.5 py-0.5 rounded bg-black/70 text-[#111318]">#{live.id}</span>
                     </div>
                     <div className="p-2.5">
                       <p className="text-xs font-semibold text-gray-800 leading-snug line-clamp-2">{live.title}</p>

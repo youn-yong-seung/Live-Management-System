@@ -57,11 +57,11 @@ export default function FreeGuideNanoBanana() {
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#005051]/40 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/4" />
 
         <div className="relative">
-          <div className="inline-flex items-center gap-2 bg-emerald-500/15 backdrop-blur-sm rounded-full px-4 py-1.5 text-sm font-medium mb-6 text-emerald-300 border border-emerald-500/20">
+          <div className="inline-flex items-center gap-2 bg-emerald-500/15 backdrop-blur-sm rounded-full px-4 py-1.5 text-sm font-medium mb-6 text-emerald-700 border border-emerald-500/20">
             <Gift className="h-4 w-4" />
             무료 PDF 가이드
           </div>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white leading-tight mb-4">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#111318] leading-tight mb-4">
             나노바나나 vs 덕테이프<br />
             <span className="text-[#CC9965]">프롬프트 가이드</span>
           </h1>
@@ -102,12 +102,12 @@ export default function FreeGuideNanoBanana() {
         <div className="glass-card p-6 sm:p-8">
           <div className="flex items-center gap-2 mb-5">
             <Sparkles className="h-4 w-4 text-[#CC9965]" />
-            <h2 className="text-base font-bold text-white">이 가이드에 담긴 것</h2>
+            <h2 className="text-base font-bold text-[#111318]">이 가이드에 담긴 것</h2>
           </div>
           <ul className="space-y-3">
             {HIGHLIGHTS.map((line) => (
               <li key={line} className="flex items-start gap-3 text-sm text-[#484d57] leading-relaxed">
-                <CheckCircle2 className="h-4 w-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                <CheckCircle2 className="h-4 w-4 text-emerald-600 flex-shrink-0 mt-0.5" />
                 <span>{line}</span>
               </li>
             ))}
@@ -117,7 +117,7 @@ export default function FreeGuideNanoBanana() {
         <div className="glass-card-gold p-6 sm:p-8">
           <div className="flex items-center gap-2 mb-5">
             <Zap className="h-4 w-4 text-[#CC9965]" />
-            <h2 className="text-base font-bold text-white">이런 분께 추천</h2>
+            <h2 className="text-base font-bold text-[#111318]">이런 분께 추천</h2>
           </div>
           <ul className="space-y-3 text-sm text-[#484d57] leading-relaxed">
             <li className="flex items-start gap-3">
@@ -141,7 +141,7 @@ export default function FreeGuideNanoBanana() {
         <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[#CC9965]/15 border border-[#CC9965]/30 mb-5">
           <Download className="h-6 w-6 text-[#CC9965]" />
         </div>
-        <h3 className="text-xl font-bold text-white mb-2">지금 바로 다운로드</h3>
+        <h3 className="text-xl font-bold text-[#111318] mb-2">지금 바로 다운로드</h3>
         <p className="text-sm text-[#8b8f98] mb-6">
           가입 / 로그인 없이 받아갈 수 있습니다. 도움이 됐다면 주변에도 공유해주세요.
         </p>
@@ -161,11 +161,11 @@ export default function FreeGuideNanoBanana() {
             <MessageCircle className="h-6 w-6 text-[#CC9965]" />
           </div>
           <div className="flex-1">
-            <div className="inline-flex items-center gap-2 bg-rose-500/15 rounded-full px-3 py-1 text-xs font-bold text-rose-300 border border-rose-500/20 mb-3">
+            <div className="inline-flex items-center gap-2 bg-rose-500/15 rounded-full px-3 py-1 text-xs font-bold text-rose-700 border border-rose-500/20 mb-3">
               <Sparkles className="h-3.5 w-3.5" />
               매주 새로운 무료 자료 + 라이브
             </div>
-            <h3 className="text-lg sm:text-xl font-bold text-white mb-2">
+            <h3 className="text-lg sm:text-xl font-bold text-[#111318] mb-2">
               윤자동 무료 특강 대기방
             </h3>
             <p className="text-sm text-[#484d57] leading-relaxed mb-5">
@@ -204,7 +204,7 @@ export default function FreeGuideNanoBanana() {
           >
             <button
               onClick={() => setShowInviteModal(false)}
-              className="absolute top-4 right-4 text-[#8b8f98] hover:text-white transition-colors"
+              className="absolute top-4 right-4 text-[#8b8f98] hover:text-[#111318] transition-colors"
               aria-label="닫기"
             >
               <X className="h-5 w-5" />
@@ -212,9 +212,9 @@ export default function FreeGuideNanoBanana() {
 
             <div className="text-center">
               <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 mb-4">
-                <CheckCircle2 className="h-7 w-7 text-emerald-400" />
+                <CheckCircle2 className="h-7 w-7 text-emerald-600" />
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">다운로드 시작했어요</h3>
+              <h3 className="text-xl font-bold text-[#111318] mb-2">다운로드 시작했어요</h3>
               <p className="text-sm text-[#484d57] leading-relaxed mb-6">
                 PDF 잘 받으셨나요? <br />
                 <span className="text-[#CC9965] font-semibold">매주 새로 풀리는 무료 자료와 라이브 특강</span>은

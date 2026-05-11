@@ -161,7 +161,7 @@ function NodeTooltip({ node, color }: { node: TreeNode; color: string }) {
             style={{ background: `${color}20`, color, border: `1px solid ${color}40` }}>
             {node.level}
           </span>
-          <h4 className="text-sm font-bold text-white mt-1.5 mb-1 leading-snug">{node.title}</h4>
+          <h4 className="text-sm font-bold text-[#111318] mt-1.5 mb-1 leading-snug">{node.title}</h4>
           <p className="text-xs text-[#8b8f98] mb-3">{node.description}</p>
 
           {/* Gains */}
@@ -225,7 +225,7 @@ function SkillInfoPanel({
           </span>
 
           {/* Title & desc */}
-          <h4 className="text-sm font-bold text-white leading-snug mb-1">{node.title}</h4>
+          <h4 className="text-sm font-bold text-[#111318] leading-snug mb-1">{node.title}</h4>
           <p className="text-[11px] text-[#8b8f98] mb-3 leading-relaxed">{node.description}</p>
 
           {/* Gains */}
@@ -352,7 +352,7 @@ function TreeNodeCircle({
             </div>
             {/* Title */}
             <div className="p-2.5">
-              <p className={`text-[12px] font-semibold text-center leading-tight ${highlighted ? "text-white" : "text-white/75"}`}>
+              <p className={`text-[12px] font-semibold text-center leading-tight ${highlighted ? "text-[#111318]" : "text-[#484d57]"}`}>
                 {node.shortTitle}
               </p>
             </div>
@@ -463,7 +463,7 @@ export default function TechTree() {
       {/* Header */}
       <div className="pt-4 text-center">
         <p className="text-[#00E5E5]/60 text-xs font-semibold uppercase tracking-[0.2em] mb-3">SKILL TREE</p>
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-3" style={{ textShadow: "0 0 40px rgba(0,229,229,0.15)" }}>테크트리</h1>
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-[#111318] mb-3" style={{ textShadow: "0 0 40px rgba(0,229,229,0.15)" }}>테크트리</h1>
         <p className="text-[#8b8f98] text-sm max-w-md mx-auto">시작 지점을 선택하고 나만의 성장 루트를 따라가세요</p>
       </div>
 
@@ -577,7 +577,7 @@ export default function TechTree() {
           {/* Path header */}
           <div className="text-center mb-10">
             <span className="text-3xl mb-3 block">{currentPath.emoji}</span>
-            <h2 className="text-xl font-bold text-white mb-1" style={{ textShadow: `0 0 30px ${currentPath.glowColor}` }}>{currentPath.name} 테크트리</h2>
+            <h2 className="text-xl font-bold text-[#111318] mb-1" style={{ textShadow: `0 0 30px ${currentPath.glowColor}` }}>{currentPath.name} 테크트리</h2>
             <p className="text-xs text-[#8b8f98]">{currentPath.description}</p>
             <div className="mt-4 mx-auto w-24 h-px" style={{ background: `linear-gradient(to right, transparent, ${currentPath.color}60, transparent)` }} />
           </div>
@@ -658,7 +658,7 @@ export default function TechTree() {
       {/* CTA when no path selected */}
       {!selectedPath && (
         <div className="text-center py-10">
-          <ChevronDown className="h-6 w-6 text-white/20 mx-auto animate-bounce" />
+          <ChevronDown className="h-6 w-6 text-[#d1d5db] mx-auto animate-bounce" />
           <p className="text-sm text-[#a0a4ab] mt-2">위에서 시작할 테크트리를 선택하세요</p>
         </div>
       )}

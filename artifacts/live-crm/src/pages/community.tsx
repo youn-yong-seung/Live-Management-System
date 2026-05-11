@@ -45,7 +45,7 @@ export default function Community() {
     <div className="space-y-8">
       <div className="flex flex-wrap items-end justify-between gap-3 pt-2">
         <div>
-          <h1 className="text-2xl font-bold text-white mb-1">커뮤니티</h1>
+          <h1 className="text-2xl font-bold text-[#111318] mb-1">커뮤니티</h1>
           <p className="text-[#8b8f98] text-sm">윤자동 클래스 회원들의 이야기와 질문을 나누세요.</p>
         </div>
         {user ? (
@@ -76,7 +76,7 @@ export default function Community() {
 
       {posts !== null && posts.length === 0 && (
         <div className="glass-card p-12 text-center">
-          <MessageSquare className="h-10 w-10 text-white/20 mx-auto mb-4" />
+          <MessageSquare className="h-10 w-10 text-[#d1d5db] mx-auto mb-4" />
           <p className="text-[#8b8f98] text-sm mb-1">아직 글이 없어요.</p>
           <p className="text-[#a0a4ab] text-xs">첫 번째 글을 작성해보세요.</p>
         </div>
@@ -88,10 +88,10 @@ export default function Community() {
             <Link key={p.id} href={`/community/${p.id}`}>
               <div className="glass-card hover:bg-[#eef0f3] hover:-translate-y-0.5 transition-all p-5 cursor-pointer group" data-testid={`post-${p.id}`}>
                 <div className="flex items-start justify-between gap-3 mb-2">
-                  <h2 className="font-bold text-white text-base leading-snug line-clamp-1 group-hover:text-[#CC9965] transition-colors">
+                  <h2 className="font-bold text-[#111318] text-base leading-snug line-clamp-1 group-hover:text-[#CC9965] transition-colors">
                     {p.title}
                   </h2>
-                  <ChevronRight className="h-4 w-4 text-white/20 group-hover:text-[#CC9965] flex-shrink-0 mt-1 transition-colors" />
+                  <ChevronRight className="h-4 w-4 text-[#d1d5db] group-hover:text-[#CC9965] flex-shrink-0 mt-1 transition-colors" />
                 </div>
                 <p className="text-sm text-[#8b8f98] line-clamp-2 mb-3 whitespace-pre-line">{p.body}</p>
                 <div className="flex flex-wrap items-center gap-3 text-xs text-[#8b8f98]">

@@ -128,7 +128,7 @@ export function ReplayModal({
                 )}
               </div>
               <div className="p-5 flex-shrink-0">
-                <h2 className="text-lg font-bold text-white mb-1">{replay.title}</h2>
+                <h2 className="text-lg font-bold text-[#111318] mb-1">{replay.title}</h2>
                 <p className="text-sm text-[#8b8f98] line-clamp-2">{replay.description}</p>
                 {tags?.length ? (
                   <div className="flex flex-wrap gap-1.5 mt-3">
@@ -150,7 +150,7 @@ export function ReplayModal({
             <div className="w-full lg:w-[360px] border-t lg:border-t-0 lg:border-l border-[#e5e7eb] flex flex-col min-h-0 max-h-[40vh] lg:max-h-none">
               <div className="flex items-center gap-2 px-5 py-4 border-b border-[#e5e7eb] flex-shrink-0">
                 <MessageSquare className="h-4 w-4 text-[#CC9965]" />
-                <span className="font-bold text-white text-sm">후기</span>
+                <span className="font-bold text-[#111318] text-sm">후기</span>
                 <span className="text-xs text-[#8b8f98]">({reviews.length})</span>
               </div>
 
@@ -163,7 +163,7 @@ export function ReplayModal({
                   reviews.map((review) => (
                     <div key={review.id} className="bg-[#f7f8fa] rounded-xl p-3.5 border border-white/5">
                       <div className="flex items-center justify-between mb-1.5">
-                        <span className="text-sm font-semibold text-white">{maskName(review.name, showPII)}</span>
+                        <span className="text-sm font-semibold text-[#111318]">{maskName(review.name, showPII)}</span>
                         <StarRating value={review.rating} />
                       </div>
                       <p className="text-sm text-[#484d57] leading-relaxed">{review.content}</p>
@@ -182,7 +182,7 @@ export function ReplayModal({
                     placeholder="이름"
                     value={reviewForm.name}
                     onChange={(e) => setReviewForm((f) => ({ ...f, name: e.target.value }))}
-                    className="flex-1 h-9 text-sm rounded-lg border-[#e5e7eb] bg-[#f7f8fa] text-white placeholder:text-[#a0a4ab]"
+                    className="flex-1 h-9 text-sm rounded-lg border-[#e5e7eb] bg-[#f7f8fa] text-[#111318] placeholder:text-[#a0a4ab]"
                   />
                   <StarRating value={reviewForm.rating} onChange={(v) => setReviewForm((f) => ({ ...f, rating: v }))} />
                 </div>
@@ -191,7 +191,7 @@ export function ReplayModal({
                     placeholder="후기를 남겨주세요..."
                     value={reviewForm.content}
                     onChange={(e) => setReviewForm((f) => ({ ...f, content: e.target.value }))}
-                    className="flex-1 resize-none text-sm rounded-lg border-[#e5e7eb] bg-[#f7f8fa] text-white placeholder:text-[#a0a4ab] min-h-[60px]"
+                    className="flex-1 resize-none text-sm rounded-lg border-[#e5e7eb] bg-[#f7f8fa] text-[#111318] placeholder:text-[#a0a4ab] min-h-[60px]"
                     rows={2}
                   />
                   <Button

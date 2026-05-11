@@ -169,7 +169,7 @@ export default function CommunityDetail() {
       </Link>
 
       <article className="glass-card p-6 sm:p-8">
-        <h1 className="text-2xl font-bold text-white mb-4 leading-snug">{post.title}</h1>
+        <h1 className="text-2xl font-bold text-[#111318] mb-4 leading-snug">{post.title}</h1>
 
         <div className="flex flex-wrap items-center justify-between gap-3 pb-4 mb-6 border-b border-[#eef0f3]">
           <div className="flex items-center gap-2 text-sm">
@@ -198,7 +198,7 @@ export default function CommunityDetail() {
             <button
               onClick={deletePost}
               disabled={deletingPost}
-              className="inline-flex items-center gap-1.5 text-xs text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 px-2.5 py-1.5 rounded-lg transition-colors disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-500/10 px-2.5 py-1.5 rounded-lg transition-colors disabled:opacity-50"
               data-testid="btn-delete-post"
             >
               <Trash2 className="h-3.5 w-3.5" /> 삭제
@@ -208,7 +208,7 @@ export default function CommunityDetail() {
 
         {post.bodyHtml ? (
           <div
-            className="prose prose-invert max-w-none text-[#111318] prose-headings:text-white prose-strong:text-white prose-a:text-[#CC9965]"
+            className="prose prose-invert max-w-none text-[#111318] prose-headings:text-[#111318] prose-strong:text-[#111318] prose-a:text-[#CC9965]"
             dangerouslySetInnerHTML={{ __html: post.bodyHtml }}
           />
         ) : (
@@ -249,14 +249,14 @@ export default function CommunityDetail() {
                     {canDelete && (
                       <button
                         onClick={() => deleteComment(c.id)}
-                        className="text-xs text-rose-400/70 hover:text-rose-300 transition-colors"
+                        className="text-xs text-rose-600/70 hover:text-rose-700 transition-colors"
                         aria-label="댓글 삭제"
                       >
                         <Trash2 className="h-3 w-3" />
                       </button>
                     )}
                   </div>
-                  <p className="text-sm text-white/75 whitespace-pre-line">{c.body}</p>
+                  <p className="text-sm text-[#484d57] whitespace-pre-line">{c.body}</p>
                 </li>
               );
             })}
@@ -271,7 +271,7 @@ export default function CommunityDetail() {
               placeholder="댓글을 입력하세요"
               rows={3}
               maxLength={5000}
-              className="w-full px-4 py-3 rounded-xl bg-[#f7f8fa] border border-[#e5e7eb] text-white text-sm placeholder:text-[#a0a4ab] focus:outline-none focus:border-[#CC9965]/50 focus:bg-[#eef0f3] transition-colors resize-none"
+              className="w-full px-4 py-3 rounded-xl bg-[#f7f8fa] border border-[#e5e7eb] text-[#111318] text-sm placeholder:text-[#a0a4ab] focus:outline-none focus:border-[#CC9965]/50 focus:bg-[#eef0f3] transition-colors resize-none"
               data-testid="input-comment-body"
             />
             <div className="flex justify-end">

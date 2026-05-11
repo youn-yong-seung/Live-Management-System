@@ -78,7 +78,7 @@ export default function CommunityNew() {
       </Link>
 
       <div>
-        <h1 className="text-2xl font-bold text-white mb-1">글쓰기</h1>
+        <h1 className="text-2xl font-bold text-[#111318] mb-1">글쓰기</h1>
         <p className="text-[#8b8f98] text-sm">윤자동 클래스 커뮤니티에 글을 남겨주세요.</p>
       </div>
 
@@ -90,7 +90,7 @@ export default function CommunityNew() {
           placeholder="제목을 입력하세요"
           maxLength={200}
           disabled={submitting}
-          className="w-full px-5 py-3.5 rounded-xl bg-[#f7f8fa] border border-[#e5e7eb] text-white text-lg font-semibold placeholder:text-[#a0a4ab] focus:outline-none focus:border-[#CC9965]/50 focus:bg-[#eef0f3] transition-colors disabled:opacity-50"
+          className="w-full px-5 py-3.5 rounded-xl bg-[#f7f8fa] border border-[#e5e7eb] text-[#111318] text-lg font-semibold placeholder:text-[#a0a4ab] focus:outline-none focus:border-[#CC9965]/50 focus:bg-[#eef0f3] transition-colors disabled:opacity-50"
           data-testid="input-post-title"
         />
 
@@ -104,7 +104,7 @@ export default function CommunityNew() {
         />
 
         {errorMsg && (
-          <p className="text-sm text-rose-400" role="alert">
+          <p className="text-sm text-rose-600" role="alert">
             {errorMsg}
           </p>
         )}

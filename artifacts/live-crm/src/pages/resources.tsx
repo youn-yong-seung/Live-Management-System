@@ -130,7 +130,7 @@ export default function Resources() {
   return (
     <div className="space-y-12">
       <div className="pt-2">
-        <h1 className="text-2xl font-bold text-white mb-1">무료 자료</h1>
+        <h1 className="text-2xl font-bold text-[#111318] mb-1">무료 자료</h1>
         <p className="text-[#8b8f98] text-sm">템플릿, 전자책, 가이드 등 무료 자료를 다운받으세요.</p>
       </div>
 
@@ -141,7 +141,7 @@ export default function Resources() {
               <section.icon className={`h-4.5 w-4.5 ${section.iconColor}`} />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-white">{section.title}</h2>
+              <h2 className="text-lg font-bold text-[#111318]">{section.title}</h2>
               <p className="text-xs text-[#8b8f98]">{section.description}</p>
             </div>
           </div>
@@ -152,17 +152,17 @@ export default function Resources() {
                 <div className={`${gcHover} p-5 group block h-full`}>
                   <div className="flex items-start justify-between mb-3">
                     {item.badge && (
-                      <span className={`${item.badgeColor} text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full`}>
+                      <span className={`${item.badgeColor} text-[#111318] text-[11px] font-bold px-2.5 py-0.5 rounded-full`}>
                         {item.badge}
                       </span>
                     )}
                     {item.internal ? (
-                      <ArrowRight className="h-4 w-4 text-white/20 group-hover:text-[#CC9965] transition-colors flex-shrink-0" />
+                      <ArrowRight className="h-4 w-4 text-[#d1d5db] group-hover:text-[#CC9965] transition-colors flex-shrink-0" />
                     ) : (
-                      <ExternalLink className="h-4 w-4 text-white/20 group-hover:text-[#CC9965] transition-colors flex-shrink-0" />
+                      <ExternalLink className="h-4 w-4 text-[#d1d5db] group-hover:text-[#CC9965] transition-colors flex-shrink-0" />
                     )}
                   </div>
-                  <h3 className="font-bold text-white text-sm mb-1 group-hover:text-[#CC9965] transition-colors">{item.title}</h3>
+                  <h3 className="font-bold text-[#111318] text-sm mb-1 group-hover:text-[#CC9965] transition-colors">{item.title}</h3>
                   <p className="text-xs text-[#8b8f98] leading-relaxed">{item.description}</p>
                 </div>
               );

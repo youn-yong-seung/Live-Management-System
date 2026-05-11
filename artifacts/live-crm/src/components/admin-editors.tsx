@@ -586,7 +586,7 @@ export function AdminEditors() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setUploadModal(null)}>취소</Button>
             <Button
-              className="bg-red-500 hover:bg-red-600 text-white"
+              className="bg-red-500 hover:bg-red-600 text-[#111318]"
               disabled={isUploading || !ytConnected}
               onClick={async () => {
                 if (!uploadModal) return;

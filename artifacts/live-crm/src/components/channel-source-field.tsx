@@ -118,7 +118,7 @@ export function ChannelSourceField({
     : "border-blue-500 bg-blue-50 text-blue-700";
   const channelLabel = isDark ? "text-[#484d57]" : "text-gray-700";
   const inputCls = isDark
-    ? "rounded-xl border-[#e5e7eb] bg-[#f7f8fa] !text-white placeholder:text-[#a0a4ab]"
+    ? "rounded-xl border-[#e5e7eb] bg-[#f7f8fa] !text-[#111318] placeholder:text-[#a0a4ab]"
     : "!rounded-xl !border-gray-200 !text-black";
 
   const showCustomInput =

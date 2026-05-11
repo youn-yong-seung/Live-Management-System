@@ -194,7 +194,7 @@ export function AdminTodoCalendar() {
                   onDrop={(e) => { e.preventDefault(); e.currentTarget.classList.remove("bg-blue-100/50"); handleDrop(day); }}
                 >
                   <span className={`text-xs font-medium ${
-                    today ? "bg-blue-500 text-white w-5 h-5 rounded-full inline-flex items-center justify-center" :
+                    today ? "bg-blue-500 text-[#111318] w-5 h-5 rounded-full inline-flex items-center justify-center" :
                     !inMonth ? "text-gray-300" : "text-gray-500"
                   }`}>
                     {format(day, "d")}

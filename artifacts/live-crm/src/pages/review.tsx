@@ -333,7 +333,7 @@ export default function ReviewPage() {
 
                 <Button
                   type="submit"
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-[#111318] font-semibold rounded-xl"
                   disabled={isSubmitting}
                 >
                   {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

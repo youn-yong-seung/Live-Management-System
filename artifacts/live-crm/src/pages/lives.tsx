@@ -231,7 +231,7 @@ export default function Lives() {
     <div className="space-y-10">
       {/* Page Header */}
       <div className="pt-2">
-        <h1 className="text-2xl font-bold text-white mb-1">라이브 신청</h1>
+        <h1 className="text-2xl font-bold text-[#111318] mb-1">라이브 신청</h1>
         <p className="text-[#8b8f98] text-sm">예정된 라이브 일정을 확인하고 참가 신청하세요. 신청 시 카카오 알림톡이 발송됩니다.</p>
       </div>
 
@@ -245,7 +245,7 @@ export default function Lives() {
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
-          <h3 className="text-base font-bold text-white">
+          <h3 className="text-base font-bold text-[#111318]">
             {format(calMonth, "yyyy년 M월", { locale: ko })}
           </h3>
           <button
@@ -281,7 +281,7 @@ export default function Lives() {
                     today
                       ? "bg-[#CC9965]/20 text-[#CC9965] font-bold border border-[#CC9965]/30"
                       : dayLives
-                        ? "text-white font-semibold"
+                        ? "text-[#111318] font-semibold"
                         : "text-[#8b8f98]"
                   }`}
                 >
@@ -317,7 +317,7 @@ export default function Lives() {
                   </span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-white truncate">{live.title}</p>
+                  <p className="text-sm font-semibold text-[#111318] truncate">{live.title}</p>
                   <p className="text-xs text-[#8b8f98]">
                     {live.scheduledAt ? format(new Date(live.scheduledAt), "a h:mm", { locale: ko }) : "시간 미정"}
                     {" · "}신청자 {live.registrationCount}명
@@ -339,7 +339,7 @@ export default function Lives() {
       {/* ── Live Now ─────────────────────────────── */}
       {activeLives && activeLives.length > 0 && (
         <div className="space-y-4">
-          <h2 className="text-lg font-bold text-white flex items-center gap-2">
+          <h2 className="text-lg font-bold text-[#111318] flex items-center gap-2">
             <span className="h-2.5 w-2.5 rounded-full bg-red-500 animate-pulse" />
             지금 라이브 중
           </h2>
@@ -351,13 +351,13 @@ export default function Lives() {
                   <span className="text-xs font-bold text-red-400 uppercase tracking-wide">LIVE NOW</span>
                   <span className="text-xs text-[#a0a4ab]">{live.registrationCount}명 참석</span>
                 </div>
-                <h3 className="font-bold text-white hover:text-[#CC9965] transition-colors mb-1">{live.title}</h3>
+                <h3 className="font-bold text-[#111318] hover:text-[#CC9965] transition-colors mb-1">{live.title}</h3>
                 <p className="text-sm text-[#8b8f98] line-clamp-2 mb-3">{live.description}</p>
               </div>
               <div className="flex gap-2 pt-3 border-t border-[#eef0f3]">
                 {live.youtubeUrl && (
                   <a href={live.youtubeUrl} target="_blank" rel="noopener noreferrer"
-                    className="flex-1 flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white text-xs font-bold py-2.5 rounded-lg transition-colors">
+                    className="flex-1 flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-[#111318] text-xs font-bold py-2.5 rounded-lg transition-colors">
                     <PlayCircle className="h-3.5 w-3.5" /> 라이브 입장하기
                   </a>
                 )}
@@ -395,7 +395,7 @@ export default function Lives() {
                 </div>
               ) : (
                 <div className="h-44 w-full bg-black/20 flex items-center justify-center">
-                  <Video className="h-10 w-10 text-white/20" />
+                  <Video className="h-10 w-10 text-[#d1d5db]" />
                 </div>
               )}
               <div className="p-5 flex flex-col flex-1">
@@ -403,7 +403,7 @@ export default function Lives() {
                   <Calendar className="h-3.5 w-3.5" />
                   <span>{formatDate(live.scheduledAt)}</span>
                 </div>
-                <h3 className="font-bold text-white leading-snug line-clamp-2 mb-2">{live.title}</h3>
+                <h3 className="font-bold text-[#111318] leading-snug line-clamp-2 mb-2">{live.title}</h3>
                 <p className="text-sm text-[#8b8f98] line-clamp-3 flex-1 mb-4">{live.description || "설명이 없습니다."}</p>
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-1.5 text-xs text-[#a0a4ab]">
@@ -426,7 +426,7 @@ export default function Lives() {
       ) : (
         <div className="glass-card py-20 text-center">
           <div className="w-14 h-14 bg-[#f7f8fa] rounded-2xl border border-[#e5e7eb] flex items-center justify-center mx-auto mb-4">
-            <Calendar className="h-6 w-6 text-white/20" />
+            <Calendar className="h-6 w-6 text-[#d1d5db]" />
           </div>
           <p className="font-semibold text-[#484d57] mb-1">예정된 라이브가 없습니다</p>
           <p className="text-sm text-[#a0a4ab]">새 라이브 일정이 등록되면 이 곳에 표시됩니다.</p>
@@ -680,7 +680,7 @@ export default function Lives() {
                   <Button type="button" variant="outline" className="rounded-xl" onClick={() => handleOpenChange(false)}>취소</Button>
                   <Button
                     type="submit"
-                    className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold"
+                    className="bg-blue-600 hover:bg-blue-700 text-[#111318] rounded-xl font-semibold"
                     disabled={createRegistration.isPending}
                     data-testid="btn-submit-registration"
                   >

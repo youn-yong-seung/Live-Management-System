@@ -21,7 +21,7 @@ export default function Login() {
           <div className="text-xs font-semibold text-[#8b8f98] border border-[#e5e7eb] rounded px-2 py-0.5 inline-block">클래스</div>
         </div>
 
-        <h1 className="text-xl sm:text-2xl font-bold text-white text-center mb-2">로그인 / 회원가입</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-[#111318] text-center mb-2">로그인 / 회원가입</h1>
         <p className="text-sm text-[#8b8f98] text-center mb-8 leading-relaxed">
           한 번의 로그인으로 라이브, 자료실, 커뮤니티까지 모두 이용하세요.
         </p>

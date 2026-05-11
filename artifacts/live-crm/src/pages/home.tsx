@@ -17,7 +17,7 @@ const FREE_RESOURCES = [
     title: "N플레이스 자동 리뷰 답글",
     description: "자영업자 전용 AI 리뷰 자동 답글 프로그램",
     icon: Zap,
-    color: "text-emerald-400",
+    color: "text-emerald-600",
     url: "https://www.yunjadong.com/shop_view?idx=127",
     badge: "무료",
   },
@@ -105,7 +105,7 @@ export default function Home() {
             <Sparkles className="h-4 w-4" />
             무료 라이브 특강
           </div>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white leading-tight mb-4" style={{ textShadow: "0 2px 20px rgba(0,0,0,0.3)" }}>
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#111318] leading-tight mb-4" style={{ textShadow: "0 2px 20px rgba(0,0,0,0.3)" }}>
             AI와 자동화로<br />일하는 방식을 바꾸세요
           </h1>
           <p className="text-[#484d57] text-sm sm:text-base mb-8 max-w-lg leading-relaxed">
@@ -135,7 +135,7 @@ export default function Home() {
       {/* ── Live Now ─────────────────────────────────── */}
       {activeLives && activeLives.length > 0 && (
         <div>
-          <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+          <h2 className="text-lg font-bold text-[#111318] mb-4 flex items-center gap-2">
             <span className="h-2.5 w-2.5 rounded-full bg-red-500 animate-pulse" />
             지금 라이브 중
           </h2>
@@ -148,13 +148,13 @@ export default function Home() {
                     <span className="text-xs font-bold text-red-400 uppercase tracking-wide">LIVE NOW</span>
                     <span className="text-xs text-[#a0a4ab]">{live.registrationCount}명 참석</span>
                   </div>
-                  <h3 className="font-bold text-white mb-1 line-clamp-1 hover:text-[#CC9965] transition-colors">{live.title}</h3>
+                  <h3 className="font-bold text-[#111318] mb-1 line-clamp-1 hover:text-[#CC9965] transition-colors">{live.title}</h3>
                   <p className="text-sm text-[#8b8f98] line-clamp-2 mb-3">{live.description}</p>
                 </div>
                 <div className="flex gap-2 pt-3 border-t border-[#eef0f3]">
                   {live.youtubeUrl && (
                     <a href={live.youtubeUrl} target="_blank" rel="noopener noreferrer"
-                      className="flex-1 flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white text-xs font-bold py-2.5 rounded-lg transition-colors"
+                      className="flex-1 flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-[#111318] text-xs font-bold py-2.5 rounded-lg transition-colors"
                       onClick={(e) => e.stopPropagation()}>
                       <PlayCircle className="h-3.5 w-3.5" /> 라이브 입장하기
                     </a>
@@ -175,7 +175,7 @@ export default function Home() {
       {scheduledLives && scheduledLives.length > 0 && (
         <div>
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-bold text-white">예정된 라이브</h2>
+            <h2 className="text-lg font-bold text-[#111318]">예정된 라이브</h2>
             <Link href="/lives">
               <span className="text-sm text-[#CC9965] hover:text-[#d4a570] font-medium flex items-center gap-1 cursor-pointer">
                 전체 보기 <ArrowRight className="h-3.5 w-3.5" />
@@ -193,7 +193,7 @@ export default function Home() {
                   <span className="h-2 w-2 rounded-full bg-[#CC9965] animate-pulse" />
                   <span className="text-xs font-bold text-[#CC9965] uppercase tracking-wide">UPCOMING</span>
                 </div>
-                <h3 className="font-bold text-white mb-1 line-clamp-1">{live.title}</h3>
+                <h3 className="font-bold text-[#111318] mb-1 line-clamp-1">{live.title}</h3>
                 <p className="text-sm text-[#8b8f98] line-clamp-1 mb-3">{live.description}</p>
                 <span className="text-xs text-[#CC9965]/80 font-medium">{formatDate(live.scheduledAt)}</span>
               </div>
@@ -205,7 +205,7 @@ export default function Home() {
       {/* ── Free Resources ────────────────────────────── */}
       <div>
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-bold text-white">무료 자료 나눔</h2>
+          <h2 className="text-lg font-bold text-[#111318]">무료 자료 나눔</h2>
           <Link href="/resources">
             <span className="text-sm text-[#CC9965] hover:text-[#d4a570] font-medium flex items-center gap-1 cursor-pointer">
               전체 보기 <ArrowRight className="h-3.5 w-3.5" />
@@ -222,12 +222,12 @@ export default function Home() {
                     <res.icon className={`h-5 w-5 ${res.color}`} />
                   </div>
                   {(res as any).badge && (
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 border border-emerald-500/30">
                       {(res as any).badge}
                     </span>
                   )}
                 </div>
-                <h3 className="font-bold text-white text-sm mb-1 group-hover:text-[#CC9965] transition-colors">{res.title}</h3>
+                <h3 className="font-bold text-[#111318] text-sm mb-1 group-hover:text-[#CC9965] transition-colors">{res.title}</h3>
                 <p className="text-xs text-[#8b8f98]">{res.description}</p>
               </div>
             );
@@ -246,7 +246,7 @@ export default function Home() {
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
               <Star className="h-5 w-5 text-[#CC9965]" />
-              <h2 className="text-lg font-bold text-white">추천 다시보기</h2>
+              <h2 className="text-lg font-bold text-[#111318]">추천 다시보기</h2>
             </div>
             <Link href="/replays">
               <span className="text-sm text-[#CC9965] hover:text-[#d4a570] font-medium flex items-center gap-1 cursor-pointer">
@@ -268,7 +268,7 @@ export default function Home() {
                       <img src={thumb} alt={replay.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 opacity-80 group-hover:opacity-100" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
-                        <PlayCircle className="h-8 w-8 text-white/20" />
+                        <PlayCircle className="h-8 w-8 text-[#d1d5db]" />
                       </div>
                     )}
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -278,7 +278,7 @@ export default function Home() {
                     </div>
                   </div>
                   <div className="p-4">
-                    <h3 className="font-bold text-white text-sm leading-snug line-clamp-2 mb-2">{replay.title}</h3>
+                    <h3 className="font-bold text-[#111318] text-sm leading-snug line-clamp-2 mb-2">{replay.title}</h3>
                     {((replay as any).tags as string[] | null)?.length ? (
                       <div className="flex flex-wrap gap-1">
                         {((replay as any).tags as string[]).slice(0, 3).map((tag) => (
@@ -312,11 +312,11 @@ export default function Home() {
             </div>
           </div>
           <div className="sm:w-[55%] p-6 sm:p-8 flex flex-col justify-center">
-            <div className="inline-flex items-center gap-2 bg-rose-500/15 rounded-full px-3 py-1 text-xs font-bold text-rose-400 border border-rose-500/20 mb-4 w-fit">
+            <div className="inline-flex items-center gap-2 bg-rose-500/15 rounded-full px-3 py-1 text-xs font-bold text-rose-600 border border-rose-500/20 mb-4 w-fit">
               <Heart className="h-3.5 w-3.5 fill-rose-400" />
               기부 특별 강의
             </div>
-            <h3 className="text-lg sm:text-xl font-bold text-white mb-2">
+            <h3 className="text-lg sm:text-xl font-bold text-[#111318] mb-2">
               보육원에 1,400만원 기부 강의
             </h3>
             <p className="text-sm text-[#8b8f98] mb-4 leading-relaxed">
@@ -345,7 +345,7 @@ export default function Home() {
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center bg-[#f7f8fa] border border-[#e5e7eb]`}>
                   <section.icon className={`h-4 w-4 ${section.color}`} />
                 </div>
-                <h2 className="text-lg font-bold text-white">{section.label}</h2>
+                <h2 className="text-lg font-bold text-[#111318]">{section.label}</h2>
               </div>
               <Link href="/replays">
                 <span className="text-sm text-[#CC9965] hover:text-[#d4a570] font-medium flex items-center gap-1 cursor-pointer">
@@ -367,12 +367,12 @@ export default function Home() {
                         <img src={thumb} alt={replay.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 opacity-80 group-hover:opacity-100" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                          <PlayCircle className="h-8 w-8 text-white/20" />
+                          <PlayCircle className="h-8 w-8 text-[#d1d5db]" />
                         </div>
                       )}
                     </div>
                     <div className="p-4">
-                      <h3 className="font-bold text-white text-sm leading-snug line-clamp-2">{replay.title}</h3>
+                      <h3 className="font-bold text-[#111318] text-sm leading-snug line-clamp-2">{replay.title}</h3>
                     </div>
                   </div>
                 );

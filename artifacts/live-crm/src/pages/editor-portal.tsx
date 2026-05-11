@@ -102,7 +102,7 @@ function LoginScreen({ onLogin }: { onLogin: (editor: EditorInfo) => void }) {
             <Input
               value={phone} onChange={(e) => setPhone(e.target.value)}
               placeholder="01012345678"
-              className="mt-1 bg-[#f7f8fa] border-[#e5e7eb] text-white placeholder:text-[#a0a4ab]"
+              className="mt-1 bg-[#f7f8fa] border-[#e5e7eb] text-[#111318] placeholder:text-[#a0a4ab]"
             />
           </div>
           <div>
@@ -110,7 +110,7 @@ function LoginScreen({ onLogin }: { onLogin: (editor: EditorInfo) => void }) {
             <Input
               type="password" value={password} onChange={(e) => setPassword(e.target.value)}
               placeholder="비밀번호"
-              className="mt-1 bg-[#f7f8fa] border-[#e5e7eb] text-white placeholder:text-[#a0a4ab]"
+              className="mt-1 bg-[#f7f8fa] border-[#e5e7eb] text-[#111318] placeholder:text-[#a0a4ab]"
               onKeyDown={(e) => e.key === "Enter" && handleLogin()}
             />
           </div>
@@ -137,7 +137,7 @@ function ProjectCard({ project, onAction }: {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div className="flex-1 min-w-0">
-          <h3 className="font-bold text-white truncate">{project.title}</h3>
+          <h3 className="font-bold text-[#111318] truncate">{project.title}</h3>
           {project.description && <p className="text-xs text-[#8b8f98] mt-1 line-clamp-2">{project.description}</p>}
         </div>
         <span className={`flex-shrink-0 ml-3 text-[11px] font-bold px-2.5 py-1 rounded-full ${st.color} ${st.bg}`}>
@@ -184,7 +184,7 @@ function ProjectCard({ project, onAction }: {
           </>
         )}
         {(project.status === "accepted" || project.status === "in_progress" || project.status === "revision") && (
-          <Button size="sm" className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg" onClick={() => onAction("submit", project)}>
+          <Button size="sm" className="bg-emerald-600 hover:bg-emerald-500 text-[#111318] font-bold text-xs rounded-lg" onClick={() => onAction("submit", project)}>
             <Upload className="h-3.5 w-3.5 mr-1" /> 편집 완료 제출
           </Button>
         )}
@@ -327,7 +327,7 @@ export default function EditorPortal() {
           </div>
           <div className="flex items-center gap-3">
             <span className="text-sm text-[#484d57]">{editor.name}님</span>
-            <Button size="sm" variant="ghost" className="text-[#8b8f98] hover:text-white" onClick={logout}>
+            <Button size="sm" variant="ghost" className="text-[#8b8f98] hover:text-[#111318]" onClick={logout}>
               <LogOut className="h-4 w-4" />
             </Button>
           </div>
@@ -337,7 +337,7 @@ export default function EditorPortal() {
       <main className="max-w-3xl mx-auto px-4 py-8 space-y-8">
         {/* Active Projects */}
         <div>
-          <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+          <h2 className="text-lg font-bold text-[#111318] mb-4 flex items-center gap-2">
             <Film className="h-5 w-5 text-[#CC9965]" />
             진행 중인 프로젝트 <span className="text-sm text-[#a0a4ab] font-normal">({activeProjects.length})</span>
           </h2>
@@ -358,7 +358,7 @@ export default function EditorPortal() {
         {/* Completed */}
         {completedProjects.length > 0 && (
           <div>
-            <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+            <h2 className="text-lg font-bold text-[#111318] mb-4 flex items-center gap-2">
               <CheckCircle className="h-5 w-5 text-emerald-400" />
               완료된 프로젝트 <span className="text-sm text-[#a0a4ab] font-normal">({completedProjects.length})</span>
             </h2>
@@ -377,7 +377,7 @@ export default function EditorPortal() {
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <p className="text-[#8b8f98] text-xs">총 정산 예정</p>
-                <p className="text-white font-bold">{formatKRW(projects.reduce((s, p) => s + (p.payAmount || 0), 0))}</p>
+                <p className="text-[#111318] font-bold">{formatKRW(projects.reduce((s, p) => s + (p.payAmount || 0), 0))}</p>
               </div>
               <div>
                 <p className="text-[#8b8f98] text-xs">정산 완료</p>
@@ -390,8 +390,8 @@ export default function EditorPortal() {
 
       {/* ── Date Proposal Modal ────────────────── */}
       <Dialog open={!!dateModal} onOpenChange={() => setDateModal(null)}>
-        <DialogContent className="sm:max-w-[400px] bg-[#0a1515] border-[#e5e7eb] text-white">
-          <DialogHeader><DialogTitle className="text-white">날짜 변경 요청</DialogTitle></DialogHeader>
+        <DialogContent className="sm:max-w-[400px] bg-[#0a1515] border-[#e5e7eb] text-[#111318]">
+          <DialogHeader><DialogTitle className="text-[#111318]">날짜 변경 요청</DialogTitle></DialogHeader>
           <div className="space-y-4 py-2">
             <div>
               <Label className="text-[#484d57]">원래 마감일</Label>
@@ -400,13 +400,13 @@ export default function EditorPortal() {
             <div>
               <Label className="text-[#484d57]">희망 날짜 *</Label>
               <Input type="datetime-local" value={proposedDate} onChange={(e) => setProposedDate(e.target.value)}
-                className="mt-1 bg-[#f7f8fa] border-[#e5e7eb] text-white" />
+                className="mt-1 bg-[#f7f8fa] border-[#e5e7eb] text-[#111318]" />
             </div>
             <div>
               <Label className="text-[#484d57]">사유 (선택)</Label>
               <Textarea value={dateMessage} onChange={(e) => setDateMessage(e.target.value)}
                 placeholder="날짜 변경 사유를 입력해주세요"
-                className="mt-1 bg-[#f7f8fa] border-[#e5e7eb] text-white placeholder:text-[#a0a4ab]" rows={2} />
+                className="mt-1 bg-[#f7f8fa] border-[#e5e7eb] text-[#111318] placeholder:text-[#a0a4ab]" rows={2} />
             </div>
           </div>
           <DialogFooter>
@@ -418,33 +418,33 @@ export default function EditorPortal() {
 
       {/* ── Submit Modal ───────────────────────── */}
       <Dialog open={!!submitModal} onOpenChange={() => setSubmitModal(null)}>
-        <DialogContent className="sm:max-w-[400px] bg-[#0a1515] border-[#e5e7eb] text-white">
-          <DialogHeader><DialogTitle className="text-white">편집 완료 제출</DialogTitle></DialogHeader>
+        <DialogContent className="sm:max-w-[400px] bg-[#0a1515] border-[#e5e7eb] text-[#111318]">
+          <DialogHeader><DialogTitle className="text-[#111318]">편집 완료 제출</DialogTitle></DialogHeader>
           <div className="space-y-4 py-2">
             <div>
               <Label className="text-[#484d57]">구글 드라이브 링크 *</Label>
               <Input value={driveLink} onChange={(e) => setDriveLink(e.target.value)}
                 placeholder="https://drive.google.com/..."
-                className="mt-1 bg-[#f7f8fa] border-[#e5e7eb] text-white placeholder:text-[#a0a4ab]" />
+                className="mt-1 bg-[#f7f8fa] border-[#e5e7eb] text-[#111318] placeholder:text-[#a0a4ab]" />
             </div>
             <div>
               <Label className="text-[#484d57]">썸네일 링크 (선택)</Label>
               <Input value={thumbnailLink} onChange={(e) => setThumbnailLink(e.target.value)}
                 placeholder="https://drive.google.com/..."
-                className="mt-1 bg-[#f7f8fa] border-[#e5e7eb] text-white placeholder:text-[#a0a4ab]" />
+                className="mt-1 bg-[#f7f8fa] border-[#e5e7eb] text-[#111318] placeholder:text-[#a0a4ab]" />
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setSubmitModal(null)} className="border-[#e5e7eb] text-[#484d57]">취소</Button>
-            <Button onClick={submitDriveLink} className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold">제출하기</Button>
+            <Button onClick={submitDriveLink} className="bg-emerald-600 hover:bg-emerald-500 text-[#111318] font-bold">제출하기</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* ── Messages Modal ─────────────────────── */}
       <Dialog open={!!msgModal} onOpenChange={() => setMsgModal(null)}>
-        <DialogContent className="sm:max-w-[480px] bg-[#0a1515] border-[#e5e7eb] text-white">
-          <DialogHeader><DialogTitle className="text-white">피드백 — {msgModal?.title}</DialogTitle></DialogHeader>
+        <DialogContent className="sm:max-w-[480px] bg-[#0a1515] border-[#e5e7eb] text-[#111318]">
+          <DialogHeader><DialogTitle className="text-[#111318]">피드백 — {msgModal?.title}</DialogTitle></DialogHeader>
           <div className="max-h-[300px] overflow-y-auto space-y-3 py-2">
             {messages.length === 0 ? (
               <p className="text-center text-[#a0a4ab] text-sm py-4">아직 메시지가 없습니다</p>
@@ -464,7 +464,7 @@ export default function EditorPortal() {
           <div className="flex gap-2 pt-2">
             <Input value={newMsg} onChange={(e) => setNewMsg(e.target.value)}
               placeholder="메시지를 입력하세요..."
-              className="bg-[#f7f8fa] border-[#e5e7eb] text-white placeholder:text-[#a0a4ab]"
+              className="bg-[#f7f8fa] border-[#e5e7eb] text-[#111318] placeholder:text-[#a0a4ab]"
               onKeyDown={(e) => e.key === "Enter" && sendMessage()} />
             <Button onClick={sendMessage} disabled={!newMsg.trim()} className="bg-[#CC9965] text-black">
               <Send className="h-4 w-4" />

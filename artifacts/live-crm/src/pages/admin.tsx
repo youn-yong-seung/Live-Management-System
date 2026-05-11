@@ -889,7 +889,7 @@ export default function Admin() {
             </div>
             <Button
               type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold h-11"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-[#111318] rounded-xl font-semibold h-11"
               disabled={isLoggingIn || !loginPwd}
             >
               {isLoggingIn ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
@@ -978,11 +978,11 @@ export default function Admin() {
                         onClick={() => handleNavClick(item.id, item.onSelect)}
                         className={`group w-full flex items-center gap-3 rounded-2xl border px-3 py-2.5 text-sm transition-all text-left ${
                           isActive
-                            ? "border-amber-500/20 bg-amber-500 text-white shadow-[0_16px_32px_-22px_rgba(204,153,101,0.7)] font-semibold"
+                            ? "border-amber-500/20 bg-amber-500 text-[#111318] shadow-[0_16px_32px_-22px_rgba(204,153,101,0.7)] font-semibold"
                             : "border-transparent text-gray-500 hover:border-amber-200/50 hover:bg-amber-50/60 hover:text-gray-900"
                         }`}
                       >
-                        <span className={`shrink-0 ${isActive ? "text-white" : "text-amber-600/90 group-hover:text-amber-700"}`}>
+                        <span className={`shrink-0 ${isActive ? "text-[#111318]" : "text-amber-600/90 group-hover:text-amber-700"}`}>
                           <Icon className="h-5 w-5" />
                         </span>
                         <span className="truncate">{item.label}</span>
@@ -1068,11 +1068,11 @@ export default function Admin() {
                         onClick={() => handleNavClick(item.id, item.onSelect)}
                         className={`group w-full flex items-center gap-3 rounded-2xl border px-3 py-2.5 text-sm transition-all text-left ${
                           isActive
-                            ? "border-amber-500/20 bg-amber-500 text-white shadow-[0_16px_32px_-22px_rgba(204,153,101,0.7)] font-semibold"
+                            ? "border-amber-500/20 bg-amber-500 text-[#111318] shadow-[0_16px_32px_-22px_rgba(204,153,101,0.7)] font-semibold"
                             : "border-transparent text-gray-500 hover:border-amber-200/50 hover:bg-amber-50/60 hover:text-gray-900"
                         }`}
                       >
-                        <span className={`shrink-0 ${isActive ? "text-white" : "text-amber-600/90 group-hover:text-amber-700"}`}>
+                        <span className={`shrink-0 ${isActive ? "text-[#111318]" : "text-amber-600/90 group-hover:text-amber-700"}`}>
                           <Icon className="h-5 w-5" />
                         </span>
                         <span className="truncate">{item.label}</span>
@@ -1169,7 +1169,7 @@ export default function Admin() {
             }}>
               <Youtube className="mr-2 h-4 w-4" />예정 라이브 불러오기
             </Button>
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold" onClick={() => handleOpenLiveModal()}>
+            <Button className="bg-blue-600 hover:bg-blue-700 text-[#111318] rounded-xl font-semibold" onClick={() => handleOpenLiveModal()}>
               <Plus className="mr-2 h-4 w-4" />라이브 생성
             </Button>
           </div>
@@ -1318,7 +1318,7 @@ export default function Admin() {
               </div>
             </div>
             <div className="flex flex-wrap gap-3 mt-5">
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold" onClick={saveConfig} disabled={isSavingConfig}>
+              <Button className="bg-blue-600 hover:bg-blue-700 text-[#111318] rounded-xl font-semibold" onClick={saveConfig} disabled={isSavingConfig}>
                 {isSavingConfig && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}저장
               </Button>
               <Button variant="outline" className="rounded-xl border-gray-200" onClick={testConnection} disabled={isTestingConn || !configForm.apiKey}>
@@ -1363,7 +1363,7 @@ export default function Admin() {
                 <Label className="text-sm font-medium text-gray-700">새 비밀번호 확인</Label>
                 <Input type="password" value={pwdForm.confirm} onChange={(e) => setPwdForm({ ...pwdForm, confirm: e.target.value })} placeholder="새 비밀번호 재입력" className="rounded-xl border-gray-200" />
               </div>
-              <Button type="submit" className="w-fit bg-gray-900 hover:bg-gray-700 text-white rounded-xl font-semibold" disabled={isChangingPwd || !pwdForm.current || !pwdForm.next || !pwdForm.confirm}>
+              <Button type="submit" className="w-fit bg-gray-900 hover:bg-gray-700 text-[#111318] rounded-xl font-semibold" disabled={isChangingPwd || !pwdForm.current || !pwdForm.next || !pwdForm.confirm}>
                 {isChangingPwd && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}비밀번호 변경
               </Button>
             </form>
@@ -1442,7 +1442,7 @@ export default function Admin() {
                 <Button
                   onClick={handleSaveAfterpartyConfig}
                   disabled={isSavingAfterparty}
-                  className="bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-semibold"
+                  className="bg-amber-600 hover:bg-amber-700 text-[#111318] rounded-xl font-semibold"
                 >
                   {isSavingAfterparty && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}저장
                 </Button>
@@ -1615,7 +1615,7 @@ export default function Admin() {
                     </div>
                   ))}
                 </div>
-                <Button className="bg-red-500 hover:bg-red-600 text-white rounded-xl font-semibold" onClick={saveYtStats} disabled={isSavingYt}>
+                <Button className="bg-red-500 hover:bg-red-600 text-[#111318] rounded-xl font-semibold" onClick={saveYtStats} disabled={isSavingYt}>
                   {isSavingYt ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Youtube className="mr-2 h-4 w-4" />}지표 저장
                 </Button>
               </>
@@ -1886,7 +1886,7 @@ export default function Admin() {
           </div>
           <DialogFooter>
             <Button variant="outline" className="rounded-xl border-gray-200" onClick={() => setIsLiveModalOpen(false)}>취소</Button>
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold" onClick={handleSaveLive} disabled={isSavingLive}>
+            <Button className="bg-blue-600 hover:bg-blue-700 text-[#111318] rounded-xl font-semibold" onClick={handleSaveLive} disabled={isSavingLive}>
               {isSavingLive && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}저장
             </Button>
           </DialogFooter>
@@ -2080,7 +2080,7 @@ export default function Admin() {
             )}
           </div>
           <DialogFooter className="flex-none pt-4 border-t border-gray-100 mt-4">
-            <Button className="bg-gray-900 hover:bg-gray-800 text-white rounded-xl" onClick={() => setIsRegistrationsModalOpen(false)}>닫기</Button>
+            <Button className="bg-gray-900 hover:bg-gray-800 text-[#111318] rounded-xl" onClick={() => setIsRegistrationsModalOpen(false)}>닫기</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -2106,7 +2106,7 @@ export default function Admin() {
                 <div className="flex gap-2">
                   {(["alimtalk", "sms"] as const).map((type) => (
                     <button key={type} onClick={() => setSendMsgType(type)}
-                      className={`flex-1 py-2 px-3 rounded-xl border text-sm font-semibold transition-colors ${sendMsgType === type ? "bg-blue-600 border-blue-600 text-white" : "border-gray-200 text-gray-500 hover:border-blue-300"}`}>
+                      className={`flex-1 py-2 px-3 rounded-xl border text-sm font-semibold transition-colors ${sendMsgType === type ? "bg-blue-600 border-blue-600 text-[#111318]" : "border-gray-200 text-gray-500 hover:border-blue-300"}`}>
                       {type === "alimtalk" ? "🔔 알림톡" : "💬 문자"}
                     </button>
                   ))}
@@ -2211,7 +2211,7 @@ export default function Admin() {
           </div>
           <DialogFooter>
             <Button variant="outline" className="rounded-xl border-gray-200" onClick={() => setSendModal({ live: null, open: false })}>취소</Button>
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold"
+            <Button className="bg-blue-600 hover:bg-blue-700 text-[#111318] rounded-xl font-semibold"
               onClick={handleSendNow}
               disabled={isSending || !solapiConfig?.configured || (sendMsgType === "alimtalk" && !sendTemplateId) || (sendMsgType === "sms" && !sendMsgBody.trim())}>
               {isSending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}발송하기
@@ -2276,7 +2276,7 @@ export default function Admin() {
                   <button
                     key={type}
                     onClick={() => setTriggerConfig((s) => ({ ...s, messageType: type }))}
-                    className={`flex-1 py-1.5 text-xs rounded-lg border font-semibold transition-colors ${triggerConfig.messageType === type ? "bg-green-600 border-green-600 text-white" : "border-gray-200 text-gray-500 hover:border-green-300"}`}
+                    className={`flex-1 py-1.5 text-xs rounded-lg border font-semibold transition-colors ${triggerConfig.messageType === type ? "bg-green-600 border-green-600 text-[#111318]" : "border-gray-200 text-gray-500 hover:border-green-300"}`}
                   >
                     {type === "alimtalk" ? "🔔 알림톡" : "💬 문자"}
                   </button>
@@ -2468,7 +2468,7 @@ export default function Admin() {
                               <button
                                 key={d}
                                 onClick={() => setOffsetEdit((s) => ({ ...s, dir: d }))}
-                                className={`px-2 py-0.5 text-xs font-semibold transition-colors ${offsetEdit.dir === d ? "bg-blue-600 text-white" : "bg-white text-gray-500 hover:bg-gray-50"}`}
+                                className={`px-2 py-0.5 text-xs font-semibold transition-colors ${offsetEdit.dir === d ? "bg-blue-600 text-[#111318]" : "bg-white text-gray-500 hover:bg-gray-50"}`}
                               >
                                 {d === "before" ? "전" : "후"}
                               </button>
@@ -2545,7 +2545,7 @@ export default function Admin() {
                       <button
                         key={type}
                         onClick={() => updateRule(idx, { messageType: type })}
-                        className={`flex-1 py-1.5 text-xs rounded-lg border font-semibold transition-colors ${rule.messageType === type ? "bg-blue-600 border-blue-600 text-white" : "border-gray-200 text-gray-500 hover:border-blue-300"}`}
+                        className={`flex-1 py-1.5 text-xs rounded-lg border font-semibold transition-colors ${rule.messageType === type ? "bg-blue-600 border-blue-600 text-[#111318]" : "border-gray-200 text-gray-500 hover:border-blue-300"}`}
                       >
                         {type === "alimtalk" ? "🔔 알림톡" : "💬 문자"}
                       </button>
@@ -2764,7 +2764,7 @@ export default function Admin() {
 
           <DialogFooter className="flex-none border-t border-gray-100 pt-4">
             <Button variant="outline" className="rounded-xl border-gray-200" onClick={() => setRulesModal({ live: null, open: false })}>취소</Button>
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold" onClick={saveRules} disabled={isSavingRules}>
+            <Button className="bg-blue-600 hover:bg-blue-700 text-[#111318] rounded-xl font-semibold" onClick={saveRules} disabled={isSavingRules}>
               {isSavingRules && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}저장
             </Button>
           </DialogFooter>
@@ -2906,7 +2906,7 @@ export default function Admin() {
             )}
           </div>
           <DialogFooter className="flex-none pt-4 border-t border-gray-100 mt-4">
-            <Button className="bg-gray-900 hover:bg-gray-800 text-white rounded-xl" onClick={() => setAnalyticsModal((m) => ({ ...m, open: false }))}>닫기</Button>
+            <Button className="bg-gray-900 hover:bg-gray-800 text-[#111318] rounded-xl" onClick={() => setAnalyticsModal((m) => ({ ...m, open: false }))}>닫기</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

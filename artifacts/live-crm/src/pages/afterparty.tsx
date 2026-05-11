@@ -137,7 +137,7 @@ export default function Afterparty() {
   const hasKakao = data.kakao.url.trim() !== "";
 
   return (
-    <div className="min-h-screen bg-white text-white">
+    <div className="min-h-screen bg-white text-[#111318]">
       {/* ── Decorative ambient blobs ──────────────────── */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
         <div className="absolute top-[-10%] left-[-10%] w-[40rem] h-[40rem] rounded-full bg-[#005051]/20 blur-[120px]" />
@@ -156,8 +156,8 @@ export default function Afterparty() {
             <span className="text-[#CC9965]"> 정말 고맙습니다 🙏</span>
           </h1>
           <p className="text-[#484d57] text-sm sm:text-base leading-relaxed max-w-xl mx-auto">
-            아래에서 <span className="text-white font-semibold">오늘 라이브 다시보기</span>와{" "}
-            <span className="text-white font-semibold">무료 자료</span>를 받아가시고,<br className="hidden sm:block" />
+            아래에서 <span className="text-[#111318] font-semibold">오늘 라이브 다시보기</span>와{" "}
+            <span className="text-[#111318] font-semibold">무료 자료</span>를 받아가시고,<br className="hidden sm:block" />
             매주 무료 특강이 열리는 카톡방에도 꼭 입장해보세요.
           </p>
         </header>
@@ -173,7 +173,7 @@ export default function Afterparty() {
                 <Calendar className="h-3 w-3" />
                 {data.live.scheduledAt ? formatDate(data.live.scheduledAt) : "오늘의 라이브"}
               </p>
-              <h2 className="text-lg sm:text-xl font-bold text-white leading-tight">{data.live.title}</h2>
+              <h2 className="text-lg sm:text-xl font-bold text-[#111318] leading-tight">{data.live.title}</h2>
             </div>
           </div>
           {data.live.description && (
@@ -227,7 +227,7 @@ export default function Afterparty() {
                       <div className="w-20 h-20 rounded-full bg-[#CC9965] flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform gold-glow">
                         <PlayCircle className="h-10 w-10 text-black fill-black" />
                       </div>
-                      <p className="mt-3 text-white font-bold text-sm sm:text-base drop-shadow-lg">▶ 다시보기 재생</p>
+                      <p className="mt-3 text-[#111318] font-bold text-sm sm:text-base drop-shadow-lg">▶ 다시보기 재생</p>
                     </div>
                   </button>
                 )
@@ -274,7 +274,7 @@ export default function Afterparty() {
                     <FileText className="h-4.5 w-4.5 text-[#CC9965]" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-white truncate">{m.title}</p>
+                    <p className="text-sm font-semibold text-[#111318] truncate">{m.title}</p>
                     <p className="text-xs text-[#8b8f98] mt-0.5 flex items-center gap-1">
                       <Download className="h-3 w-3" />
                       받기
@@ -309,7 +309,7 @@ export default function Afterparty() {
                     <ShoppingBag className="h-4.5 w-4.5 text-[#484d57] group-hover:text-[#CC9965] transition-colors" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-white truncate">{p.title}</p>
+                    <p className="text-sm font-semibold text-[#111318] truncate">{p.title}</p>
                     <p className="text-xs text-[#8b8f98] mt-0.5 flex items-center gap-1">
                       <ExternalLink className="h-3 w-3" />
                       자세히 보기
@@ -332,10 +332,10 @@ export default function Afterparty() {
 
             <div className="glass-card-gold p-6 sm:p-8 space-y-5">
               <div className="space-y-2">
-                <h2 className="text-xl sm:text-2xl font-black leading-tight text-white">
+                <h2 className="text-xl sm:text-2xl font-black leading-tight text-[#111318]">
                   {data.kakao.headline}
                 </h2>
-                <p className="text-sm sm:text-base text-white/75 leading-relaxed whitespace-pre-line">
+                <p className="text-sm sm:text-base text-[#484d57] leading-relaxed whitespace-pre-line">
                   {data.kakao.body}
                 </p>
               </div>
