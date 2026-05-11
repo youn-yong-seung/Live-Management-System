@@ -51,6 +51,10 @@ Thumbs.db
 # DB 백업 (PII 포함)
 artifacts/db-backup/
 
+# 작업용 자료 파일 (개인정보·로컬 데이터)
+권오서라이브.jpg
+라이브66_신청자목록_*.md
+
 # Environment
 .env
 .env.local
