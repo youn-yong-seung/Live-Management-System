@@ -1,4 +1,5 @@
-import { ExternalLink, BookOpen, Download, GraduationCap, FileText, Crown, Zap, MessageCircle } from "lucide-react";
+import { ExternalLink, BookOpen, Download, GraduationCap, FileText, Crown, Zap, MessageCircle, ArrowRight } from "lucide-react";
+import { Link } from "wouter";
 
 const gcHover = "glass-card hover:bg-white/[0.06] hover:-translate-y-1 transition-all duration-300";
 
@@ -8,6 +9,7 @@ interface Resource {
   url: string;
   badge?: string;
   badgeColor?: string;
+  internal?: boolean;
 }
 
 interface ResourceSection {
@@ -100,11 +102,19 @@ const SECTIONS: ResourceSection[] = [
     ],
   },
   {
-    title: "무료 전자책",
-    description: "무료로 다운받을 수 있는 전자책 & 자료",
+    title: "무료 전자책 & PDF 가이드",
+    description: "무료로 다운받을 수 있는 전자책 & PDF 가이드",
     icon: FileText,
     iconColor: "text-emerald-400",
     items: [
+      {
+        title: "나노바나나 vs 덕테이프 프롬프트 가이드",
+        description: "AI 이미지/영상 생성, 어떤 모델을 언제 쓸까 — 실전 프롬프트와 케이스별 의사결정 기준 PDF",
+        url: "/resources/nano-banana-vs-duct-tape",
+        badge: "NEW",
+        badgeColor: "bg-rose-500",
+        internal: true,
+      },
       {
         title: "노션 왕초보를 위한 무료 전자책",
         description: "노션의 기초부터 차근차근 알려주는 전자책",
@@ -137,26 +147,38 @@ export default function Resources() {
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            {section.items.map((item) => (
-              <a
-                key={item.url}
-                href={item.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`${gcHover} p-5 group block`}
-              >
-                <div className="flex items-start justify-between mb-3">
-                  {item.badge && (
-                    <span className={`${item.badgeColor} text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full`}>
-                      {item.badge}
-                    </span>
-                  )}
-                  <ExternalLink className="h-4 w-4 text-white/20 group-hover:text-[#CC9965] transition-colors flex-shrink-0" />
+            {section.items.map((item) => {
+              const cardInner = (
+                <div className={`${gcHover} p-5 group block h-full`}>
+                  <div className="flex items-start justify-between mb-3">
+                    {item.badge && (
+                      <span className={`${item.badgeColor} text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full`}>
+                        {item.badge}
+                      </span>
+                    )}
+                    {item.internal ? (
+                      <ArrowRight className="h-4 w-4 text-white/20 group-hover:text-[#CC9965] transition-colors flex-shrink-0" />
+                    ) : (
+                      <ExternalLink className="h-4 w-4 text-white/20 group-hover:text-[#CC9965] transition-colors flex-shrink-0" />
+                    )}
+                  </div>
+                  <h3 className="font-bold text-white text-sm mb-1 group-hover:text-[#CC9965] transition-colors">{item.title}</h3>
+                  <p className="text-xs text-white/40 leading-relaxed">{item.description}</p>
                 </div>
-                <h3 className="font-bold text-white text-sm mb-1 group-hover:text-[#CC9965] transition-colors">{item.title}</h3>
-                <p className="text-xs text-white/40 leading-relaxed">{item.description}</p>
-              </a>
-            ))}
+              );
+              return item.internal ? (
+                <Link key={item.url} href={item.url}>{cardInner}</Link>
+              ) : (
+                <a
+                  key={item.url}
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {cardInner}
+                </a>
+              );
+            })}
           </div>
         </div>
       ))}
