@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useGetLives, getGetLivesQueryKey, useCreateRegistration, getGetDashboardSummaryQueryKey } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -7,15 +7,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate } from "@/lib/date-utils";
-import { Video, Calendar, Users, ChevronLeft, ChevronRight, PlayCircle, Star, MessageSquare } from "lucide-react";
+import { Video, Calendar, Users, PlayCircle, Star, MessageSquare } from "lucide-react";
 import { useLocation } from "wouter";
 import { ReplayModal } from "@/components/replay-modal";
 import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
-import {
-  startOfMonth, endOfMonth, startOfWeek, endOfWeek,
-  eachDayOfInterval, isSameMonth, isSameDay, format, addMonths, subMonths, isToday,
-} from "date-fns";
+import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -205,27 +202,29 @@ export default function Lives() {
     if (!open) { setSelectedLiveId(null); form.reset(); }
   };
 
-  /* ── Calendar state ──────────────────────── */
-  const [calMonth, setCalMonth] = useState(new Date());
+  /* ── 직관적 날짜 라벨 ──────────────────── */
+  function relativeDateLabel(iso: string | null | undefined): { label: string; tone: "today" | "soon" | "thisweek" | "nextweek" | "later" | "past" } {
+    if (!iso) return { label: "일정 미정", tone: "later" };
+    const d = new Date(iso);
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const target = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    const diffDays = Math.round((target.getTime() - startOfToday.getTime()) / 86400000);
+    const weekdays = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"];
+    const wd = weekdays[d.getDay()];
 
-  const calDays = useMemo(() => {
-    const monthStart = startOfMonth(calMonth);
-    const monthEnd = endOfMonth(calMonth);
-    const start = startOfWeek(monthStart, { weekStartsOn: 0 });
-    const end = endOfWeek(monthEnd, { weekStartsOn: 0 });
-    return eachDayOfInterval({ start, end });
-  }, [calMonth]);
+    if (diffDays < 0) return { label: "지난 라이브", tone: "past" };
+    if (diffDays === 0) return { label: "오늘", tone: "today" };
+    if (diffDays === 1) return { label: "내일", tone: "today" };
+    if (diffDays === 2) return { label: "모레", tone: "today" };
 
-  const liveDates = useMemo(() => {
-    const map = new Map<string, NonNullable<typeof lives>[number][]>();
-    (lives ?? []).forEach((live) => {
-      if (!live.scheduledAt) return;
-      const key = format(new Date(live.scheduledAt), "yyyy-MM-dd");
-      if (!map.has(key)) map.set(key, []);
-      map.get(key)!.push(live);
-    });
-    return map;
-  }, [lives]);
+    const todayDow = now.getDay(); // 0=일
+    const daysToEndOfThisWeek = 6 - todayDow;
+    if (diffDays <= daysToEndOfThisWeek) return { label: `이번 주 ${wd}`, tone: "thisweek" };
+    if (diffDays <= daysToEndOfThisWeek + 7) return { label: `다음 주 ${wd}`, tone: "nextweek" };
+    if (diffDays <= 21) return { label: `${Math.ceil(diffDays / 7)}주 후`, tone: "later" };
+    return { label: format(d, "M월 d일 (E)", { locale: ko }), tone: "later" };
+  }
 
   return (
     <div className="space-y-10">
@@ -304,8 +303,24 @@ export default function Lives() {
                 );
               })()}
               <div className="p-5 flex flex-col flex-1">
-                <div className="flex items-center gap-1.5 text-xs text-[#6366F1] font-medium mb-2">
-                  <Calendar className="h-3.5 w-3.5" />
+                {(() => {
+                  const rel = relativeDateLabel(live.scheduledAt);
+                  const toneStyles: Record<typeof rel.tone, string> = {
+                    today: "bg-rose-50 text-rose-700 border-rose-200",
+                    soon: "bg-rose-50 text-rose-700 border-rose-200",
+                    thisweek: "bg-[#eef2ff] text-[#6366F1] border-[#c7d2fe]",
+                    nextweek: "bg-[#f7f8fa] text-[#484d57] border-[#e5e7eb]",
+                    later: "bg-[#f7f8fa] text-[#8b8f98] border-[#e5e7eb]",
+                    past: "bg-[#f7f8fa] text-[#a0a4ab] border-[#e5e7eb]",
+                  };
+                  return (
+                    <span className={`self-start inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full border mb-3 ${toneStyles[rel.tone]}`}>
+                      <Calendar className="h-3 w-3" />
+                      {rel.label}
+                    </span>
+                  );
+                })()}
+                <div className="flex items-center gap-1.5 text-xs text-[#8b8f98] mb-2">
                   <span>{formatDate(live.scheduledAt)}</span>
                 </div>
                 <h3 className="font-bold text-[#111318] leading-snug line-clamp-2 mb-2">{live.title}</h3>
@@ -315,7 +330,6 @@ export default function Lives() {
                     <Users className="h-3.5 w-3.5" />
                     <span>신청자 {live.registrationCount}명</span>
                   </div>
-                  <span className="inline-block bg-[#6366F1]/15 text-[#6366F1] text-xs font-semibold px-2.5 py-1 rounded-full border border-[#6366F1]/30">예정됨</span>
                 </div>
                 <Button
                   className="w-full bg-[#6366F1] hover:bg-[#818CF8] text-black font-bold rounded-xl gold-glow"
@@ -337,72 +351,6 @@ export default function Lives() {
           <p className="text-sm text-[#a0a4ab]">새 라이브 일정이 등록되면 이 곳에 표시됩니다.</p>
         </div>
       )}
-
-      {/* ── Monthly Calendar (맨 아래 보조 뷰) ──────────────────── */}
-      <div className="glass-card p-6">
-        <h3 className="text-sm font-semibold text-[#8b8f98] mb-3 uppercase tracking-wide">월간 캘린더</h3>
-        {/* Month nav */}
-        <div className="flex items-center justify-between mb-5">
-          <button
-            onClick={() => setCalMonth(subMonths(calMonth, 1))}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-[#8b8f98] hover:text-[#6366F1] hover:bg-[#f7f8fa] transition-colors"
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </button>
-          <h3 className="text-base font-bold text-[#111318]">
-            {format(calMonth, "yyyy년 M월", { locale: ko })}
-          </h3>
-          <button
-            onClick={() => setCalMonth(addMonths(calMonth, 1))}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-[#8b8f98] hover:text-[#6366F1] hover:bg-[#f7f8fa] transition-colors"
-          >
-            <ChevronRight className="h-5 w-5" />
-          </button>
-        </div>
-
-        {/* Weekday headers */}
-        <div className="grid grid-cols-7 mb-2">
-          {["일", "월", "화", "수", "목", "금", "토"].map((d) => (
-            <div key={d} className="text-center text-xs font-medium text-[#a0a4ab] py-1">{d}</div>
-          ))}
-        </div>
-
-        {/* Days */}
-        <div className="grid grid-cols-7">
-          {calDays.map((day) => {
-            const key = format(day, "yyyy-MM-dd");
-            const dayLives = liveDates.get(key);
-            const inMonth = isSameMonth(day, calMonth);
-            const today = isToday(day);
-
-            return (
-              <div
-                key={key}
-                className={`relative py-2 text-center ${!inMonth ? "opacity-20" : ""}`}
-              >
-                <span
-                  className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm transition-colors ${
-                    today
-                      ? "bg-[#6366F1]/20 text-[#6366F1] font-bold border border-[#6366F1]/30"
-                      : dayLives
-                        ? "text-[#111318] font-semibold"
-                        : "text-[#8b8f98]"
-                  }`}
-                >
-                  {format(day, "d")}
-                </span>
-                {dayLives && inMonth && (
-                  <div className="flex justify-center gap-0.5 mt-0.5">
-                    {dayLives.slice(0, 3).map((_, i) => (
-                      <span key={i} className="w-1.5 h-1.5 rounded-full bg-[#6366F1]" />
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
 
       {/* Registration Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={handleOpenChange}>
