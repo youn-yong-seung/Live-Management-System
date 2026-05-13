@@ -163,14 +163,14 @@ function NodeTooltip({ node, color }: { node: TreeNode; color: string }) {
             style={{ background: `${color}20`, color, border: `1px solid ${color}40` }}>
             {node.level}
           </span>
-          <h4 className="text-sm font-bold text-[#111318] mt-1.5 mb-1 leading-snug">{node.title}</h4>
-          <p className="text-xs text-[#8b8f98] mb-3">{node.description}</p>
+          <h4 className="text-sm font-bold text-white mt-1.5 mb-1 leading-snug">{node.title}</h4>
+          <p className="text-xs text-white/70 mb-3">{node.description}</p>
 
           {/* Gains */}
           <div className="space-y-1.5 mb-3">
-            <p className="text-[10px] font-semibold text-[#6366F1] uppercase tracking-wider">습득 스킬</p>
+            <p className="text-[10px] font-semibold text-[#818CF8] uppercase tracking-wider">습득 스킬</p>
             {node.gains.map((g) => (
-              <div key={g} className="flex items-center gap-2 text-xs text-[#484d57]">
+              <div key={g} className="flex items-center gap-2 text-xs text-white/85">
                 <span className="w-1 h-1 rounded-full flex-shrink-0" style={{ background: color }} />
                 {g}
               </div>
@@ -180,7 +180,7 @@ function NodeTooltip({ node, color }: { node: TreeNode; color: string }) {
           {/* Tags */}
           <div className="flex flex-wrap gap-1">
             {node.tags.map((t) => (
-              <span key={t} className="text-[10px] bg-[#f7f8fa] text-[#8b8f98] px-2 py-0.5 rounded-full border border-white/5">{t}</span>
+              <span key={t} className="text-[10px] bg-white/10 text-white/80 px-2 py-0.5 rounded-full border border-white/15">{t}</span>
             ))}
           </div>
         </div>
@@ -227,17 +227,17 @@ function SkillInfoPanel({
           </span>
 
           {/* Title & desc */}
-          <h4 className="text-sm font-bold text-[#111318] leading-snug mb-1">{node.title}</h4>
-          <p className="text-[11px] text-[#8b8f98] mb-3 leading-relaxed">{node.description}</p>
+          <h4 className="text-sm font-bold text-white leading-snug mb-1">{node.title}</h4>
+          <p className="text-[11px] text-white/70 mb-3 leading-relaxed">{node.description}</p>
 
           {/* Gains */}
           <div className="mb-4">
-            <p className="text-[9px] font-bold text-[#6366F1] uppercase tracking-[0.15em] mb-2">습득 스킬</p>
+            <p className="text-[9px] font-bold text-[#818CF8] uppercase tracking-[0.15em] mb-2">습득 스킬</p>
             <div className="space-y-1.5">
               {node.gains.map((g) => (
                 <div key={g} className="flex items-start gap-2">
                   <span className="w-1 h-1 rounded-full mt-1.5 flex-shrink-0" style={{ background: color }} />
-                  <span className="text-[11px] text-[#484d57] leading-snug">{g}</span>
+                  <span className="text-[11px] text-white/85 leading-snug">{g}</span>
                 </div>
               ))}
             </div>
@@ -247,13 +247,13 @@ function SkillInfoPanel({
           {ytId ? (
             <button
               onClick={onWatch}
-              className="w-full py-2.5 rounded-xl text-sm font-bold text-black bg-[#6366F1] hover:bg-[#818CF8] transition-all gold-glow flex items-center justify-center gap-2"
+              className="w-full py-2.5 rounded-xl text-sm font-bold text-white bg-[#6366F1] hover:bg-[#818CF8] transition-all gold-glow flex items-center justify-center gap-2"
             >
               <Play className="h-4 w-4" />
               100% 무료로 시청하기
             </button>
           ) : (
-            <p className="text-[11px] text-[#8b8f98] text-center py-2">아래 분기점에서 학습 경로를 선택하세요</p>
+            <p className="text-[11px] text-white/60 text-center py-2">아래 분기점에서 학습 경로를 선택하세요</p>
           )}
         </div>
       </div>
