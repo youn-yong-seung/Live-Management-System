@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate } from "@/lib/date-utils";
-import { Video, Calendar, Users, PlayCircle, Star, MessageSquare } from "lucide-react";
+import { Video, Calendar, PlayCircle, Star, MessageSquare } from "lucide-react";
 import { useLocation } from "wouter";
 import { ReplayModal } from "@/components/replay-modal";
 import { useQueryClient } from "@tanstack/react-query";
@@ -325,12 +325,6 @@ export default function Lives() {
                 </div>
                 <h3 className="font-bold text-[#111318] leading-snug line-clamp-2 mb-2">{live.title}</h3>
                 <p className="text-sm text-[#8b8f98] line-clamp-3 flex-1 mb-4">{live.description || "설명이 없습니다."}</p>
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-1.5 text-xs text-[#a0a4ab]">
-                    <Users className="h-3.5 w-3.5" />
-                    <span>신청자 {live.registrationCount}명</span>
-                  </div>
-                </div>
                 <Button
                   className="w-full bg-[#6366F1] hover:bg-[#818CF8] text-black font-bold rounded-xl gold-glow"
                   onClick={() => { setSelectedLiveId(live.id); setIsDialogOpen(true); }}
