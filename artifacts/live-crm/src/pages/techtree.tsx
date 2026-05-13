@@ -444,8 +444,16 @@ export default function TechTree() {
     const levels: TreeNode[][] = [];
     const placed = new Set<string>();
 
-    // BFS by parent→children
-    let queue = [path.nodes[0]];
+    // 다른 노드의 children에 들어있지 않은 노드 = 트리 루트
+    // (admin에서 사용자가 만든 트리 구조의 최상위 노드를 찾음)
+    const childIds = new Set<string>();
+    for (const n of path.nodes) {
+      for (const c of n.children ?? []) childIds.add(c);
+    }
+    const roots = path.nodes.filter((n) => !childIds.has(n.id));
+
+    // BFS by parent→children — 루트 노드(들)부터 시작
+    let queue = roots.length > 0 ? roots : [path.nodes[0]];
     while (queue.length > 0) {
       const level: TreeNode[] = [];
       const nextQueue: TreeNode[] = [];
