@@ -828,7 +828,7 @@ export default function Admin() {
     {
       title: "캠페인",
       items: [
-        { id: "settings", label: "API 설정", icon: KeyRound },
+        { id: "settings", label: "Setting", icon: Settings },
         { id: "schedule", label: "발송 현황", icon: Send, onSelect: loadSchedule },
       ],
     },

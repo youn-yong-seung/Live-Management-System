@@ -46,8 +46,11 @@
 - [x] `.env`에 `PORT=3000` 추가 — api-server용
 - [x] DB push — `users` 테이블 + `user_role` enum 생성 (drizzle-kit)
 - [x] dev 서버 검증 — Google OAuth 로그인 → /auth/callback → /api/auth/sync → users 테이블에 yunjadong101@gmail.com이 role=admin으로 등록 → 헤더 프로필 드롭다운에 ADMIN 뱃지 노출. 라이브 신청 폼/자료실 회귀 없음.
+- [x] **Production 배포 (2026-05-13)** — Vercel 프로젝트 `yunjadong-live-class` (팀: ceo-3736s-projects)에 환경변수 11개 등록, Supabase URL Configuration에 production URL 추가, `feat/phase1-auth` → main fast-forward 머지(27커밋), `https://yunjadong-live-class.vercel.app` 운영 반영. 사용자 검증: "잘 작동해"
 - [ ] yun-platform 디자인 토큰 추출 (color/font/radius/shadow) — Phase 1A 잔여, 별도 작업으로 진행
 - [ ] Live의 Tailwind config + globals.css에 토큰 이식 — 위와 같이
+
+> **참고 — ADR-007과 실제 배포의 불일치**: ADR-007은 기존 yun-platform Vercel 프로젝트 `yun-landing-dev`를 재활용한다고 했지만, 실제 production은 별도 프로젝트 `yunjadong-live-class.vercel.app`로 운영 중. Phase 5에서 도메인 통합 시 yun-landing-dev로 합칠지, 아니면 yunjadong-live-class를 그대로 두고 yun-landing-dev에서 301 redirect할지 재결정 필요.
 
 ### Phase 1B — 신청 폼 → 자동 가입 깔때기
 - [ ] 라이브 신청 시 등록 이메일로 매직링크 자동 발송
