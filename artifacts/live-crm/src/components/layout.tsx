@@ -9,7 +9,6 @@ const navItems = [
   { href: "/techtree", label: "다시보기 / 테크트리" },
   { href: "/lives", label: "라이브 신청" },
   { href: "/resources", label: "무료 자료" },
-  { href: "/courses", label: "유료 강의" },
 ];
 
 const navIcons: Record<string, typeof Home> = {
