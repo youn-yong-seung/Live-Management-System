@@ -307,13 +307,12 @@ function TreeNodeCircle({
         return (
           <button
             onClick={onClick}
-            className="group relative w-[150px] sm:w-[170px] rounded-2xl overflow-hidden transition-all duration-300 cursor-pointer"
+            className="group relative w-[150px] sm:w-[170px] rounded-2xl overflow-hidden transition-all duration-300 cursor-pointer bg-white"
             style={{
-              background: "rgba(255,255,255,0.03)",
-              border: `2px solid ${highlighted ? color : "rgba(255,255,255,0.08)"}`,
+              border: `2px solid ${highlighted ? color : `${color}30`}`,
               boxShadow: isInfoOpen
                 ? `0 0 28px ${glowColor}, 0 0 56px ${glowColor.replace("0.3", "0.12")}`
-                : isActive ? `0 0 18px ${glowColor}` : "0 4px 16px rgba(0,0,0,0.4)",
+                : isActive ? `0 0 18px ${glowColor}` : `0 2px 8px ${color}20`,
             }}
           >
             {/* Thumbnail */}
@@ -583,14 +582,14 @@ export default function TechTree() {
                   style={{
                     background: isSelected
                       ? "rgba(0, 229, 229, 0.12)"
-                      : "rgba(255, 255, 255, 0.03)",
+                      : "#fff",
                     backdropFilter: "blur(12px)",
                     border: isSelected
                       ? "1.5px solid rgba(0, 229, 229, 0.5)"
-                      : "1px solid rgba(255, 255, 255, 0.08)",
+                      : `1px solid ${path.color}30`,
                     boxShadow: isSelected
                       ? "0 0 30px rgba(0, 229, 229, 0.25), 0 0 60px rgba(0, 229, 229, 0.1), inset 0 0 20px rgba(0, 229, 229, 0.05)"
-                      : "0 4px 24px rgba(0,0,0,0.3)",
+                      : `0 2px 8px ${path.color}20`,
                   }}
                 >
                   {/* Icon — thin line style */}
