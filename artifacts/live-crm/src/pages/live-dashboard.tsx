@@ -174,7 +174,7 @@ export default function LiveDashboard() {
 
   return (
     <div
-      className="min-h-screen text-[#111318] relative overflow-hidden"
+      className="min-h-screen text-white relative overflow-hidden"
       style={{
         background:
           "radial-gradient(ellipse at top left, rgba(99,102,241,0.08) 0%, transparent 50%), radial-gradient(ellipse at bottom right, rgba(0,229,229,0.06) 0%, transparent 50%), #050A0A",
@@ -225,7 +225,7 @@ export default function LiveDashboard() {
               >
                 {view.total}
               </p>
-              <span className="absolute -bottom-1 -right-8 sm:-right-10 text-2xl sm:text-3xl font-bold text-[#484d57]">명</span>
+              <span className="absolute -bottom-1 -right-8 sm:-right-10 text-2xl sm:text-3xl font-bold text-white/70">명</span>
             </div>
             {filter && (
               <p className="mt-4 text-sm text-[#8b8f98]">전체 {data.total}명 중</p>
@@ -335,7 +335,7 @@ function SectionHeader({ eyebrow, title, sub }: { eyebrow: string; title: string
   return (
     <div className="text-center mb-8">
       <p className="text-[10px] font-bold tracking-[0.3em] uppercase text-[#6366F1]/70 mb-2">{eyebrow}</p>
-      <h2 className="text-xl sm:text-2xl font-bold text-[#111318]">{title}</h2>
+      <h2 className="text-xl sm:text-2xl font-bold text-white">{title}</h2>
       {sub && <p className="text-sm text-[#8b8f98] mt-2">{sub}</p>}
     </div>
   );
@@ -409,8 +409,8 @@ function DonutCard({
                   className="w-2.5 h-2.5 rounded-full flex-shrink-0"
                   style={{ background: PALETTE[i % PALETTE.length], boxShadow: `0 0 12px ${PALETTE[i % PALETTE.length]}80` }}
                 />
-                <span className="text-sm text-[#111318] leading-relaxed flex-1 break-words">{d.value}</span>
-                <span className="text-[13px] font-semibold text-[#484d57] tabular-nums whitespace-nowrap flex-shrink-0">
+                <span className="text-sm text-white/90 leading-relaxed flex-1 break-words">{d.value}</span>
+                <span className="text-[13px] font-semibold text-white/60 tabular-nums whitespace-nowrap flex-shrink-0">
                   {d.count}<span className="text-[#a0a4ab] ml-0.5">명</span>
                   <span className="text-[#8b8f98] ml-2">{pct(d.count, total)}%</span>
                 </span>
@@ -442,7 +442,7 @@ function QuestionCard({
   return (
     <Card>
       <div className="flex items-start justify-between gap-4 mb-5">
-        <h3 className="text-base sm:text-lg font-bold text-[#111318] leading-snug flex-1">
+        <h3 className="text-base sm:text-lg font-bold text-white leading-snug flex-1">
           {question}
         </h3>
         <div className="flex-shrink-0 text-right">
@@ -468,13 +468,13 @@ function QuestionCard({
                 className={`w-full text-left group transition-all duration-200 ${dimmed ? "opacity-30" : ""}`}
               >
                 <div className="flex items-baseline justify-between gap-3 mb-2">
-                  <span className="text-[15px] sm:text-base text-[#111318] leading-relaxed flex-1 group-hover:text-[#111318]">
+                  <span className="text-[15px] sm:text-base text-white/95 leading-relaxed flex-1 group-hover:text-white">
                     {d.value}
                   </span>
                   <span className="text-sm font-bold tabular-nums whitespace-nowrap flex-shrink-0">
                     <span style={{ color }}>{d.count}</span>
                     <span className="text-[#a0a4ab] mx-1">·</span>
-                    <span className="text-[#484d57]">{sharePct}%</span>
+                    <span className="text-white/55">{sharePct}%</span>
                   </span>
                 </div>
                 <div className="h-2 rounded-full bg-[#f7f8fa] overflow-hidden">
@@ -515,7 +515,7 @@ function MessagesGrid({ messages }: { messages: string[] }) {
             }}
           >
             <Quote className="h-4 w-4 text-[#6366F1]/40 mb-2" />
-            <p className="text-[14px] text-[#111318] leading-relaxed whitespace-pre-wrap break-words">
+            <p className="text-[14px] text-white/90 leading-relaxed whitespace-pre-wrap break-words">
               {m}
             </p>
           </div>
