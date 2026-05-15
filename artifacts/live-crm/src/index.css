@@ -403,3 +403,15 @@
 .animate-credits-scroll:hover {
   animation-play-state: paused;
 }
+
+/* Tech track carousel — slide enter animation */
+@keyframes trackSlideEnter {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.track-slide-enter {
+  animation: trackSlideEnter 0.5s ease-out;
+}
+/* Hide scrollbar on node rail */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }

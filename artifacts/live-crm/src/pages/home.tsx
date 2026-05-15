@@ -4,6 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate } from "@/lib/date-utils";
 import { ReplayModal } from "@/components/replay-modal";
 import { FeaturedReplaysCarousel } from "@/components/featured-replays-carousel";
+import { TechTrackCarousel } from "@/components/tech-track-carousel";
 import { Link } from "wouter";
 import { useLocation } from "wouter";
 import {
@@ -355,59 +356,8 @@ export default function Home() {
         </div>
       </div></section>
 
-      {/* ── Recommended Replays ───────────────────────── */}
-      {!isLoading && recommended.length > 0 && (
-        <section className="section-band"><div className="section-band-inner">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-2">
-              <Star className="h-5 w-5 text-[#6366F1]" />
-              <h2 className="text-lg font-bold text-[#111318]">추천 다시보기</h2>
-            </div>
-            <Link href="/replays">
-              <span className="text-sm text-[#6366F1] hover:text-[#818CF8] font-medium flex items-center gap-1 cursor-pointer">
-                전체 보기 <ArrowRight className="h-3.5 w-3.5" />
-              </span>
-            </Link>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {recommended.map((replay) => {
-              const thumb = replay.youtubeUrl ? youtubeThumbnail(replay.youtubeUrl) : null;
-              return (
-                <div
-                  key={replay.id}
-                  onClick={() => setModalReplay(replay)}
-                  className={`${gcHover} overflow-hidden cursor-pointer group`}
-                >
-                  <div className="aspect-video bg-black/30 overflow-hidden relative">
-                    {thumb ? (
-                      <img src={thumb} alt={replay.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 opacity-80 group-hover:opacity-100" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <PlayCircle className="h-8 w-8 text-[#d1d5db]" />
-                      </div>
-                    )}
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      <div className="w-12 h-12 bg-[#6366F1]/90 rounded-full flex items-center justify-center shadow-lg">
-                        <PlayCircle className="h-6 w-6 text-black" />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="p-4">
-                    <h3 className="font-bold text-[#111318] text-sm leading-snug line-clamp-2 mb-2">{replay.title}</h3>
-                    {((replay as any).tags as string[] | null)?.length ? (
-                      <div className="flex flex-wrap gap-1">
-                        {((replay as any).tags as string[]).slice(0, 3).map((tag) => (
-                          <span key={tag} className="text-[11px] bg-[#f7f8fa] text-[#8b8f98] px-2 py-0.5 rounded-full border border-white/5">{tag}</span>
-                        ))}
-                      </div>
-                    ) : null}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div></section>
-      )}
+      {/* ── 테크트리 트랙 캐러셀 (큐레이션된 학습 경로) ── */}
+      <TechTrackCarousel />
 
       {/* ── Charity Live Feature ─────────────────────── */}
       <section className="section-band section-band-alt"><div className="section-band-inner">
