@@ -6,6 +6,27 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PlaySquare, MessageSquare, Star, Send, ExternalLink, Maximize2, Minimize2 } from "lucide-react";
 import { usePIIVisible, maskName } from "@/lib/pii";
+import { formatRelativeTime } from "@/lib/date-utils";
+
+function getInitials(name: string) {
+  return name.trim().slice(0, 1) || "?";
+}
+
+const AVATAR_COLORS = [
+  "bg-blue-100 text-blue-600",
+  "bg-purple-100 text-purple-600",
+  "bg-emerald-100 text-emerald-700",
+  "bg-amber-100 text-amber-700",
+  "bg-rose-100 text-rose-600",
+  "bg-indigo-100 text-indigo-600",
+  "bg-cyan-100 text-cyan-700",
+  "bg-pink-100 text-pink-600",
+];
+
+function avatarColor(name: string) {
+  const code = name.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  return AVATAR_COLORS[code % AVATAR_COLORS.length];
+}
 
 interface Review {
   id: number;
@@ -165,29 +186,55 @@ export function ReplayModal({
 
             {/* Right: Reviews */}
             <div className={`w-full ${isFullscreen ? "lg:w-[440px]" : "lg:w-[360px]"} border-t lg:border-t-0 lg:border-l border-[#e5e7eb] flex flex-col min-h-0 max-h-[40vh] lg:max-h-none`}>
-              <div className="flex items-center gap-2 px-5 py-4 border-b border-[#e5e7eb] flex-shrink-0">
-                <MessageSquare className="h-4 w-4 text-[#6366F1]" />
-                <span className="font-bold text-[#111318] text-sm">후기</span>
-                <span className="text-xs text-[#8b8f98]">({reviews.length})</span>
+              <div className="flex items-baseline gap-2 px-5 py-4 border-b border-[#e5e7eb] flex-shrink-0">
+                <MessageSquare className="h-4 w-4 text-[#6366F1] self-center" />
+                <span className="font-bold text-[#0f0f0f] text-[15px]">후기</span>
+                <span className="text-[13px] text-[#606060] font-medium">{reviews.length}개</span>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
+              <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5 min-h-0">
                 {isLoadingReviews ? (
-                  <div className="space-y-3">
-                    {[1, 2, 3].map((i) => <Skeleton key={i} className="h-16 w-full rounded-xl" />)}
+                  <div className="space-y-4">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="flex gap-3">
+                        <Skeleton className="h-9 w-9 rounded-full flex-shrink-0" />
+                        <div className="flex-1 space-y-2">
+                          <Skeleton className="h-3 w-24 rounded" />
+                          <Skeleton className="h-12 w-full rounded" />
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 ) : reviews.length > 0 ? (
-                  reviews.map((review) => (
-                    <div key={review.id} className="bg-[#f7f8fa] rounded-xl p-3.5 border border-white/5">
-                      <div className="flex items-center justify-between mb-1.5">
-                        <span className="text-sm font-semibold text-[#111318]">{maskName(review.name, showPII)}</span>
-                        <StarRating value={review.rating} />
+                  reviews.map((review) => {
+                    const displayName = maskName(review.name, showPII);
+                    return (
+                      <div key={review.id} className="flex gap-3">
+                        <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 ${avatarColor(review.name)}`}>
+                          {getInitials(displayName)}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <span className="text-[13px] font-semibold text-[#0f0f0f] truncate">{displayName}</span>
+                            <span className="text-[12px] text-[#606060] flex-shrink-0">· {formatRelativeTime(review.createdAt)}</span>
+                          </div>
+                          <div className="flex gap-0.5 mb-1.5">
+                            {[1, 2, 3, 4, 5].map((s) => (
+                              <Star
+                                key={s}
+                                className={`h-3 w-3 ${review.rating >= s ? "fill-amber-400 text-amber-400" : "text-gray-200"}`}
+                              />
+                            ))}
+                          </div>
+                          <p className="text-[14px] text-[#0f0f0f] leading-[1.6] whitespace-pre-wrap break-words">
+                            {review.content}
+                          </p>
+                        </div>
                       </div>
-                      <p className="text-sm text-[#484d57] leading-relaxed">{review.content}</p>
-                    </div>
-                  ))
+                    );
+                  })
                 ) : (
-                  <div className="text-center py-8 text-[#a0a4ab] text-sm">
+                  <div className="text-center py-12 text-[#606060] text-sm">
                     아직 후기가 없습니다.<br />첫 후기를 남겨보세요!
                   </div>
                 )}
