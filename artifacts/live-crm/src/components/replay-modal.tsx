@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { PlaySquare, MessageSquare, Star, Send, ExternalLink } from "lucide-react";
+import { PlaySquare, MessageSquare, Star, Send, ExternalLink, Maximize2, Minimize2 } from "lucide-react";
 import { usePIIVisible, maskName } from "@/lib/pii";
 
 interface Review {
@@ -57,9 +57,10 @@ export function ReplayModal({
   const [reviewForm, setReviewForm] = useState({ name: "", rating: 0, content: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   useEffect(() => {
-    if (!replay) return;
+    if (!replay) { setIsFullscreen(false); return; }
     setIsLoadingReviews(true);
     setReviews([]);
     setReviewForm({ name: "", rating: 0, content: "" });
@@ -104,12 +105,28 @@ export function ReplayModal({
 
   return (
     <Dialog open={!!replay} onOpenChange={(open) => { if (!open) onClose(); }}>
-      <DialogContent className="max-w-5xl w-[95vw] h-[90vh] p-0 bg-white border border-[#e5e7eb] rounded-md overflow-hidden flex flex-col lg:flex-row shadow-[0_8px_32px_rgba(0,0,0,0.12)]">
+      <DialogContent
+        className={
+          isFullscreen
+            ? "max-w-none w-screen h-screen p-0 bg-white border-0 rounded-none overflow-hidden flex flex-col lg:flex-row"
+            : "max-w-5xl w-[95vw] h-[90vh] p-0 bg-white border border-[#e5e7eb] rounded-md overflow-hidden flex flex-col lg:flex-row shadow-[0_8px_32px_rgba(0,0,0,0.12)]"
+        }
+      >
         {replay && (
           <>
+            {/* Fullscreen toggle — sits next to the radix X close button (top-4 right-4) */}
+            <button
+              type="button"
+              onClick={() => setIsFullscreen((v) => !v)}
+              aria-label={isFullscreen ? "전체화면 해제" : "전체화면으로 보기"}
+              className="absolute right-12 top-4 z-20 rounded-sm p-1 text-[#484d57] opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-[#6366F1]/40"
+            >
+              {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+            </button>
+
             {/* Left: Video */}
             <div className="flex-1 flex flex-col min-h-0">
-              <div className="w-full aspect-video bg-black flex-shrink-0">
+              <div className={`w-full bg-black flex-shrink-0 ${isFullscreen ? "h-[65vh] lg:h-full" : "aspect-video"}`}>
                 {youtubeId ? (
                   <iframe
                     width="100%"
@@ -147,7 +164,7 @@ export function ReplayModal({
             </div>
 
             {/* Right: Reviews */}
-            <div className="w-full lg:w-[360px] border-t lg:border-t-0 lg:border-l border-[#e5e7eb] flex flex-col min-h-0 max-h-[40vh] lg:max-h-none">
+            <div className={`w-full ${isFullscreen ? "lg:w-[440px]" : "lg:w-[360px]"} border-t lg:border-t-0 lg:border-l border-[#e5e7eb] flex flex-col min-h-0 max-h-[40vh] lg:max-h-none`}>
               <div className="flex items-center gap-2 px-5 py-4 border-b border-[#e5e7eb] flex-shrink-0">
                 <MessageSquare className="h-4 w-4 text-[#6366F1]" />
                 <span className="font-bold text-[#111318] text-sm">후기</span>
