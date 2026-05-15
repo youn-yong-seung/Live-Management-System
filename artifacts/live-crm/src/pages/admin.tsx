@@ -30,6 +30,7 @@ import { AdminEditors } from "@/components/admin-editors";
 import { AdminFormBuilder } from "@/components/admin-form-builder";
 import { AdminTechTreeEditor } from "@/components/admin-techtree-editor";
 import { AdminDashboard } from "@/components/admin-dashboard";
+import { AdminAnalytics } from "@/components/admin-analytics";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
@@ -822,6 +823,7 @@ export default function Admin() {
     {
       items: [
         { id: "dashboard", label: "대시보드", icon: BarChart2 },
+        { id: "analytics", label: "방문자 분석", icon: TrendingUp },
         { id: "lives", label: "라이브 관리", icon: PlayCircle },
       ],
     },
@@ -1134,6 +1136,7 @@ export default function Admin() {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="hidden">
           <TabsTrigger value="dashboard">대시보드</TabsTrigger>
+          <TabsTrigger value="analytics">방문자 분석</TabsTrigger>
           <TabsTrigger value="lives">라이브 관리</TabsTrigger>
           <TabsTrigger value="settings">API 설정</TabsTrigger>
           <TabsTrigger value="schedule">발송 현황</TabsTrigger>
@@ -1145,6 +1148,11 @@ export default function Admin() {
         {/* ── Tab: Dashboard ─────────────────────────── */}
         <TabsContent value="dashboard" className="mt-6">
           <AdminDashboard />
+        </TabsContent>
+
+        {/* ── Tab: Analytics ──────────────────────────── */}
+        <TabsContent value="analytics" className="mt-6">
+          <AdminAnalytics />
         </TabsContent>
 
         {/* ── Tab 1: Live Management ─────────────────── */}

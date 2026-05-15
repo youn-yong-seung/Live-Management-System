@@ -10,6 +10,7 @@ import techTreeRouter from "./tech-tree";
 import authRouter from "./auth";
 import communityRouter from "./community";
 import resourcesRouter from "./resources";
+import analyticsRouter from "./analytics";
 
 const router: IRouter = Router();
 
@@ -24,5 +25,6 @@ router.use(techTreeRouter);
 router.use(authRouter);
 router.use(communityRouter);
 router.use(resourcesRouter);
+router.use(analyticsRouter);
 
 export default router;

@@ -1,9 +1,11 @@
+import { useEffect } from "react";
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Layout } from "@/components/layout";
 import { AuthProvider } from "@/lib/auth";
+import { startSiteTracking } from "@/lib/site-tracking";
 
 import Home from "@/pages/home";
 import Lives from "@/pages/lives";
@@ -56,6 +58,9 @@ function MainRouter() {
 }
 
 function App() {
+  useEffect(() => {
+    startSiteTracking();
+  }, []);
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>

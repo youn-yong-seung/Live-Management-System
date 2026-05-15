@@ -7,6 +7,7 @@ import {
   integer,
   jsonb,
   index,
+  bigserial,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
@@ -111,6 +112,36 @@ export const afterpartyEventsTable = pgTable(
 );
 
 export type AfterpartyEvent = typeof afterpartyEventsTable.$inferSelect;
+
+/* ── 사이트 전체 방문자/클릭/세션 트래킹 ─────────────── */
+
+export const siteEventsTable = pgTable(
+  "site_events",
+  {
+    id: bigserial("id", { mode: "number" }).primaryKey(),
+    eventType: text("event_type").notNull(), // 'page_view' | 'click' | 'session_start' | 'session_end'
+    path: text("path"),
+    target: text("target"),            // 클릭된 요소의 키 (data-track 값 또는 href)
+    targetLabel: text("target_label"), // 사람 읽기용 라벨
+    visitorId: text("visitor_id").notNull(),
+    sessionId: text("session_id").notNull(),
+    referrer: text("referrer"),
+    userAgent: text("user_agent"),
+    viewport: text("viewport"),
+    durationMs: integer("duration_ms"), // session_end / page leave 시 체류시간(ms)
+    meta: jsonb("meta").$type<Record<string, unknown>>(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    byCreated: index("site_events_created_idx").on(t.createdAt),
+    byTypeCreated: index("site_events_type_created_idx").on(t.eventType, t.createdAt),
+    byPath: index("site_events_path_idx").on(t.path),
+    byVisitor: index("site_events_visitor_idx").on(t.visitorId),
+    bySession: index("site_events_session_idx").on(t.sessionId),
+  }),
+);
+
+export type SiteEvent = typeof siteEventsTable.$inferSelect;
 
 export const insertReviewSchema = createInsertSchema(reviewsTable, {
   name: (s) => s.min(1, "이름을 입력해주세요.").max(50, "이름은 50자 이하여야 합니다."),
