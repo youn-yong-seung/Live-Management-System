@@ -390,3 +390,16 @@
     transform: translateX(0) translateY(-50%);
   }
 }
+
+/* Featured replays — review credits scroll (movie credits style) */
+@keyframes creditsScroll {
+  0%   { transform: translateY(0); }
+  100% { transform: translateY(-50%); }
+}
+.animate-credits-scroll {
+  animation: creditsScroll linear infinite;
+  will-change: transform;
+}
+.animate-credits-scroll:hover {
+  animation-play-state: paused;
+}

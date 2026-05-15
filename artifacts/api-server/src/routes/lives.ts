@@ -758,6 +758,73 @@ router.get("/lives/:liveId/reviews", async (req: Request, res: Response) => {
   }
 });
 
+/* ── GET /featured-replays — 후기 많은 ended 라이브 top N + 후기 ─── */
+
+router.get("/featured-replays", async (req: Request, res: Response) => {
+  try {
+    const limit = Math.min(parseInt(String(req.query.limit ?? "5"), 10) || 5, 10);
+    const reviewsPerLive = Math.min(parseInt(String(req.query.reviewsPerLive ?? "30"), 10) || 30, 100);
+
+    // Step 1: 후기 많은 ended 라이브 top N
+    const topLives = await db
+      .select({
+        id: livesTable.id,
+        title: livesTable.title,
+        description: livesTable.description,
+        youtubeUrl: livesTable.youtubeUrl,
+        thumbnailUrl: livesTable.thumbnailUrl,
+        scheduledAt: livesTable.scheduledAt,
+        tags: livesTable.tags,
+        reviewCount: count(reviewsTable.id).as("reviewCount"),
+        avgRating: sql<number>`COALESCE(AVG(${reviewsTable.rating})::numeric(3,2), 0)`.as("avgRating"),
+      })
+      .from(livesTable)
+      .leftJoin(reviewsTable, eq(reviewsTable.liveId, livesTable.id))
+      .where(eq(livesTable.status, "ended"))
+      .groupBy(livesTable.id)
+      .having(sql`COUNT(${reviewsTable.id}) > 0`)
+      .orderBy(sql`COUNT(${reviewsTable.id}) DESC, MAX(${reviewsTable.createdAt}) DESC NULLS LAST`)
+      .limit(limit);
+
+    if (topLives.length === 0) return res.json({ replays: [] });
+
+    // Step 2: 각 라이브의 최신 후기 N개 일괄 조회
+    const liveIds = topLives.map((l) => l.id);
+    const allReviews = await db
+      .select({
+        id: reviewsTable.id,
+        liveId: reviewsTable.liveId,
+        name: reviewsTable.name,
+        rating: reviewsTable.rating,
+        content: reviewsTable.content,
+        createdAt: reviewsTable.createdAt,
+      })
+      .from(reviewsTable)
+      .where(sql`${reviewsTable.liveId} IN (${sql.join(liveIds.map((id) => sql`${id}`), sql`, `)})`)
+      .orderBy(sql`${reviewsTable.createdAt} DESC`);
+
+    const reviewsByLive = new Map<number, typeof allReviews>();
+    for (const r of allReviews) {
+      if (!reviewsByLive.has(r.liveId)) reviewsByLive.set(r.liveId, []);
+      const arr = reviewsByLive.get(r.liveId)!;
+      if (arr.length < reviewsPerLive) arr.push(r);
+    }
+
+    const replays = topLives.map((l) => ({
+      ...l,
+      reviewCount: Number(l.reviewCount),
+      avgRating: Number(l.avgRating),
+      reviews: reviewsByLive.get(l.id) ?? [],
+    }));
+
+    res.set("Cache-Control", "public, max-age=300, s-maxage=300"); // 5분 캐시
+    return res.json({ replays });
+  } catch (error) {
+    req.log.error({ error }, "Error fetching featured replays");
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 /* ── POST /lives/:liveId/reviews (public) ─────────── */
 
 router.post("/lives/:liveId/reviews", async (req: Request, res: Response) => {

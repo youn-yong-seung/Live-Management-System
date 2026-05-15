@@ -3,6 +3,7 @@ import { useGetLives, getGetLivesQueryKey } from "@workspace/api-client-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate } from "@/lib/date-utils";
 import { ReplayModal } from "@/components/replay-modal";
+import { FeaturedReplaysCarousel } from "@/components/featured-replays-carousel";
 import { Link } from "wouter";
 import { useLocation } from "wouter";
 import {
@@ -167,27 +168,9 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── DECLARATION (다크 풀폭) ──────────────────── */}
-      <div className="declare-v2" ref={declare.ref}>
-        <div className={`declare-v2-inner ${declare.visible ? "revealed" : ""}`}>
-          <h2>
-            <em>매주 새 라이브,</em>
-            <br />
-            다시보기는 100% 무료.
-          </h2>
-          <p>
-            매주 현업자들의 실속 있는 AI 강의와 비즈니스 인사이트를 무료 라이브로 진행하고, 모든 다시보기를 100% 무료로 제공 중입니다.
-            <br />
-            뭐부터 봐야 할지 모르겠다면 — 난이도별·단계별로 큐레이션해드리는 테크트리에서 시작하세요.
-          </p>
-          <div className="declare-v2-line" />
-          <Link href="/techtree">
-            <span className="inline-flex items-center gap-2 mt-8 bg-white text-[#111318] font-bold text-sm px-7 py-3.5 rounded-md hover:bg-[#f7f8fa] transition-all cursor-pointer">
-              <PlayCircle className="h-4 w-4" />
-              다시보기 무료 제공
-            </span>
-          </Link>
-        </div>
+      {/* ── 인기 라이브 다시보기 캐러셀 (후기 크레딧 스크롤) ── */}
+      <div ref={declare.ref} className={declare.visible ? "" : ""}>
+        <FeaturedReplaysCarousel />
       </div>
 
       {/* ── Community Preview ────────────────────────── */}
