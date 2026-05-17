@@ -415,3 +415,6 @@
 /* Hide scrollbar on node rail */
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Featured replays — review credits scroll (always overflow-auto, scrollbar hidden) */
+.credits-scroll::-webkit-scrollbar { display: none; }

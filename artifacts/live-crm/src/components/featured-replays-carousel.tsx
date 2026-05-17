@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { PlayCircle, Star, MessageSquare, ChevronLeft, ChevronRight } from "lucide-react";
 import { ReplayModal } from "@/components/replay-modal";
 import { formatRelativeTime } from "@/lib/date-utils";
@@ -116,9 +116,9 @@ export function FeaturedReplaysCarousel() {
           }}
         />
 
-        <div className="relative max-w-6xl mx-auto px-6 py-16 lg:py-24">
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16 lg:py-24">
           {/* Eyebrow */}
-          <div className="text-center mb-10">
+          <div className="text-center mb-8 sm:mb-10">
             <p className="text-[11px] font-bold tracking-[0.3em] uppercase text-[#6366F1] mb-3">
               MOST LOVED REPLAYS
             </p>
@@ -136,45 +136,14 @@ export function FeaturedReplaysCarousel() {
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-[1fr_1.1fr] gap-8 lg:gap-12 items-stretch">
+          <div className="grid lg:grid-cols-[1fr_1.1fr] gap-6 lg:gap-12 items-stretch">
             {/* ── Left: review credits scroll ── */}
-            <div
-              className="relative rounded-3xl border border-white/10 overflow-hidden h-[500px] lg:h-[560px]"
-              style={{
-                background:
-                  "linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%)",
-                backdropFilter: "blur(20px)",
-              }}
-            >
-              {/* Fade gradients top/bottom */}
-              <div
-                className="absolute inset-x-0 top-0 h-20 z-10 pointer-events-none"
-                style={{ background: "linear-gradient(180deg, #050A0A 0%, transparent 100%)" }}
-              />
-              <div
-                className="absolute inset-x-0 bottom-0 h-20 z-10 pointer-events-none"
-                style={{ background: "linear-gradient(0deg, #050A0A 0%, transparent 100%)" }}
-              />
-
-              <div
-                key={current.id}
-                className="px-6 py-4 space-y-5 animate-credits-scroll"
-                style={{
-                  animationDuration: `${Math.max(40, reviewsForScroll.length * 6)}s`,
-                }}
-              >
-                {/* 2배 복제로 무한 루프 */}
-                {[...reviewsForScroll, ...reviewsForScroll].map((r, i) => (
-                  <ReviewCreditCard key={`${r.id}-${i}`} review={r} showPII={showPII} />
-                ))}
-              </div>
-
-              {/* Count badge */}
-              <div className="absolute top-4 left-4 z-20 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/40 border border-white/15 backdrop-blur-sm">
-                <MessageSquare className="h-3.5 w-3.5 text-[#6366F1]" />
-                <span className="text-xs font-semibold text-white">후기 {current.reviewCount.toLocaleString()}개</span>
-              </div>
-            </div>
+            <ReviewCreditsScroll
+              trackKey={String(current.id)}
+              reviews={reviewsForScroll}
+              showPII={showPII}
+              countBadge={current.reviewCount}
+            />
 
             {/* ── Right: live info ── */}
             <div className="flex flex-col">
@@ -207,8 +176,8 @@ export function FeaturedReplaysCarousel() {
               </div>
 
               {/* Info */}
-              <div className="mt-6 flex-1 flex flex-col">
-                <div className="flex items-center gap-2 mb-3">
+              <div className="mt-5 sm:mt-6 flex-1 flex flex-col">
+                <div className="flex items-center gap-2 mb-3 flex-wrap">
                   <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-400/15 border border-amber-400/30">
                     <Star className="h-3.5 w-3.5 text-amber-300 fill-amber-300" />
                     <span className="text-xs font-bold text-amber-200">{current.avgRating.toFixed(2)}</span>
@@ -216,18 +185,18 @@ export function FeaturedReplaysCarousel() {
                   <span className="text-xs text-white/50">·</span>
                   <span className="text-xs font-medium text-white/70">{current.reviewCount.toLocaleString()}개 후기</span>
                   {current.tags?.slice(0, 2).map((t) => (
-                    <span key={t} className="ml-1 text-[11px] px-2 py-0.5 rounded-full bg-white/8 text-white/70 border border-white/10">
+                    <span key={t} className="text-[11px] px-2 py-0.5 rounded-full bg-white/[0.08] text-white/70 border border-white/10">
                       {t}
                     </span>
                   ))}
                 </div>
 
-                <h3 className="text-xl sm:text-2xl font-bold text-white leading-tight mb-3 line-clamp-2">
+                <h3 className="text-lg sm:text-2xl font-bold text-white leading-tight mb-2 sm:mb-3 line-clamp-2">
                   {current.title}
                 </h3>
 
                 {current.description && (
-                  <p className="text-sm text-white/65 leading-relaxed line-clamp-3 mb-6">
+                  <p className="text-sm text-white/65 leading-relaxed line-clamp-2 sm:line-clamp-3 mb-5 sm:mb-6">
                     {current.description}
                   </p>
                 )}
@@ -235,38 +204,40 @@ export function FeaturedReplaysCarousel() {
                 <div className="mt-auto flex flex-col gap-4">
                   <button
                     onClick={() => setModalReplay(current)}
-                    className="inline-flex items-center justify-center gap-2 px-6 py-4 rounded-2xl bg-white text-[#050A0A] font-bold text-[15px] hover:bg-white/90 transition-all shadow-[0_8px_32px_rgba(255,255,255,0.15)] hover:shadow-[0_8px_40px_rgba(255,255,255,0.25)] hover:-translate-y-0.5"
+                    className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3.5 sm:py-4 rounded-2xl bg-white text-[#050A0A] font-bold text-[14px] sm:text-[15px] hover:bg-white/90 transition-all shadow-[0_8px_32px_rgba(255,255,255,0.15)] hover:shadow-[0_8px_40px_rgba(255,255,255,0.25)] hover:-translate-y-0.5"
+                    data-track="featured-replays:watch"
+                    data-track-label={`${current.title} 다시보기 (홈 캐러셀)`}
                   >
                     <PlayCircle className="h-5 w-5" fill="currentColor" />
                     라이브 특강 100% 무료 다시보기
                   </button>
 
-                  {/* Indicators + arrows */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
+                  {/* Indicators + arrows — 모바일에선 한 줄에서 분리 */}
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                       {replays.map((_, i) => (
                         <button
                           key={i}
                           onClick={() => setIdx(i)}
                           aria-label={`${i + 1}번째 라이브로 이동`}
                           className={`h-1.5 rounded-full transition-all ${
-                            i === idx ? "w-8 bg-white" : "w-1.5 bg-white/30 hover:bg-white/50"
+                            i === idx ? "w-8 bg-white" : "w-1.5 bg-white/30 hover:bg-white/50 active:bg-white/60"
                           }`}
                         />
                       ))}
                     </div>
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1.5">
                       <button
                         onClick={() => setIdx((i) => (i - 1 + replays.length) % replays.length)}
                         aria-label="이전"
-                        className="w-9 h-9 rounded-full border border-white/15 text-white/70 hover:text-white hover:bg-white/10 transition-colors flex items-center justify-center"
+                        className="w-10 h-10 sm:w-9 sm:h-9 rounded-full border border-white/15 text-white/80 sm:text-white/70 hover:text-white hover:bg-white/10 active:bg-white/20 transition-colors flex items-center justify-center"
                       >
                         <ChevronLeft className="h-4 w-4" />
                       </button>
                       <button
                         onClick={() => setIdx((i) => (i + 1) % replays.length)}
                         aria-label="다음"
-                        className="w-9 h-9 rounded-full border border-white/15 text-white/70 hover:text-white hover:bg-white/10 transition-colors flex items-center justify-center"
+                        className="w-10 h-10 sm:w-9 sm:h-9 rounded-full border border-white/15 text-white/80 sm:text-white/70 hover:text-white hover:bg-white/10 active:bg-white/20 transition-colors flex items-center justify-center"
                       >
                         <ChevronRight className="h-4 w-4" />
                       </button>
@@ -281,6 +252,114 @@ export function FeaturedReplaysCarousel() {
 
       <ReplayModal replay={modalReplay as any} onClose={() => setModalReplay(null)} />
     </>
+  );
+}
+
+/* ── Credits Scroll Container (rAF + 사용자 스크롤 허용) ─ */
+function ReviewCreditsScroll({
+  trackKey, reviews, showPII, countBadge,
+}: {
+  trackKey: string;
+  reviews: Review[];
+  showPII: boolean;
+  countBadge: number;
+}) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [paused, setPaused] = useState(false);
+  const [hoverCapable, setHoverCapable] = useState(true);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    setHoverCapable(window.matchMedia("(hover: hover)").matches);
+  }, []);
+
+  // 트랙(=current.id) 바뀌면 스크롤 처음으로
+  useEffect(() => {
+    if (scrollRef.current) scrollRef.current.scrollTop = 0;
+  }, [trackKey]);
+
+  // rAF 자동 스크롤 (pause 상태면 동작 안 함)
+  useEffect(() => {
+    if (paused) return;
+    const el = scrollRef.current;
+    if (!el) return;
+    const SPEED = 28; // px/sec
+    let raf = 0;
+    let last = performance.now();
+    const tick = (now: number) => {
+      const dt = (now - last) / 1000;
+      last = now;
+      const half = el.scrollHeight / 2;
+      if (half > 0) {
+        let next = el.scrollTop + SPEED * dt;
+        if (next >= half) next -= half;
+        el.scrollTop = next;
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [paused, reviews.length, trackKey]);
+
+  // 무한 루프 wrap (사용자가 직접 스크롤해서 절반 지나도 자연스럽게 처음으로)
+  const handleScroll = () => {
+    const el = scrollRef.current;
+    if (!el || !paused) return;
+    const half = el.scrollHeight / 2;
+    if (half > 0 && el.scrollTop >= half) el.scrollTop -= half;
+  };
+
+  return (
+    <div
+      className="relative rounded-3xl border border-white/10 h-[440px] sm:h-[500px] lg:h-[560px] overflow-hidden"
+      style={{
+        background:
+          "linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%)",
+        backdropFilter: "blur(20px)",
+      }}
+    >
+      {/* Fade gradients top/bottom (포인터 이벤트 통과) */}
+      <div
+        className="absolute inset-x-0 top-0 h-16 sm:h-20 z-10 pointer-events-none"
+        style={{ background: "linear-gradient(180deg, #050A0A 0%, transparent 100%)" }}
+      />
+      <div
+        className="absolute inset-x-0 bottom-0 h-16 sm:h-20 z-10 pointer-events-none"
+        style={{ background: "linear-gradient(0deg, #050A0A 0%, transparent 100%)" }}
+      />
+
+      {/* 실제 스크롤 컨테이너 */}
+      <div
+        ref={scrollRef}
+        onScroll={handleScroll}
+        onMouseEnter={() => hoverCapable && setPaused(true)}
+        onMouseLeave={() => hoverCapable && setPaused(false)}
+        onTouchStart={() => setPaused(true)}
+        className="credits-scroll absolute inset-0 overflow-y-auto overscroll-contain"
+        style={{ scrollbarWidth: "none" }}
+        aria-label="라이브 후기 모음"
+      >
+        <div className="px-5 sm:px-6 py-4 space-y-4 sm:space-y-5">
+          {/* 2배 복제 — 무한 루프 */}
+          {[...reviews, ...reviews].map((r, i) => (
+            <ReviewCreditCard key={`${r.id}-${i}`} review={r} showPII={showPII} />
+          ))}
+        </div>
+      </div>
+
+      {/* Count badge */}
+      <div className="absolute top-3 sm:top-4 left-3 sm:left-4 z-20 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/40 border border-white/15 backdrop-blur-sm pointer-events-none">
+        <MessageSquare className="h-3.5 w-3.5 text-[#6366F1]" />
+        <span className="text-xs font-semibold text-white">후기 {countBadge.toLocaleString()}개</span>
+      </div>
+
+      {/* "직접 스크롤 가능" 힌트 — 호버 시에만 살짝 */}
+      {paused && (
+        <div className="absolute bottom-3 right-3 z-20 text-[10px] font-medium text-white/45 bg-black/30 px-2 py-0.5 rounded-full border border-white/10 pointer-events-none">
+          ↕ 직접 스크롤
+        </div>
+      )}
+    </div>
   );
 }
 

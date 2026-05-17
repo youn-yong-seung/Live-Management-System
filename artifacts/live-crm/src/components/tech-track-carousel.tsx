@@ -134,9 +134,9 @@ function TrackSlide({
       }}
     >
       {/* Track header */}
-      <div className="px-6 sm:px-8 pt-7 pb-5 border-b border-white/10 flex flex-wrap items-start gap-4">
+      <div className="px-4 sm:px-8 pt-5 sm:pt-7 pb-4 sm:pb-5 border-b border-white/10 flex flex-wrap items-start gap-3 sm:gap-4">
         <div
-          className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center text-2xl sm:text-3xl flex-shrink-0 border"
+          className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center text-2xl sm:text-3xl flex-shrink-0 border"
           style={{
             background: `${track.color}22`,
             borderColor: `${track.color}55`,
@@ -146,7 +146,7 @@ function TrackSlide({
           {track.emoji}
         </div>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1.5">
+          <div className="flex items-center gap-2 mb-1 sm:mb-1.5 flex-wrap">
             <span
               className="text-[10px] font-bold tracking-[0.25em] uppercase"
               style={{ color: track.color }}
@@ -157,10 +157,10 @@ function TrackSlide({
               · 강의 {ordered.length}개
             </span>
           </div>
-          <h3 className="text-2xl sm:text-3xl font-extrabold text-white leading-tight">
-            {track.name} <span className="text-white/40 text-base font-medium">트랙</span>
+          <h3 className="text-xl sm:text-3xl font-extrabold text-white leading-tight">
+            {track.name} <span className="text-white/40 text-sm sm:text-base font-medium">트랙</span>
           </h3>
-          <p className="text-sm text-white/65 mt-1.5">
+          <p className="text-xs sm:text-sm text-white/65 mt-1 sm:mt-1.5 leading-snug">
             {track.description}
           </p>
         </div>
@@ -199,7 +199,7 @@ function TrackSlide({
 
         <div
           ref={railRef}
-          className="flex gap-4 px-6 sm:px-8 py-6 overflow-x-auto scrollbar-hide snap-x snap-mandatory"
+          className="flex gap-3 sm:gap-4 px-4 sm:px-8 py-5 sm:py-6 overflow-x-auto scrollbar-hide snap-x snap-mandatory overscroll-x-contain"
           style={{ scrollbarWidth: "none" }}
         >
           {ordered.map((node, idx) => (
@@ -223,7 +223,7 @@ function TrackSlide({
       </div>
 
       {/* Bottom CTA bar */}
-      <div className="px-6 sm:px-8 py-4 border-t border-white/10 bg-black/20 flex items-center justify-between flex-wrap gap-3">
+      <div className="px-4 sm:px-8 py-3.5 sm:py-4 border-t border-white/10 bg-black/20 flex items-center justify-between flex-wrap gap-3">
         <p className="text-xs text-white/55">
           한 단계씩 따라오면 <span className="text-white/85 font-semibold">자연스럽게 마스터</span>까지 도달합니다.
         </p>
