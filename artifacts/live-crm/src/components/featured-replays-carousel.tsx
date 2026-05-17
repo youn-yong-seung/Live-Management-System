@@ -265,7 +265,8 @@ function ReviewCreditsScroll({
   countBadge: number;
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [paused, setPaused] = useState(false);
+  const pausedRef = useRef(false);          // rAF 내부에서 읽으려고 ref
+  const [paused, setPaused] = useState(false); // hint 표시용 state
   const [hoverCapable, setHoverCapable] = useState(true);
 
   useEffect(() => {
@@ -273,40 +274,47 @@ function ReviewCreditsScroll({
     setHoverCapable(window.matchMedia("(hover: hover)").matches);
   }, []);
 
-  // 트랙(=current.id) 바뀌면 스크롤 처음으로
+  const pause = () => { pausedRef.current = true; setPaused(true); };
+  const resume = () => { pausedRef.current = false; setPaused(false); };
+
+  // 트랙 바뀌면 스크롤 처음으로 (재생 상태도 리셋)
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = 0;
+    pausedRef.current = false;
+    setPaused(false);
   }, [trackKey]);
 
-  // rAF 자동 스크롤 (pause 상태면 동작 안 함)
+  // rAF 자동 스크롤 — 마운트~언마운트 평생 단일 루프, paused는 ref로 매 프레임 체크
   useEffect(() => {
-    if (paused) return;
     const el = scrollRef.current;
     if (!el) return;
-    const SPEED = 28; // px/sec
+    const SPEED = 30; // px/sec
     let raf = 0;
     let last = performance.now();
     const tick = (now: number) => {
-      const dt = (now - last) / 1000;
+      const dt = Math.min((now - last) / 1000, 0.1); // 탭 비활성 등으로 dt 폭주 방지
       last = now;
-      const half = el.scrollHeight / 2;
-      if (half > 0) {
-        let next = el.scrollTop + SPEED * dt;
-        if (next >= half) next -= half;
-        el.scrollTop = next;
+      if (!pausedRef.current) {
+        const max = el.scrollHeight;
+        const half = max / 2;
+        if (half > el.clientHeight) {
+          let next = el.scrollTop + SPEED * dt;
+          if (next >= half) next -= half;
+          el.scrollTop = next;
+        }
       }
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [paused, reviews.length, trackKey]);
+  }, [reviews.length, trackKey]);
 
-  // 무한 루프 wrap (사용자가 직접 스크롤해서 절반 지나도 자연스럽게 처음으로)
+  // 사용자가 직접 스크롤해서 절반 지나도 무한 루프 유지
   const handleScroll = () => {
     const el = scrollRef.current;
-    if (!el || !paused) return;
+    if (!el || !pausedRef.current) return;
     const half = el.scrollHeight / 2;
-    if (half > 0 && el.scrollTop >= half) el.scrollTop -= half;
+    if (half > el.clientHeight && el.scrollTop >= half) el.scrollTop -= half;
   };
 
   return (
@@ -332,9 +340,9 @@ function ReviewCreditsScroll({
       <div
         ref={scrollRef}
         onScroll={handleScroll}
-        onMouseEnter={() => hoverCapable && setPaused(true)}
-        onMouseLeave={() => hoverCapable && setPaused(false)}
-        onTouchStart={() => setPaused(true)}
+        onMouseEnter={() => hoverCapable && pause()}
+        onMouseLeave={() => hoverCapable && resume()}
+        onTouchStart={pause}
         className="credits-scroll absolute inset-0 overflow-y-auto overscroll-contain"
         style={{ scrollbarWidth: "none" }}
         aria-label="라이브 후기 모음"
