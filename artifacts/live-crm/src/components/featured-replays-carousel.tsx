@@ -288,7 +288,7 @@ function ReviewCreditsScroll({
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-    const SPEED = 50; // px/sec — 너무 빠르면 멀미, 너무 느리면 안 보임
+    const SPEED = 35; // px/sec — 50에서 30% 감속 (사용자 조정)
     let raf = 0;
     let last = performance.now();
     const tick = (now: number) => {
