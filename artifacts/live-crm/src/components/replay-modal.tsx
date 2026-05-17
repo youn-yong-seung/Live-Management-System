@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -136,6 +136,10 @@ export function ReplayModal({
       >
         {replay && (
           <>
+            {/* Radix 접근성 요구사항 — sr-only로 시각 숨김 */}
+            <DialogTitle className="sr-only">{replay.title}</DialogTitle>
+            <DialogDescription className="sr-only">{replay.description ?? "라이브 다시보기 영상"}</DialogDescription>
+
             {/* Fullscreen toggle — 데스크탑에서만 보임. 모바일은 이미 풀스크린 */}
             <button
               type="button"
