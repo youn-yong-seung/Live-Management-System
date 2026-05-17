@@ -57,7 +57,7 @@ function avatarColor(name: string) {
   return AVATAR_COLORS[code % AVATAR_COLORS.length];
 }
 
-const ROTATE_MS = 9000;
+const ROTATE_MS = 16000; // 16초 — 후기 읽을 시간 충분히
 const REPLAY_API = "/api/featured-replays?limit=5&reviewsPerLive=30";
 
 export function FeaturedReplaysCarousel() {
@@ -288,7 +288,7 @@ function ReviewCreditsScroll({
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-    const SPEED = 30; // px/sec
+    const SPEED = 50; // px/sec — 너무 빠르면 멀미, 너무 느리면 안 보임
     let raf = 0;
     let last = performance.now();
     const tick = (now: number) => {
