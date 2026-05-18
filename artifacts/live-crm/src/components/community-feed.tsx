@@ -123,8 +123,8 @@ export function CommunityFeed() {
   }, [order, activeBoard]);
 
   return (
-    <section className="section-band" style={{ paddingTop: "32px", paddingBottom: "32px" }}>
-      <div className="section-band-inner">
+    <section className="section-band">
+      <div className="section-band-inner" style={{ paddingTop: 24, paddingBottom: 32 }}>
         {/* 헤더 */}
         <div className="flex flex-wrap items-end justify-between gap-3 mb-4">
           <div>

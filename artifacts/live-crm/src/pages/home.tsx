@@ -138,7 +138,7 @@ export default function Home() {
     <>
       {/* ── Promo Banner: 윤자동의 고민상담소 (이번 주 목요일 오픈) ── */}
       <section className="section-band" style={{ paddingTop: "28px", paddingBottom: "0" }}>
-        <div className="section-band-inner">
+        <div className="section-band-inner" style={{ paddingTop: 0, paddingBottom: 0 }}>
           <Link href="/community/consultations/new">
             <div className="relative overflow-hidden rounded-2xl cursor-pointer group bg-gradient-to-r from-[#6366F1] via-[#818CF8] to-[#F472B6] hover:shadow-2xl hover:-translate-y-0.5 transition-all duration-300">
               {/* 배경 데코 */}
