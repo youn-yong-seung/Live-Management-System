@@ -38,6 +38,10 @@ const createConsultationSchema = z.object({
   liveRequested: z.boolean().default(false),
   /** liveRequested = true 인데 liveId 명시 안 하면 가장 가까운 예정 라이브로 자동 매칭 */
   liveId: z.number().int().positive().optional().nullable(),
+  phoneConsultPreference: z
+    .enum(["available", "apply_only", "decline"])
+    .optional()
+    .nullable(),
 });
 
 type CreateConsultationInput = z.infer<typeof createConsultationSchema>;
@@ -293,6 +297,7 @@ router.post("/community/consultations", optionalUser, async (req: Request, res: 
       liveRequested: data.liveRequested,
       liveId: resolvedLiveId,
       registrationId,
+      phoneConsultPreference: data.phoneConsultPreference ?? null,
       status: "pending",
       isSeed: false,
     })
@@ -489,6 +494,10 @@ const adminPatchSchema = z.object({
   status: z.enum(["pending", "featured", "answered", "hidden"]).optional(),
   isSeed: z.boolean().optional(),
   liveRequested: z.boolean().optional(),
+  phoneConsultPreference: z
+    .enum(["available", "apply_only", "decline"])
+    .nullable()
+    .optional(),
 });
 
 /* ── PATCH /admin/consultations/form-config ───────── */

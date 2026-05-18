@@ -47,6 +47,8 @@ interface UpcomingLive {
   scheduledAt: string | null;
 }
 
+type PhoneConsultPref = "available" | "apply_only" | "decline";
+
 interface FormConfig {
   board: { badge: string; title: string; description: string };
   form: {
@@ -61,9 +63,37 @@ interface FormConfig {
     submitLabel: string;
     liveCheckboxLabel: string;
     liveCheckboxDescription: string;
+    phoneConsult?: {
+      label: string;
+      hint: string;
+      options: {
+        available: { label: string; description: string };
+        applyOnly: { label: string; description: string };
+        decline: { label: string; description: string };
+      };
+    };
   };
   thankYou: { title: string; body: string };
 }
+
+const FALLBACK_PHONE_CONSULT = {
+  label: "라이브 전화상담, 어떻게 하실래요?",
+  hint: "픽업되신 분은 라이브에서 실시간 전화로 직접 상담해드려요.",
+  options: {
+    available: {
+      label: "이번 라이브 시간에 전화 받을 수 있어요",
+      description: "라이브 픽업 1순위로 검토해드려요.",
+    },
+    applyOnly: {
+      label: "일단 응모만 할게요",
+      description: "라이브 시간 일정 봐서 받을지 결정할 수 있어요.",
+    },
+    decline: {
+      label: "전화상담은 포기할게요. 사연만 다뤄주세요",
+      description: "라이브에서 사연만 익명으로 소개됩니다.",
+    },
+  },
+};
 
 const FALLBACK_FORM_CONFIG: FormConfig = {
   board: { badge: "윤자동의 자동화 상담소", title: "", description: "" },
@@ -107,6 +137,7 @@ export default function CommunityConsultationNew() {
   const [concern, setConcern] = useState("");
   const [hardest, setHardest] = useState("");
   const [liveRequested, setLiveRequested] = useState(true);
+  const [phoneConsult, setPhoneConsult] = useState<PhoneConsultPref | null>(null);
 
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -158,6 +189,7 @@ export default function CommunityConsultationNew() {
     if (currentWork.trim().length < 2) return setErrorMsg("어떤 일을 하시는지 알려주세요.");
     if (concern.trim().length < 2) return setErrorMsg("고민 내용을 적어주세요.");
     if (hardest.trim().length < 2) return setErrorMsg("가장 힘든 부분을 알려주세요.");
+    if (!phoneConsult) return setErrorMsg("라이브 전화상담 의향을 선택해주세요.");
 
     setSubmitting(true);
     setErrorMsg(null);
@@ -184,6 +216,7 @@ export default function CommunityConsultationNew() {
         hardest: hardest.trim(),
         liveRequested,
         liveId: liveRequested && upcomingLive ? upcomingLive.id : null,
+        phoneConsultPreference: phoneConsult,
       }),
     });
 
@@ -451,6 +484,68 @@ export default function CommunityConsultationNew() {
             />
           </Field>
         </div>
+
+        {/* 3.5) 라이브 전화상담 의향 (라디오 3개) */}
+        {(() => {
+          const pc = cfgForm.phoneConsult ?? FALLBACK_PHONE_CONSULT;
+          const opts: { key: PhoneConsultPref; cfgKey: "available" | "applyOnly" | "decline" }[] = [
+            { key: "available", cfgKey: "available" },
+            { key: "apply_only", cfgKey: "applyOnly" },
+            { key: "decline", cfgKey: "decline" },
+          ];
+          return (
+            <div className="glass-card p-6 space-y-3">
+              <div className="flex items-center gap-2 text-sm font-bold text-[#111318]">
+                <Video className="h-4 w-4 text-[#6366F1]" />
+                <span>{pc.label}</span>
+                <span className="text-rose-500 ml-1">*</span>
+              </div>
+              {pc.hint && (
+                <p className="text-xs text-[#8b8f98] leading-relaxed">{pc.hint}</p>
+              )}
+              <div className="space-y-2">
+                {opts.map(({ key, cfgKey }) => {
+                  const opt = pc.options[cfgKey];
+                  const active = phoneConsult === key;
+                  return (
+                    <label
+                      key={key}
+                      className={`flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition-colors ${
+                        active
+                          ? "bg-[#6366F1]/10 border-[#6366F1]/40"
+                          : "bg-[#f7f8fa] border-[#e5e7eb] hover:bg-[#eef0f3]"
+                      }`}
+                      data-testid={`radio-phone-${key}`}
+                    >
+                      <input
+                        type="radio"
+                        name="phoneConsult"
+                        value={key}
+                        checked={active}
+                        onChange={() => setPhoneConsult(key)}
+                        className="mt-0.5 h-4 w-4 text-[#6366F1] border-[#d1d5db] focus:ring-[#6366F1]/30"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div
+                          className={`text-sm font-bold ${
+                            active ? "text-[#111318]" : "text-[#484d57]"
+                          }`}
+                        >
+                          {opt.label}
+                        </div>
+                        {opt.description && (
+                          <p className="text-xs text-[#8b8f98] mt-0.5 leading-relaxed">
+                            {opt.description}
+                          </p>
+                        )}
+                      </div>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })()}
 
         {/* 4) 라이브 동시 신청 */}
         <div

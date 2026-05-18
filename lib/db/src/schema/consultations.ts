@@ -49,6 +49,15 @@ export const communityConsultationsTable = pgTable(
       onDelete: "set null",
     }),
 
+    /**
+     * 라이브 전화상담 의향
+     * - 'available' : 라이브 시간에 전화 받을 수 있음 (픽업 1순위 후보)
+     * - 'apply_only': 응모만 — 시간 봐서 받을지 결정
+     * - 'decline'   : 전화상담은 포기, 사연만 다뤄주세요
+     * null = 미응답 (구버전 사연)
+     */
+    phoneConsultPreference: text("phone_consult_preference"),
+
     likeCount: integer("like_count").notNull().default(0),
     viewCount: integer("view_count").notNull().default(0),
 
@@ -127,6 +136,15 @@ export type ConsultationFormConfig = {
     submitLabel: string;
     liveCheckboxLabel: string;
     liveCheckboxDescription: string;
+    phoneConsult?: {
+      label: string;
+      hint: string;
+      options: {
+        available: { label: string; description: string };
+        applyOnly: { label: string; description: string };
+        decline: { label: string; description: string };
+      };
+    };
   };
   thankYou: {
     title: string;
@@ -175,6 +193,24 @@ export const DEFAULT_CONSULTATION_FORM_CONFIG: ConsultationFormConfig = {
     liveCheckboxLabel: "이번 라이브에도 참가할래요",
     liveCheckboxDescription:
       "체크하면 별도 신청 없이 바로 등록됩니다. 알림톡으로 접속 링크를 보내드려요.",
+    phoneConsult: {
+      label: "라이브 전화상담, 어떻게 하실래요?",
+      hint: "픽업되신 분은 라이브에서 실시간 전화로 직접 상담해드려요.",
+      options: {
+        available: {
+          label: "이번 라이브 시간에 전화 받을 수 있어요",
+          description: "라이브 픽업 1순위로 검토해드려요.",
+        },
+        applyOnly: {
+          label: "일단 응모만 할게요",
+          description: "라이브 시간 일정 봐서 받을지 결정할 수 있어요.",
+        },
+        decline: {
+          label: "전화상담은 포기할게요. 사연만 다뤄주세요",
+          description: "라이브에서 사연만 익명으로 소개됩니다.",
+        },
+      },
+    },
   },
   thankYou: {
     title: "사연이 등록되었어요!",

@@ -38,6 +38,7 @@ interface Consultation {
   hardest: string;
   liveRequested: boolean;
   liveId: number | null;
+  phoneConsultPreference: "available" | "apply_only" | "decline" | null;
   likeCount: number;
   viewCount: number;
   status: string;
@@ -45,6 +46,12 @@ interface Consultation {
   createdAt: string;
   updatedAt: string;
 }
+
+const PHONE_CONSULT_LABEL: Record<string, { label: string; cls: string }> = {
+  available: { label: "전화 가능", cls: "bg-emerald-100 text-emerald-700 border-emerald-200" },
+  apply_only: { label: "응모만", cls: "bg-sky-100 text-sky-700 border-sky-200" },
+  decline: { label: "전화 포기", cls: "bg-gray-100 text-gray-600 border-gray-200" },
+};
 
 interface Stats {
   total: number;
@@ -68,9 +75,37 @@ interface FormConfig {
     submitLabel: string;
     liveCheckboxLabel: string;
     liveCheckboxDescription: string;
+    phoneConsult?: {
+      label: string;
+      hint: string;
+      options: {
+        available: { label: string; description: string };
+        applyOnly: { label: string; description: string };
+        decline: { label: string; description: string };
+      };
+    };
   };
   thankYou: { title: string; body: string };
 }
+
+const FALLBACK_PHONE_CONSULT_CFG = {
+  label: "라이브 전화상담, 어떻게 하실래요?",
+  hint: "픽업되신 분은 라이브에서 실시간 전화로 직접 상담해드려요.",
+  options: {
+    available: {
+      label: "이번 라이브 시간에 전화 받을 수 있어요",
+      description: "라이브 픽업 1순위로 검토해드려요.",
+    },
+    applyOnly: {
+      label: "일단 응모만 할게요",
+      description: "라이브 시간 일정 봐서 받을지 결정할 수 있어요.",
+    },
+    decline: {
+      label: "전화상담은 포기할게요. 사연만 다뤄주세요",
+      description: "라이브에서 사연만 익명으로 소개됩니다.",
+    },
+  },
+};
 
 function authHeaders(): Record<string, string> {
   const token = (() => {
@@ -386,6 +421,16 @@ function RowCard({
           {c.status === "hidden" && (
             <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 border border-gray-200">
               숨김
+            </span>
+          )}
+          {c.phoneConsultPreference && PHONE_CONSULT_LABEL[c.phoneConsultPreference] && (
+            <span
+              className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${
+                PHONE_CONSULT_LABEL[c.phoneConsultPreference].cls
+              }`}
+              title="라이브 전화상담 의향"
+            >
+              📞 {PHONE_CONSULT_LABEL[c.phoneConsultPreference].label}
             </span>
           )}
           <span className="text-sm font-bold text-gray-900">{c.name}</span>
@@ -813,6 +858,101 @@ function FormConfigEditor() {
             className={`${inputCls} resize-none`}
           />
         </FieldRow>
+      </Section>
+
+      {/* 라이브 전화상담 의향 (라디오 3개) */}
+      <Section title="라이브 전화상담 의향 (라디오 3지선다)">
+        <p className="text-xs text-gray-500 -mt-1">
+          폼에서 사연자가 "라이브 시간에 전화 받기 가능 / 응모만 / 전화 포기" 중 하나를 고르도록 합니다.
+        </p>
+        <FieldRow label="섹션 라벨">
+          <input
+            value={config.form.phoneConsult?.label ?? FALLBACK_PHONE_CONSULT_CFG.label}
+            onChange={(e) =>
+              setConfig({
+                ...config,
+                form: {
+                  ...config.form,
+                  phoneConsult: {
+                    ...(config.form.phoneConsult ?? FALLBACK_PHONE_CONSULT_CFG),
+                    label: e.target.value,
+                  },
+                },
+              })
+            }
+            className={inputCls}
+          />
+        </FieldRow>
+        <FieldRow label="섹션 힌트 (작은 안내)">
+          <textarea
+            value={config.form.phoneConsult?.hint ?? FALLBACK_PHONE_CONSULT_CFG.hint}
+            onChange={(e) =>
+              setConfig({
+                ...config,
+                form: {
+                  ...config.form,
+                  phoneConsult: {
+                    ...(config.form.phoneConsult ?? FALLBACK_PHONE_CONSULT_CFG),
+                    hint: e.target.value,
+                  },
+                },
+              })
+            }
+            rows={2}
+            className={`${inputCls} resize-none`}
+          />
+        </FieldRow>
+        {(
+          [
+            { key: "available", title: "옵션 1 — 전화 받기 가능" },
+            { key: "applyOnly", title: "옵션 2 — 응모만" },
+            { key: "decline", title: "옵션 3 — 전화 포기" },
+          ] as const
+        ).map(({ key, title }) => {
+          const cur =
+            config.form.phoneConsult?.options[key] ??
+            FALLBACK_PHONE_CONSULT_CFG.options[key];
+          const setOptField = (field: "label" | "description", val: string) => {
+            const baseOptions =
+              config.form.phoneConsult?.options ?? FALLBACK_PHONE_CONSULT_CFG.options;
+            const baseTop = config.form.phoneConsult ?? FALLBACK_PHONE_CONSULT_CFG;
+            setConfig({
+              ...config,
+              form: {
+                ...config.form,
+                phoneConsult: {
+                  ...baseTop,
+                  options: {
+                    ...baseOptions,
+                    [key]: { ...baseOptions[key], [field]: val },
+                  },
+                },
+              },
+            });
+          };
+          return (
+            <div
+              key={key}
+              className="rounded-lg border border-gray-200 bg-gray-50 p-3 space-y-2"
+            >
+              <div className="text-[11px] font-bold text-gray-600">{title}</div>
+              <FieldRow label="라벨">
+                <input
+                  value={cur.label}
+                  onChange={(e) => setOptField("label", e.target.value)}
+                  className={inputCls}
+                />
+              </FieldRow>
+              <FieldRow label="보조 설명">
+                <input
+                  value={cur.description}
+                  onChange={(e) => setOptField("description", e.target.value)}
+                  className={inputCls}
+                />
+              </FieldRow>
+            </div>
+          );
+        })}
       </Section>
 
       {/* 제출 후 화면 */}
