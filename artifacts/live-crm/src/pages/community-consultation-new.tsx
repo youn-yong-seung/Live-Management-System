@@ -47,6 +47,42 @@ interface UpcomingLive {
   scheduledAt: string | null;
 }
 
+interface FormConfig {
+  board: { badge: string; title: string; description: string };
+  form: {
+    badge: string;
+    title: string;
+    description: string;
+    fields: {
+      currentWork: { label: string; hint: string; placeholder: string };
+      concern: { label: string; hint: string; placeholder: string };
+      hardest: { label: string; hint: string; placeholder: string };
+    };
+    submitLabel: string;
+    liveCheckboxLabel: string;
+    liveCheckboxDescription: string;
+  };
+  thankYou: { title: string; body: string };
+}
+
+const FALLBACK_FORM_CONFIG: FormConfig = {
+  board: { badge: "윤자동의 자동화 상담소", title: "", description: "" },
+  form: {
+    badge: "윤자동의 자동화 상담소",
+    title: "사연 신청하기",
+    description: "",
+    fields: {
+      currentWork: { label: "어떤 일을 하고 계신가요?", hint: "", placeholder: "" },
+      concern: { label: "어떤 고민이 있으신가요?", hint: "", placeholder: "" },
+      hardest: { label: "가장 힘든 게 무엇인가요?", hint: "", placeholder: "" },
+    },
+    submitLabel: "사연 제출하기",
+    liveCheckboxLabel: "이번 라이브에도 참가할래요",
+    liveCheckboxDescription: "",
+  },
+  thankYou: { title: "사연이 등록되었어요!", body: "" },
+};
+
 function formatPhone(raw: string): string {
   const d = raw.replace(/\D/g, "").slice(0, 11);
   if (d.length < 4) return d;
@@ -58,6 +94,7 @@ export default function CommunityConsultationNew() {
   const { user } = useAuth();
   const [, navigate] = useLocation();
   const [upcomingLive, setUpcomingLive] = useState<UpcomingLive | null>(null);
+  const [formConfig, setFormConfig] = useState<FormConfig>(FALLBACK_FORM_CONFIG);
 
   const [name, setName] = useState("");
   const [ageRange, setAgeRange] = useState("");
@@ -83,7 +120,17 @@ export default function CommunityConsultationNew() {
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => setUpcomingLive(d?.live ?? null))
       .catch(() => setUpcomingLive(null));
+    fetch("/api/community/consultations/meta/form-config")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (d?.config) setFormConfig(d.config);
+      })
+      .catch(() => {});
   }, []);
+
+  const cfgForm = formConfig.form;
+  const cfgFields = cfgForm.fields;
+  const cfgThankYou = formConfig.thankYou;
 
   const inputCls =
     "w-full px-4 py-3 rounded-xl bg-[#f7f8fa] border border-[#e5e7eb] text-[#111318] placeholder:text-[#a0a4ab] focus:outline-none focus:border-[#6366F1]/50 focus:bg-[#eef0f3] transition-colors disabled:opacity-50";
@@ -165,12 +212,10 @@ export default function CommunityConsultationNew() {
           <CheckCircle className="h-14 w-14 text-[#6366F1] mx-auto" />
           <div>
             <h2 className="text-xl font-bold text-[#111318] mb-2">
-              사연이 등록되었어요!
+              {cfgThankYou.title}
             </h2>
-            <p className="text-[#484d57] text-sm leading-relaxed">
-              윤자동이 직접 읽고, 라이브에서 다룰 사연을 골라드립니다.
-              <br />
-              커뮤니티에서 좋아요·댓글이 많을수록 픽업 가능성이 올라가요.
+            <p className="text-[#484d57] text-sm leading-relaxed whitespace-pre-line">
+              {cfgThankYou.body}
             </p>
           </div>
 
@@ -220,13 +265,11 @@ export default function CommunityConsultationNew() {
       <div className="space-y-2">
         <div className="inline-flex items-center gap-2 bg-[#6366F1]/10 rounded-full px-3 py-1 text-xs font-bold text-[#6366F1] border border-[#6366F1]/30">
           <Sparkles className="h-3.5 w-3.5" />
-          윤자동의 자동화 상담소
+          {cfgForm.badge}
         </div>
-        <h1 className="text-2xl font-bold text-[#111318]">사연 신청하기</h1>
-        <p className="text-[#8b8f98] text-sm leading-relaxed">
-          반복 업무·자동화·AX 도입 어디서 막혔는지 알려주세요. 18년 경력으로 직접 처방해드려요.
-          <br />
-          체크박스 한 번이면 <span className="font-semibold text-[#6366F1]">이번 주 라이브 참가까지 자동 신청</span> 됩니다.
+        <h1 className="text-2xl font-bold text-[#111318]">{cfgForm.title}</h1>
+        <p className="text-[#8b8f98] text-sm leading-relaxed whitespace-pre-line">
+          {cfgForm.description}
         </p>
       </div>
 
@@ -352,11 +395,15 @@ export default function CommunityConsultationNew() {
             )}
           </Field>
 
-          <Field label="어떤 일을 하고 계신가요?" required hint="예: 강남에서 카페 2호점 운영 중. 일 8시간 중 4시간이 정산·재고관리.">
+          <Field
+            label={cfgFields.currentWork.label}
+            required
+            hint={cfgFields.currentWork.hint}
+          >
             <textarea
               value={currentWork}
               onChange={(e) => setCurrentWork(e.target.value)}
-              placeholder="구체적으로 적어주실수록 정확한 처방이 가능해요."
+              placeholder={cfgFields.currentWork.placeholder}
               rows={3}
               maxLength={2000}
               className={`${inputCls} resize-none`}
@@ -373,14 +420,14 @@ export default function CommunityConsultationNew() {
           </div>
 
           <Field
-            label="어떤 고민이 있으신가요?"
+            label={cfgFields.concern.label}
             required
-            hint="자동화·AI·반복업무 무엇이든 좋아요."
+            hint={cfgFields.concern.hint}
           >
             <textarea
               value={concern}
               onChange={(e) => setConcern(e.target.value)}
-              placeholder="예: 고객 문의가 카톡/인스타/메일에 흩어져서 답장 누락이 자주 나요."
+              placeholder={cfgFields.concern.placeholder}
               rows={4}
               maxLength={2000}
               className={`${inputCls} resize-none`}
@@ -389,14 +436,14 @@ export default function CommunityConsultationNew() {
           </Field>
 
           <Field
-            label="가장 힘든 게 무엇인가요?"
+            label={cfgFields.hardest.label}
             required
-            hint="한 줄만 — 우선순위가 명확해야 처방이 빠릅니다."
+            hint={cfgFields.hardest.hint}
           >
             <textarea
               value={hardest}
               onChange={(e) => setHardest(e.target.value)}
-              placeholder="예: 매주 같은 보고서를 손으로 만드는 게 너무 지쳐요."
+              placeholder={cfgFields.hardest.placeholder}
               rows={3}
               maxLength={2000}
               className={`${inputCls} resize-none`}
@@ -424,13 +471,13 @@ export default function CommunityConsultationNew() {
             <div className="flex-1">
               <div className="flex items-center gap-2 text-sm font-bold text-[#111318]">
                 <Video className="h-4 w-4 text-[#6366F1]" />
-                이번 라이브에도 참가할래요
+                {cfgForm.liveCheckboxLabel}
               </div>
               {liveDateLabel ? (
-                <p className="text-xs text-[#484d57] mt-1 leading-relaxed">
+                <p className="text-xs text-[#484d57] mt-1 leading-relaxed whitespace-pre-line">
                   <span className="font-semibold text-[#6366F1]">{liveDateLabel}</span>
-                  <br />
-                  체크하면 별도 신청 없이 바로 등록됩니다. 알림톡으로 접속 링크를 보내드려요.
+                  {"\n"}
+                  {cfgForm.liveCheckboxDescription}
                 </p>
               ) : (
                 <p className="text-xs text-[#8b8f98] mt-1">
@@ -464,7 +511,7 @@ export default function CommunityConsultationNew() {
                 <Loader2 className="h-4 w-4 animate-spin" /> 등록 중...
               </>
             ) : (
-              "사연 제출하기"
+              cfgForm.submitLabel
             )}
           </button>
         </div>

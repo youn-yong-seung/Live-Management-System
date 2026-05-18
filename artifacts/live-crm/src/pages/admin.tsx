@@ -22,7 +22,7 @@ import {
   Zap, Lock, Youtube, TrendingUp, ThumbsUp, X,
   MessageCircle, PlayCircle, BarChart2, Link2, MonitorPlay,
   ExternalLink, Gift, FileText, Sparkles, ShoppingBag,
-  Menu, GitBranch, MoreHorizontal, Calendar, EyeOff, Shield,
+  Menu, GitBranch, MoreHorizontal, Calendar, EyeOff, Shield, MessageSquare,
 } from "lucide-react";
 import { usePIIVisible, setShowPII, maskName, maskPhone, maskEmail, maskFreeText } from "@/lib/pii";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -31,6 +31,7 @@ import { AdminFormBuilder } from "@/components/admin-form-builder";
 import { AdminTechTreeEditor } from "@/components/admin-techtree-editor";
 import { AdminDashboard } from "@/components/admin-dashboard";
 import { AdminAnalytics } from "@/components/admin-analytics";
+import { AdminConsultations } from "@/components/admin-consultations";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
@@ -837,6 +838,7 @@ export default function Admin() {
     {
       title: "콘텐츠",
       items: [
+        { id: "consultations", label: "사연 게시판", icon: MessageSquare },
         { id: "youtube", label: "YouTube 성과", icon: Youtube, onSelect: loadYtStatsAll },
         { id: "editors", label: "편집자 관리", icon: Users },
         { id: "techtree", label: "테크트리", icon: GitBranch },
@@ -1143,6 +1145,7 @@ export default function Admin() {
           <TabsTrigger value="youtube">YouTube 성과</TabsTrigger>
           <TabsTrigger value="editors">편집자 관리</TabsTrigger>
           <TabsTrigger value="techtree">테크트리</TabsTrigger>
+          <TabsTrigger value="consultations">사연 게시판</TabsTrigger>
         </TabsList>
 
         {/* ── Tab: Dashboard ─────────────────────────── */}
@@ -1720,6 +1723,11 @@ export default function Admin() {
         {/* ── Tab 6: 테크트리 편집 ───────────────── */}
         <TabsContent value="techtree" className="mt-6">
           <AdminTechTreeEditor />
+        </TabsContent>
+
+        {/* ── Tab 7: 사연 게시판 관리 ────────────── */}
+        <TabsContent value="consultations" className="mt-6">
+          <AdminConsultations />
         </TabsContent>
 
       </Tabs>

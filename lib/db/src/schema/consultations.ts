@@ -6,6 +6,7 @@ import {
   uuid,
   integer,
   boolean,
+  jsonb,
   index,
   uniqueIndex,
 } from "drizzle-orm/pg-core";
@@ -103,3 +104,80 @@ export type InsertCommunityConsultation = z.infer<typeof insertCommunityConsulta
 export type CommunityConsultation = typeof communityConsultationsTable.$inferSelect;
 
 export type CommunityConsultationLike = typeof communityConsultationLikesTable.$inferSelect;
+
+/**
+ * 사연 게시판/폼 텍스트 동적 편집용 단일행 설정 테이블.
+ * 어드민이 게시판 소개·폼 질문·플레이스홀더 등을 자유롭게 바꿀 수 있게.
+ */
+export type ConsultationFormConfig = {
+  board: {
+    badge: string; // "NEW · 윤자동의 자동화 상담소"
+    title: string;
+    description: string;
+  };
+  form: {
+    badge: string; // 폼 상단 작은 배지
+    title: string;
+    description: string;
+    fields: {
+      currentWork: { label: string; hint: string; placeholder: string };
+      concern: { label: string; hint: string; placeholder: string };
+      hardest: { label: string; hint: string; placeholder: string };
+    };
+    submitLabel: string;
+    liveCheckboxLabel: string;
+    liveCheckboxDescription: string;
+  };
+  thankYou: {
+    title: string;
+    body: string;
+  };
+};
+
+export const consultationFormConfigTable = pgTable("consultation_form_config", {
+  id: serial("id").primaryKey(),
+  config: jsonb("config").$type<ConsultationFormConfig>().notNull(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export type ConsultationFormConfigRow = typeof consultationFormConfigTable.$inferSelect;
+
+export const DEFAULT_CONSULTATION_FORM_CONFIG: ConsultationFormConfig = {
+  board: {
+    badge: "윤자동의 자동화 상담소",
+    title: "반복업무 때문에 막힌 일, 18년 경력으로 직접 처방해드려요.",
+    description:
+      "자동화·AI·AX 어디서 막혔는지 알려주시면, 매주 목요일 라이브에서 직접 답변드립니다. 폼 한 번 작성하면 이번 주 라이브 참가 신청까지 같이 완료돼요.",
+  },
+  form: {
+    badge: "윤자동의 자동화 상담소",
+    title: "사연 신청하기",
+    description:
+      "반복 업무·자동화·AX 도입 어디서 막혔는지 알려주세요. 18년 경력으로 직접 처방해드려요. 체크박스 한 번이면 이번 주 라이브 참가까지 자동 신청됩니다.",
+    fields: {
+      currentWork: {
+        label: "어떤 일을 하고 계신가요?",
+        hint: "예: 강남에서 카페 2호점 운영 중. 일 8시간 중 4시간이 정산·재고관리.",
+        placeholder: "구체적으로 적어주실수록 정확한 처방이 가능해요.",
+      },
+      concern: {
+        label: "어떤 고민이 있으신가요?",
+        hint: "자동화·AI·반복업무 무엇이든 좋아요.",
+        placeholder: "예: 고객 문의가 카톡/인스타/메일에 흩어져서 답장 누락이 자주 나요.",
+      },
+      hardest: {
+        label: "가장 힘든 게 무엇인가요?",
+        hint: "한 줄만 — 우선순위가 명확해야 처방이 빠릅니다.",
+        placeholder: "예: 매주 같은 보고서를 손으로 만드는 게 너무 지쳐요.",
+      },
+    },
+    submitLabel: "사연 제출하기",
+    liveCheckboxLabel: "이번 라이브에도 참가할래요",
+    liveCheckboxDescription:
+      "체크하면 별도 신청 없이 바로 등록됩니다. 알림톡으로 접속 링크를 보내드려요.",
+  },
+  thankYou: {
+    title: "사연이 등록되었어요!",
+    body: "윤자동이 직접 읽고, 라이브에서 다룰 사연을 골라드립니다. 커뮤니티에서 좋아요·댓글이 많을수록 픽업 가능성이 올라가요.",
+  },
+};

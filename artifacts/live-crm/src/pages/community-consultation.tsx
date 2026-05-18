@@ -60,10 +60,22 @@ function getVisitorId(): string {
   return id;
 }
 
+interface BoardHeaderConfig {
+  badge: string;
+  title: string;
+  description: string;
+}
+
 export default function CommunityConsultation() {
   const [items, setItems] = useState<ConsultationRow[] | null>(null);
   const [order, setOrder] = useState<"popular" | "recent">("popular");
   const [busyId, setBusyId] = useState<number | null>(null);
+  const [boardHeader, setBoardHeader] = useState<BoardHeaderConfig>({
+    badge: "윤자동의 자동화 상담소",
+    title: "반복업무 때문에 막힌 일, 18년 경력으로 직접 처방해드려요.",
+    description:
+      "자동화·AI·AX 어디서 막혔는지 알려주시면, 매주 목요일 라이브에서 직접 답변드립니다.",
+  });
 
   useEffect(() => {
     setItems(null);
@@ -74,6 +86,15 @@ export default function CommunityConsultation() {
       .then((d) => setItems(d.consultations ?? []))
       .catch(() => setItems([]));
   }, [order]);
+
+  useEffect(() => {
+    fetch("/api/community/consultations/meta/form-config")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (d?.config?.board) setBoardHeader(d.config.board);
+      })
+      .catch(() => {});
+  }, []);
 
   const handleLike = async (id: number) => {
     if (busyId === id) return;
@@ -118,17 +139,13 @@ export default function CommunityConsultation() {
       <div className="glass-card-gold p-6 sm:p-8 space-y-3">
         <div className="inline-flex items-center gap-2 bg-[#6366F1]/15 rounded-full px-3 py-1 text-xs font-bold text-[#6366F1] border border-[#6366F1]/30">
           <Sparkles className="h-3.5 w-3.5" />
-          윤자동의 자동화 상담소
+          {boardHeader.badge}
         </div>
-        <h1 className="text-2xl sm:text-3xl font-black text-[#111318] leading-tight">
-          반복업무 때문에 막힌 일,
-          <br />
-          18년 경력으로 직접 처방해드려요.
+        <h1 className="text-2xl sm:text-3xl font-black text-[#111318] leading-tight whitespace-pre-line">
+          {boardHeader.title}
         </h1>
-        <p className="text-[#484d57] text-sm leading-relaxed">
-          자동화·AI·AX 어디서 막혔는지 알려주시면, 매주 목요일 라이브에서 직접 답변드립니다.
-          <br />
-          폼 한 번 작성하면 <span className="font-semibold text-[#6366F1]">이번 주 라이브 참가 신청까지 같이</span> 완료돼요.
+        <p className="text-[#484d57] text-sm leading-relaxed whitespace-pre-line">
+          {boardHeader.description}
         </p>
         <div className="flex flex-wrap gap-2 pt-2">
           <Link href="/community/consultations/new">

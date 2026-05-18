@@ -3,13 +3,17 @@ import {
   db,
   communityConsultationsTable,
   communityConsultationLikesTable,
+  consultationFormConfigTable,
+  DEFAULT_CONSULTATION_FORM_CONFIG,
   livesTable,
   registrationsTable,
   usersTable,
 } from "@workspace/db";
+import type { ConsultationFormConfig } from "@workspace/db";
 import { eq, desc, sql, and, gte, asc, isNull, or } from "drizzle-orm";
 import { z } from "zod";
 import { optionalUser, requireUser } from "../middleware/userAuth.js";
+import { requireAdminAuth } from "../middleware/adminAuth";
 import { fireRegistrationTrigger } from "./notifications";
 
 const router: IRouter = Router();
@@ -414,6 +418,176 @@ router.delete(
     }
     await db.delete(communityConsultationsTable).where(eq(communityConsultationsTable.id, id));
     res.json({ ok: true });
+  },
+);
+
+/* ── GET /community/consultations/meta/form-config ─ */
+/* 폼/게시판 텍스트 (public) */
+
+router.get(
+  "/community/consultations/meta/form-config",
+  async (_req: Request, res: Response) => {
+    const [row] = await db.select().from(consultationFormConfigTable).limit(1);
+    res.json({ config: row?.config ?? DEFAULT_CONSULTATION_FORM_CONFIG });
+  },
+);
+
+/* ════════════════════════════════════════════════════
+ * ADMIN: 사연 관리
+ * ════════════════════════════════════════════════════ */
+
+/* ── GET /admin/consultations ─────────────────────── */
+/* 시드 + 실제 + hidden 모두 노출. 마스킹 X. */
+
+router.get(
+  "/admin/consultations",
+  requireAdminAuth,
+  async (req: Request, res: Response) => {
+    const filter = String(req.query.filter ?? "all"); // all | seeds | real
+    const order = String(req.query.order ?? "recent"); // recent | popular
+
+    const whereClauses: any[] = [];
+    if (filter === "seeds") whereClauses.push(eq(communityConsultationsTable.isSeed, true));
+    else if (filter === "real") whereClauses.push(eq(communityConsultationsTable.isSeed, false));
+
+    const rows = await db
+      .select()
+      .from(communityConsultationsTable)
+      .where(whereClauses.length ? and(...whereClauses) : undefined as any)
+      .orderBy(
+        order === "popular"
+          ? desc(communityConsultationsTable.likeCount)
+          : desc(communityConsultationsTable.createdAt),
+      );
+
+    // 통계
+    const allRows = await db.select().from(communityConsultationsTable);
+    const stats = {
+      total: allRows.length,
+      seeds: allRows.filter((r) => r.isSeed).length,
+      real: allRows.filter((r) => !r.isSeed).length,
+      hidden: allRows.filter((r) => r.status === "hidden").length,
+      seedsVisible: allRows.some((r) => r.isSeed && r.status !== "hidden"),
+    };
+
+    res.json({ consultations: rows, stats });
+  },
+);
+
+/* ── PATCH /admin/consultations/:id ───────────────── */
+/* 부분 업데이트 (status, isSeed, 본문 텍스트 등) */
+
+const adminPatchSchema = z.object({
+  name: z.string().min(1).max(50).optional(),
+  ageRange: z.string().optional(),
+  phone: z.string().optional(),
+  industry: z.string().optional(),
+  jobType: z.string().optional(),
+  currentWork: z.string().max(5000).optional(),
+  concern: z.string().max(5000).optional(),
+  hardest: z.string().max(5000).optional(),
+  status: z.enum(["pending", "featured", "answered", "hidden"]).optional(),
+  isSeed: z.boolean().optional(),
+  liveRequested: z.boolean().optional(),
+});
+
+router.patch(
+  "/admin/consultations/:id",
+  requireAdminAuth,
+  async (req: Request, res: Response) => {
+    const id = parseInt(req.params.id, 10);
+    if (!Number.isFinite(id) || id <= 0) {
+      res.status(400).json({ error: "잘못된 사연 ID" });
+      return;
+    }
+    const parsed = adminPatchSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: "잘못된 입력", details: parsed.error.flatten() });
+      return;
+    }
+
+    const [updated] = await db
+      .update(communityConsultationsTable)
+      .set({ ...parsed.data, updatedAt: new Date() })
+      .where(eq(communityConsultationsTable.id, id))
+      .returning();
+
+    if (!updated) {
+      res.status(404).json({ error: "사연을 찾을 수 없습니다." });
+      return;
+    }
+    res.json({ consultation: updated });
+  },
+);
+
+/* ── DELETE /admin/consultations/:id ──────────────── */
+
+router.delete(
+  "/admin/consultations/:id",
+  requireAdminAuth,
+  async (req: Request, res: Response) => {
+    const id = parseInt(req.params.id, 10);
+    if (!Number.isFinite(id) || id <= 0) {
+      res.status(400).json({ error: "잘못된 사연 ID" });
+      return;
+    }
+    await db.delete(communityConsultationsTable).where(eq(communityConsultationsTable.id, id));
+    res.json({ ok: true });
+  },
+);
+
+/* ── POST /admin/consultations/seeds-visible ──────── */
+/* 시드 사연 일괄 노출/숨김 토글 */
+
+router.post(
+  "/admin/consultations/seeds-visible",
+  requireAdminAuth,
+  async (req: Request, res: Response) => {
+    const visible = Boolean(req.body?.visible);
+    await db
+      .update(communityConsultationsTable)
+      .set({
+        status: visible ? "pending" : "hidden",
+        updatedAt: new Date(),
+      })
+      .where(eq(communityConsultationsTable.isSeed, true));
+    res.json({ ok: true, visible });
+  },
+);
+
+/* ── PATCH /admin/consultations/form-config ───────── */
+/* 폼/게시판 텍스트 일괄 수정. config 전체를 통째로 받음. */
+
+router.patch(
+  "/admin/consultations/form-config",
+  requireAdminAuth,
+  async (req: Request, res: Response) => {
+    const cfg = req.body?.config as ConsultationFormConfig | undefined;
+    if (!cfg || typeof cfg !== "object") {
+      res.status(400).json({ error: "config 객체가 필요합니다." });
+      return;
+    }
+    // 단순한 shape 검증
+    if (!cfg.board || !cfg.form || !cfg.form.fields || !cfg.thankYou) {
+      res.status(400).json({ error: "config 구조가 올바르지 않습니다." });
+      return;
+    }
+
+    const [existing] = await db.select().from(consultationFormConfigTable).limit(1);
+    let saved;
+    if (existing) {
+      [saved] = await db
+        .update(consultationFormConfigTable)
+        .set({ config: cfg, updatedAt: new Date() })
+        .where(eq(consultationFormConfigTable.id, existing.id))
+        .returning();
+    } else {
+      [saved] = await db
+        .insert(consultationFormConfigTable)
+        .values({ config: cfg })
+        .returning();
+    }
+    res.json({ config: saved.config });
   },
 );
 
