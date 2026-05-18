@@ -153,9 +153,7 @@ export default function CommunityConsultationDetail() {
         </div>
 
         <Section title="어떤 일을 하시나요?">{c.currentWork}</Section>
-        <Section title="어떤 고민이 있으신가요?" emphasis>
-          {c.concern}
-        </Section>
+        <Section title="어떤 고민이 있으신가요?">{c.concern}</Section>
         <Section title="가장 힘든 게 무엇인가요?">{c.hardest}</Section>
 
         <div className="flex items-center gap-2 pt-2">
@@ -193,21 +191,15 @@ export default function CommunityConsultationDetail() {
 
 function Section({
   title,
-  emphasis,
   children,
 }: {
   title: string;
-  emphasis?: boolean;
   children: React.ReactNode;
 }) {
   return (
-    <div className="space-y-1.5">
+    <div className="space-y-2">
       <div className="text-xs font-bold text-[#6366F1] uppercase tracking-wide">{title}</div>
-      <p
-        className={`whitespace-pre-line text-[#111318] leading-relaxed ${
-          emphasis ? "text-lg font-semibold" : "text-sm"
-        }`}
-      >
+      <p className="whitespace-pre-line text-[#111318] text-[15px] leading-[1.85] font-normal">
         {children}
       </p>
     </div>
