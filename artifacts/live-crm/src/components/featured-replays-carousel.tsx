@@ -57,7 +57,7 @@ function avatarColor(name: string) {
   return AVATAR_COLORS[code % AVATAR_COLORS.length];
 }
 
-const ROTATE_MS = 16000; // 16초 — 후기 읽을 시간 충분히
+const ROTATE_MS = 30000; // 30초 — 후기 읽을 시간 + 스크롤 진행감 충분히
 const REPLAY_API = "/api/featured-replays?limit=5&reviewsPerLive=30";
 
 export function FeaturedReplaysCarousel() {
@@ -288,25 +288,39 @@ function ReviewCreditsScroll({
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-    const SPEED = 35; // px/sec — 50에서 30% 감속 (사용자 조정)
+    const SPEED = 50; // px/sec — 카드 한 장이 약 3~4초마다 흐르는 정도
     let raf = 0;
     let last = performance.now();
+    // scrollTop 누적분(소수점 포함)을 따로 보관해 sub-pixel 드롭 방지
+    let accum = el.scrollTop;
     const tick = (now: number) => {
       const dt = Math.min((now - last) / 1000, 0.1); // 탭 비활성 등으로 dt 폭주 방지
       last = now;
       if (!pausedRef.current) {
-        const max = el.scrollHeight;
-        const half = max / 2;
+        const half = el.scrollHeight / 2;
         if (half > el.clientHeight) {
-          let next = el.scrollTop + SPEED * dt;
-          if (next >= half) next -= half;
-          el.scrollTop = next;
+          // 사용자가 휠 등으로 위치 옮겼다면 그 위치부터 다시 누적
+          if (Math.abs(accum - el.scrollTop) > 2) accum = el.scrollTop;
+          accum += SPEED * dt;
+          if (accum >= half) accum -= half;
+          el.scrollTop = accum;
         }
+      } else {
+        // 정지 중에는 사용자 스크롤 따라가야 다시 풀렸을 때 점프 안 함
+        accum = el.scrollTop;
       }
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
+
+    // 탭 visible 복귀 시 last 리셋해서 점프 방지
+    const onVis = () => { last = performance.now(); };
+    document.addEventListener("visibilitychange", onVis);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      document.removeEventListener("visibilitychange", onVis);
+    };
   }, [reviews.length, trackKey]);
 
   // 사용자가 직접 스크롤해서 절반 지나도 무한 루프 유지
@@ -361,12 +375,29 @@ function ReviewCreditsScroll({
         <span className="text-xs font-semibold text-white">후기 {countBadge.toLocaleString()}개</span>
       </div>
 
-      {/* "직접 스크롤 가능" 힌트 — 호버 시에만 살짝 */}
-      {paused && (
-        <div className="absolute bottom-3 right-3 z-20 text-[10px] font-medium text-white/45 bg-black/30 px-2 py-0.5 rounded-full border border-white/10 pointer-events-none">
-          ↕ 직접 스크롤
-        </div>
-      )}
+      {/* 상태 인디케이터 — 항상 노출. paused에 따라 톤만 바뀜 */}
+      <div
+        className={`absolute top-3 sm:top-4 right-3 sm:right-4 z-20 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border backdrop-blur-sm pointer-events-none transition-all duration-200 ${
+          paused
+            ? "bg-amber-400/20 border-amber-300/40 text-amber-100"
+            : "bg-black/40 border-white/15 text-white/75"
+        }`}
+      >
+        {paused ? (
+          <>
+            <span className="text-[10px]">↕</span>
+            <span className="text-[11px] font-semibold">마우스로 직접 스크롤</span>
+          </>
+        ) : (
+          <>
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
+            </span>
+            <span className="text-[11px] font-semibold tracking-wide">AUTO</span>
+          </>
+        )}
+      </div>
     </div>
   );
 }
