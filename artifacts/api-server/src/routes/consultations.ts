@@ -491,6 +491,60 @@ const adminPatchSchema = z.object({
   liveRequested: z.boolean().optional(),
 });
 
+/* ── PATCH /admin/consultations/form-config ───────── */
+/* (반드시 :id 라우트보다 먼저 등록 — 그렇지 않으면 "form-config" 가 :id 로 잡힘) */
+
+router.patch(
+  "/admin/consultations/form-config",
+  requireAdminAuth,
+  async (req: Request, res: Response) => {
+    const cfg = req.body?.config as ConsultationFormConfig | undefined;
+    if (!cfg || typeof cfg !== "object") {
+      res.status(400).json({ error: "config 객체가 필요합니다." });
+      return;
+    }
+    if (!cfg.board || !cfg.form || !cfg.form.fields || !cfg.thankYou) {
+      res.status(400).json({ error: "config 구조가 올바르지 않습니다." });
+      return;
+    }
+
+    const [existing] = await db.select().from(consultationFormConfigTable).limit(1);
+    let saved;
+    if (existing) {
+      [saved] = await db
+        .update(consultationFormConfigTable)
+        .set({ config: cfg, updatedAt: new Date() })
+        .where(eq(consultationFormConfigTable.id, existing.id))
+        .returning();
+    } else {
+      [saved] = await db
+        .insert(consultationFormConfigTable)
+        .values({ config: cfg })
+        .returning();
+    }
+    res.json({ config: saved.config });
+  },
+);
+
+/* ── POST /admin/consultations/seeds-visible ──────── */
+/* (마찬가지로 :id 라우트보다 먼저) */
+
+router.post(
+  "/admin/consultations/seeds-visible",
+  requireAdminAuth,
+  async (req: Request, res: Response) => {
+    const visible = Boolean(req.body?.visible);
+    await db
+      .update(communityConsultationsTable)
+      .set({
+        status: visible ? "pending" : "hidden",
+        updatedAt: new Date(),
+      })
+      .where(eq(communityConsultationsTable.isSeed, true));
+    res.json({ ok: true, visible });
+  },
+);
+
 router.patch(
   "/admin/consultations/:id",
   requireAdminAuth,
@@ -533,61 +587,6 @@ router.delete(
     }
     await db.delete(communityConsultationsTable).where(eq(communityConsultationsTable.id, id));
     res.json({ ok: true });
-  },
-);
-
-/* ── POST /admin/consultations/seeds-visible ──────── */
-/* 시드 사연 일괄 노출/숨김 토글 */
-
-router.post(
-  "/admin/consultations/seeds-visible",
-  requireAdminAuth,
-  async (req: Request, res: Response) => {
-    const visible = Boolean(req.body?.visible);
-    await db
-      .update(communityConsultationsTable)
-      .set({
-        status: visible ? "pending" : "hidden",
-        updatedAt: new Date(),
-      })
-      .where(eq(communityConsultationsTable.isSeed, true));
-    res.json({ ok: true, visible });
-  },
-);
-
-/* ── PATCH /admin/consultations/form-config ───────── */
-/* 폼/게시판 텍스트 일괄 수정. config 전체를 통째로 받음. */
-
-router.patch(
-  "/admin/consultations/form-config",
-  requireAdminAuth,
-  async (req: Request, res: Response) => {
-    const cfg = req.body?.config as ConsultationFormConfig | undefined;
-    if (!cfg || typeof cfg !== "object") {
-      res.status(400).json({ error: "config 객체가 필요합니다." });
-      return;
-    }
-    // 단순한 shape 검증
-    if (!cfg.board || !cfg.form || !cfg.form.fields || !cfg.thankYou) {
-      res.status(400).json({ error: "config 구조가 올바르지 않습니다." });
-      return;
-    }
-
-    const [existing] = await db.select().from(consultationFormConfigTable).limit(1);
-    let saved;
-    if (existing) {
-      [saved] = await db
-        .update(consultationFormConfigTable)
-        .set({ config: cfg, updatedAt: new Date() })
-        .where(eq(consultationFormConfigTable.id, existing.id))
-        .returning();
-    } else {
-      [saved] = await db
-        .insert(consultationFormConfigTable)
-        .values({ config: cfg })
-        .returning();
-    }
-    res.json({ config: saved.config });
   },
 );
 
