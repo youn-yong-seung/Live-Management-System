@@ -5,12 +5,13 @@ import { formatDate } from "@/lib/date-utils";
 import { ReplayModal } from "@/components/replay-modal";
 import { FeaturedReplaysCarousel } from "@/components/featured-replays-carousel";
 import { TechTrackCarousel } from "@/components/tech-track-carousel";
+import { CommunityFeed } from "@/components/community-feed";
 import { Link } from "wouter";
 import { useLocation } from "wouter";
 import {
   PlayCircle, ArrowRight, MessageCircle, Download, Sparkles,
   Video, BookOpen, Zap, TrendingUp, Star, Heart, ExternalLink,
-  MessageSquare, Eye, Shield, PenSquare,
+  MessageSquare, Eye, Shield, PenSquare, Lightbulb,
 } from "lucide-react";
 
 /* ── Free Resources ─────────────────────────────────── */
@@ -135,9 +136,50 @@ export default function Home() {
 
   return (
     <>
+      {/* ── Promo Banner: 윤자동의 고민상담소 (이번 주 목요일 오픈) ── */}
+      <section className="section-band" style={{ paddingTop: "28px", paddingBottom: "0" }}>
+        <div className="section-band-inner">
+          <Link href="/community/consultations/new">
+            <div className="relative overflow-hidden rounded-2xl cursor-pointer group bg-gradient-to-r from-[#6366F1] via-[#818CF8] to-[#F472B6] hover:shadow-2xl hover:-translate-y-0.5 transition-all duration-300">
+              {/* 배경 데코 */}
+              <div className="absolute inset-0 opacity-20 pointer-events-none">
+                <div className="absolute right-0 top-0 w-64 h-64 bg-white rounded-full blur-3xl -translate-y-1/2 translate-x-1/4" />
+                <div className="absolute left-0 bottom-0 w-48 h-48 bg-white rounded-full blur-3xl translate-y-1/2 -translate-x-1/4" />
+              </div>
+
+              <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-6 sm:p-7">
+                <div className="flex-1 min-w-0">
+                  <div className="inline-flex items-center gap-1.5 bg-white/25 backdrop-blur-sm rounded-full px-3 py-1 text-[11px] font-bold text-white mb-3 border border-white/20">
+                    <Sparkles className="h-3 w-3" />
+                    NEW · 이번 주 목요일(5/21) 오픈
+                  </div>
+                  <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-white mb-1.5 leading-tight flex items-center gap-2">
+                    <Lightbulb className="h-6 w-6 sm:h-7 sm:w-7 flex-shrink-0" />
+                    윤자동의 사업·자동화 고민상담소
+                  </h2>
+                  <p className="text-white/95 text-sm sm:text-base leading-relaxed">
+                    사연을 남기면 윤자동이 라이브에서 직접 답해드려요. 지금 신청하고 1:1 솔루션 받으세요.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 w-full sm:w-auto flex-shrink-0">
+                  <span className="inline-flex items-center justify-center gap-2 bg-white text-[#6366F1] font-bold text-sm px-5 py-3 rounded-lg group-hover:bg-[#f7f8fa] transition-all whitespace-nowrap w-full sm:w-auto shadow-lg">
+                    <PenSquare className="h-4 w-4" />
+                    사연 보내기
+                    <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
+                  </span>
+                </div>
+              </div>
+            </div>
+          </Link>
+        </div>
+      </section>
+
+      {/* ── 커뮤니티 피드 (첫 화면에 바로 노출) ────────── */}
+      <CommunityFeed />
+
       {/* ── Hero ─────────────────────────────────────── */}
       <section className="section-band">
-        <div className="section-band-inner text-center" style={{ paddingTop: "120px", paddingBottom: "120px" }}>
+        <div className="section-band-inner text-center" style={{ paddingTop: "60px", paddingBottom: "100px" }}>
           <div className="inline-flex items-center gap-2 bg-[#eef2ff] rounded-full px-3 py-1 text-xs font-semibold mb-6 text-[#6366F1]">
             <Sparkles className="h-3.5 w-3.5" />
             무료 라이브 특강
