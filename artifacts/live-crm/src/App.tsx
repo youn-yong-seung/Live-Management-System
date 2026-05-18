@@ -16,6 +16,9 @@ import FreeGuideNanoBanana from "@/pages/free-guide-nano-banana";
 import Community from "@/pages/community";
 import CommunityNew from "@/pages/community-new";
 import CommunityDetail from "@/pages/community-detail";
+import CommunityConsultation from "@/pages/community-consultation";
+import CommunityConsultationNew from "@/pages/community-consultation-new";
+import CommunityConsultationDetail from "@/pages/community-consultation-detail";
 import TechTree from "@/pages/techtree";
 import Admin from "@/pages/admin";
 import AdminResources from "@/pages/admin-resources";
@@ -45,6 +48,9 @@ function MainRouter() {
         <Route path="/resources/nano-banana-vs-duct-tape" component={FreeGuideNanoBanana} />
         <Route path="/community" component={Community} />
         <Route path="/community/new" component={CommunityNew} />
+        <Route path="/community/consultations" component={CommunityConsultation} />
+        <Route path="/community/consultations/new" component={CommunityConsultationNew} />
+        <Route path="/community/consultations/:id" component={CommunityConsultationDetail} />
         <Route path="/community/:id" component={CommunityDetail} />
         <Route path="/techtree" component={TechTree} />
         <Route path="/video-factory" component={VideoFactory} />

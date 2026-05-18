@@ -1,6 +1,15 @@
 import { useEffect, useState } from "react";
 import { Link } from "wouter";
-import { MessageSquare, Eye, PenSquare, ChevronRight, Shield } from "lucide-react";
+import {
+  MessageSquare,
+  Eye,
+  PenSquare,
+  ChevronRight,
+  Shield,
+  Lightbulb,
+  Sparkles,
+  Video,
+} from "lucide-react";
 import { useAuth } from "@/lib/auth";
 
 interface PostRow {
@@ -43,6 +52,41 @@ export default function Community() {
 
   return (
     <div className="space-y-8">
+      {/* 고민상담소 진입 배너 */}
+      <Link href="/community/consultations">
+        <div
+          className="glass-card-gold p-5 sm:p-6 cursor-pointer hover:-translate-y-0.5 transition-all group"
+          data-testid="consultation-banner"
+        >
+          <div className="flex items-start gap-4">
+            <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-[#6366F1]/15 border border-[#6366F1]/30 flex items-center justify-center">
+              <Lightbulb className="h-6 w-6 text-[#6366F1]" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="inline-flex items-center gap-1.5 bg-[#6366F1]/15 rounded-full px-2.5 py-0.5 text-[10px] font-bold text-[#6366F1] border border-[#6366F1]/30 mb-2">
+                <Sparkles className="h-3 w-3" /> NEW · 윤자동의 자동화 상담소
+              </div>
+              <h2 className="text-base sm:text-lg font-bold text-[#111318] mb-1 leading-snug">
+                반복업무·자동화 고민, 18년 경력으로 처방해드려요
+              </h2>
+              <p className="text-xs sm:text-sm text-[#484d57] leading-relaxed">
+                폼 한 번 작성하면 라이브 신청까지 자동 완료. 인기 사연은 라이브에서 직접 답변드립니다.
+              </p>
+            </div>
+            <ChevronRight className="h-5 w-5 text-[#8b8f98] group-hover:text-[#6366F1] flex-shrink-0 self-center transition-colors" />
+          </div>
+          <div className="flex flex-wrap gap-2 mt-4 pl-16">
+            <span className="inline-flex items-center gap-1 text-[11px] text-[#6366F1] font-semibold">
+              <Video className="h-3 w-3" /> 매주 목요일 라이브
+            </span>
+            <span className="text-[11px] text-[#8b8f98]">·</span>
+            <span className="text-[11px] text-[#484d57] font-semibold">
+              사연 신청 → 자동 처방 → 라이브 픽업
+            </span>
+          </div>
+        </div>
+      </Link>
+
       <div className="flex flex-wrap items-end justify-between gap-3 pt-2">
         <div>
           <h1 className="text-2xl font-bold text-[#111318] mb-1">커뮤니티</h1>

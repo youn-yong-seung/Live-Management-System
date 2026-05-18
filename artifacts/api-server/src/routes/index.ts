@@ -9,6 +9,7 @@ import marketingRouter from "./marketing";
 import techTreeRouter from "./tech-tree";
 import authRouter from "./auth";
 import communityRouter from "./community";
+import consultationsRouter from "./consultations";
 import resourcesRouter from "./resources";
 import analyticsRouter from "./analytics";
 
@@ -24,6 +25,7 @@ router.use(marketingRouter);
 router.use(techTreeRouter);
 router.use(authRouter);
 router.use(communityRouter);
+router.use(consultationsRouter);
 router.use(resourcesRouter);
 router.use(analyticsRouter);
 
