@@ -124,7 +124,8 @@ export default function CommunityConsultationNew() {
   const { user } = useAuth();
   const [, navigate] = useLocation();
   const [upcomingLive, setUpcomingLive] = useState<UpcomingLive | null>(null);
-  const [formConfig, setFormConfig] = useState<FormConfig>(FALLBACK_FORM_CONFIG);
+  // null = 아직 로딩 중. fallback을 첫 프레임에 노출하지 않기 위해 null로 시작.
+  const [formConfig, setFormConfig] = useState<FormConfig | null>(null);
 
   const [name, setName] = useState("");
   const [ageRange, setAgeRange] = useState("");
@@ -154,14 +155,10 @@ export default function CommunityConsultationNew() {
     fetch("/api/community/consultations/meta/form-config")
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => {
-        if (d?.config) setFormConfig(d.config);
+        setFormConfig(d?.config ?? FALLBACK_FORM_CONFIG);
       })
-      .catch(() => {});
+      .catch(() => setFormConfig(FALLBACK_FORM_CONFIG));
   }, []);
-
-  const cfgForm = formConfig.form;
-  const cfgFields = cfgForm.fields;
-  const cfgThankYou = formConfig.thankYou;
 
   const inputCls =
     "w-full px-4 py-3 rounded-xl bg-[#f7f8fa] border border-[#e5e7eb] text-[#111318] placeholder:text-[#a0a4ab] focus:outline-none focus:border-[#6366F1]/50 focus:bg-[#eef0f3] transition-colors disabled:opacity-50";
@@ -237,6 +234,19 @@ export default function CommunityConsultationNew() {
     });
     setSubmitting(false);
   };
+
+  // formConfig 로드 전엔 폼을 렌더하지 않음 (fallback 깜빡임 방지)
+  if (!formConfig) {
+    return (
+      <div className="min-h-[50vh] flex items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-[#8b8f98]" />
+      </div>
+    );
+  }
+
+  const cfgForm = formConfig.form;
+  const cfgFields = cfgForm.fields;
+  const cfgThankYou = formConfig.thankYou;
 
   if (submitted) {
     return (

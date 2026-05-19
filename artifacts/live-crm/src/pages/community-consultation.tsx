@@ -70,12 +70,8 @@ export default function CommunityConsultation() {
   const [items, setItems] = useState<ConsultationRow[] | null>(null);
   const [order, setOrder] = useState<"popular" | "recent">("popular");
   const [busyId, setBusyId] = useState<number | null>(null);
-  const [boardHeader, setBoardHeader] = useState<BoardHeaderConfig>({
-    badge: "윤자동의 자동화 상담소",
-    title: "반복업무 때문에 막힌 일, 18년 경력으로 직접 처방해드려요.",
-    description:
-      "자동화·AI·AX 어디서 막혔는지 알려주시면, 매주 목요일 라이브에서 직접 답변드립니다.",
-  });
+  // null = 로드 전. 사용자 수정본이 도착하기 전에 fallback이 노출되는 깜빡임 방지.
+  const [boardHeader, setBoardHeader] = useState<BoardHeaderConfig | null>(null);
 
   useEffect(() => {
     setItems(null);
@@ -91,9 +87,23 @@ export default function CommunityConsultation() {
     fetch("/api/community/consultations/meta/form-config")
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => {
-        if (d?.config?.board) setBoardHeader(d.config.board);
+        setBoardHeader(
+          d?.config?.board ?? {
+            badge: "윤자동의 자동화 상담소",
+            title: "반복업무 때문에 막힌 일, 18년 경력으로 직접 처방해드려요.",
+            description:
+              "자동화·AI·AX 어디서 막혔는지 알려주시면, 매주 목요일 라이브에서 직접 답변드립니다.",
+          },
+        );
       })
-      .catch(() => {});
+      .catch(() =>
+        setBoardHeader({
+          badge: "윤자동의 자동화 상담소",
+          title: "반복업무 때문에 막힌 일, 18년 경력으로 직접 처방해드려요.",
+          description:
+            "자동화·AI·AX 어디서 막혔는지 알려주시면, 매주 목요일 라이브에서 직접 답변드립니다.",
+        }),
+      );
   }, []);
 
   const handleLike = async (id: number) => {
@@ -135,31 +145,40 @@ export default function CommunityConsultation() {
         </span>
       </Link>
 
-      {/* 헤더 / 히어로 */}
-      <div className="glass-card-gold p-6 sm:p-8 space-y-3">
-        <div className="inline-flex items-center gap-2 bg-[#6366F1]/15 rounded-full px-3 py-1 text-xs font-bold text-[#6366F1] border border-[#6366F1]/30">
-          <Sparkles className="h-3.5 w-3.5" />
-          {boardHeader.badge}
+      {/* 헤더 / 히어로 — 로드 전엔 스켈레톤 (fallback 깜빡임 방지) */}
+      {boardHeader === null ? (
+        <div className="glass-card-gold p-6 sm:p-8 space-y-3 animate-pulse">
+          <div className="h-5 w-40 bg-[#eef0f3] rounded-full" />
+          <div className="h-7 w-3/4 bg-[#eef0f3] rounded" />
+          <div className="h-4 w-full bg-[#eef0f3] rounded" />
+          <div className="h-4 w-5/6 bg-[#eef0f3] rounded" />
         </div>
-        <h1 className="text-2xl sm:text-3xl font-black text-[#111318] leading-tight whitespace-pre-line">
-          {boardHeader.title}
-        </h1>
-        <p className="text-[#484d57] text-sm leading-relaxed whitespace-pre-line">
-          {boardHeader.description}
-        </p>
-        <div className="flex flex-wrap gap-2 pt-2">
-          <Link href="/community/consultations/new">
-            <span className="inline-flex items-center gap-2 bg-[#6366F1] text-black font-bold text-sm px-5 py-3 rounded-xl hover:bg-[#818CF8] transition-all cursor-pointer gold-glow">
-              <PenSquare className="h-4 w-4" /> 사연 신청하기
-            </span>
-          </Link>
-          <Link href="/lives">
-            <span className="inline-flex items-center gap-2 border border-[#e5e7eb] text-[#484d57] font-semibold text-sm px-5 py-3 rounded-xl hover:bg-[#f7f8fa] cursor-pointer transition-colors">
-              <Video className="h-4 w-4" /> 이번 라이브 보기
-            </span>
-          </Link>
+      ) : (
+        <div className="glass-card-gold p-6 sm:p-8 space-y-3">
+          <div className="inline-flex items-center gap-2 bg-[#6366F1]/15 rounded-full px-3 py-1 text-xs font-bold text-[#6366F1] border border-[#6366F1]/30">
+            <Sparkles className="h-3.5 w-3.5" />
+            {boardHeader.badge}
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-black text-[#111318] leading-tight whitespace-pre-line">
+            {boardHeader.title}
+          </h1>
+          <p className="text-[#484d57] text-sm leading-relaxed whitespace-pre-line">
+            {boardHeader.description}
+          </p>
+          <div className="flex flex-wrap gap-2 pt-2">
+            <Link href="/community/consultations/new">
+              <span className="inline-flex items-center gap-2 bg-[#6366F1] text-black font-bold text-sm px-5 py-3 rounded-xl hover:bg-[#818CF8] transition-all cursor-pointer gold-glow">
+                <PenSquare className="h-4 w-4" /> 사연 신청하기
+              </span>
+            </Link>
+            <Link href="/lives">
+              <span className="inline-flex items-center gap-2 border border-[#e5e7eb] text-[#484d57] font-semibold text-sm px-5 py-3 rounded-xl hover:bg-[#f7f8fa] cursor-pointer transition-colors">
+                <Video className="h-4 w-4" /> 이번 라이브 보기
+              </span>
+            </Link>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* 정렬 탭 */}
       <div className="flex items-center justify-between">
