@@ -55,6 +55,11 @@ interface FormConfig {
     badge: string;
     title: string;
     description: string;
+    sectionHeaders?: {
+      profile: string;
+      industry: string;
+      concern: string;
+    };
     fields: {
       currentWork: { label: string; hint: string; placeholder: string };
       concern: { label: string; hint: string; placeholder: string };
@@ -321,7 +326,7 @@ export default function CommunityConsultationNew() {
         <div className="glass-card p-6 space-y-4">
           <div className="flex items-center gap-2 text-sm font-bold text-[#111318]">
             <UserIcon className="h-4 w-4 text-[#6366F1]" />
-            <span>본인 소개</span>
+            <span>{cfgForm.sectionHeaders?.profile ?? "본인 소개"}</span>
           </div>
 
           <Field label="성함" required>
@@ -375,7 +380,7 @@ export default function CommunityConsultationNew() {
         <div className="glass-card p-6 space-y-4">
           <div className="flex items-center gap-2 text-sm font-bold text-[#111318]">
             <Briefcase className="h-4 w-4 text-[#6366F1]" />
-            <span>일하시는 분야</span>
+            <span>{cfgForm.sectionHeaders?.industry ?? "일하시는 분야"}</span>
           </div>
 
           <Field label="직군분야" required>
@@ -459,7 +464,7 @@ export default function CommunityConsultationNew() {
         <div className="glass-card p-6 space-y-4">
           <div className="flex items-center gap-2 text-sm font-bold text-[#111318]">
             <Lightbulb className="h-4 w-4 text-[#6366F1]" />
-            <span>어디서 막혔나요?</span>
+            <span>{cfgForm.sectionHeaders?.concern ?? "어디서 막혔나요?"}</span>
           </div>
 
           <Field

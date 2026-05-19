@@ -128,6 +128,11 @@ export type ConsultationFormConfig = {
     badge: string; // 폼 상단 작은 배지
     title: string;
     description: string;
+    sectionHeaders?: {
+      profile: string;  // 1) 본인 소개
+      industry: string; // 2) 일하시는 분야
+      concern: string;  // 3) 어디서 막혔나요?
+    };
     fields: {
       currentWork: { label: string; hint: string; placeholder: string };
       concern: { label: string; hint: string; placeholder: string };
@@ -172,6 +177,11 @@ export const DEFAULT_CONSULTATION_FORM_CONFIG: ConsultationFormConfig = {
     title: "사연 신청하기",
     description:
       "반복 업무·자동화·AX 도입 어디서 막혔는지 알려주세요. 18년 경력으로 직접 처방해드려요. 체크박스 한 번이면 이번 주 라이브 참가까지 자동 신청됩니다.",
+    sectionHeaders: {
+      profile: "본인 소개",
+      industry: "일하시는 분야",
+      concern: "어디서 막혔나요?",
+    },
     fields: {
       currentWork: {
         label: "어떤 일을 하고 계신가요?",

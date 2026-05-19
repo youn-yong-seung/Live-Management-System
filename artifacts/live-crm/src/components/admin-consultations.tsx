@@ -67,6 +67,11 @@ interface FormConfig {
     badge: string;
     title: string;
     description: string;
+    sectionHeaders?: {
+      profile: string;
+      industry: string;
+      concern: string;
+    };
     fields: {
       currentWork: { label: string; hint: string; placeholder: string };
       concern: { label: string; hint: string; placeholder: string };
@@ -747,6 +752,70 @@ function FormConfigEditor() {
             }
             rows={3}
             className={`${inputCls} resize-none`}
+          />
+        </FieldRow>
+      </Section>
+
+      {/* 섹션 헤더 (폼의 카드 그룹 헤더 3개) */}
+      <Section title="섹션 헤더 (카드 그룹 헤더 3개)">
+        <p className="text-xs text-gray-500 -mt-1">
+          폼 페이지에서 입력란 카드 위에 보이는 그룹 헤더 텍스트입니다.
+        </p>
+        <FieldRow label="섹션 1 — 본인 소개 카드 헤더">
+          <input
+            value={config.form.sectionHeaders?.profile ?? "본인 소개"}
+            onChange={(e) =>
+              setConfig({
+                ...config,
+                form: {
+                  ...config.form,
+                  sectionHeaders: {
+                    profile: e.target.value,
+                    industry: config.form.sectionHeaders?.industry ?? "일하시는 분야",
+                    concern: config.form.sectionHeaders?.concern ?? "어디서 막혔나요?",
+                  },
+                },
+              })
+            }
+            className={inputCls}
+          />
+        </FieldRow>
+        <FieldRow label="섹션 2 — 직군/직업 카드 헤더">
+          <input
+            value={config.form.sectionHeaders?.industry ?? "일하시는 분야"}
+            onChange={(e) =>
+              setConfig({
+                ...config,
+                form: {
+                  ...config.form,
+                  sectionHeaders: {
+                    profile: config.form.sectionHeaders?.profile ?? "본인 소개",
+                    industry: e.target.value,
+                    concern: config.form.sectionHeaders?.concern ?? "어디서 막혔나요?",
+                  },
+                },
+              })
+            }
+            className={inputCls}
+          />
+        </FieldRow>
+        <FieldRow label="섹션 3 — 고민 카드 헤더">
+          <input
+            value={config.form.sectionHeaders?.concern ?? "어디서 막혔나요?"}
+            onChange={(e) =>
+              setConfig({
+                ...config,
+                form: {
+                  ...config.form,
+                  sectionHeaders: {
+                    profile: config.form.sectionHeaders?.profile ?? "본인 소개",
+                    industry: config.form.sectionHeaders?.industry ?? "일하시는 분야",
+                    concern: e.target.value,
+                  },
+                },
+              })
+            }
+            className={inputCls}
           />
         </FieldRow>
       </Section>
